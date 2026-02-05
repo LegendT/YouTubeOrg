@@ -56,3 +56,12 @@ export const quotaUsage = pgTable('quota_usage', {
   operation: text('operation').notNull(), // e.g., "playlists.list", "videos.list"
   details: jsonb('details'), // Request params, response summary
 });
+
+// Sync state tracking table - stores pagination progress for resumable syncs
+export const syncState = pgTable('sync_state', {
+  id: serial('id').primaryKey(),
+  playlistYoutubeId: text('playlist_youtube_id').notNull().unique(),
+  nextPageToken: text('next_page_token'),
+  itemsFetched: integer('items_fetched').default(0),
+  lastSyncAt: timestamp('last_sync_at').notNull().defaultNow(),
+});
