@@ -37,10 +37,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. User can view cached playlist data without triggering new API calls
   5. System maintains valid session across multi-hour operations without re-authentication
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 01-01-PLAN.md — Next.js 15 setup, dependencies, and database schema
+- [ ] 01-02-PLAN.md — NextAuth OAuth with token refresh
+- [ ] 01-03-PLAN.md — Rate limiter, ETag caching, and quota tracking
+- [ ] 01-04-PLAN.md — Playlist/video sync with resume capability
+- [ ] 01-05-PLAN.md — Dashboard UI with authentication flow
 
 ---
 
@@ -202,7 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & API Integration | 0/TBD | Not started | - |
+| 1. Foundation & API Integration | 0/5 | Ready to execute | - |
 | 2. Playlist Analysis & Consolidation | 0/TBD | Not started | - |
 | 3. Category Management | 0/TBD | Not started | - |
 | 4. Video Display & Organization | 0/TBD | Not started | - |
