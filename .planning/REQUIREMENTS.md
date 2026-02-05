@@ -147,13 +147,74 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TBD | TBD | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DATA-06 | Phase 1 | Pending |
+| UI-01 | Phase 1 | Pending |
+| CAT-05 | Phase 2 | Pending |
+| CAT-06 | Phase 2 | Pending |
+| CAT-07 | Phase 2 | Pending |
+| CAT-08 | Phase 2 | Pending |
+| CAT-09 | Phase 2 | Pending |
+| SAFE-04 | Phase 2 | Pending |
+| CAT-01 | Phase 3 | Pending |
+| CAT-02 | Phase 3 | Pending |
+| CAT-03 | Phase 3 | Pending |
+| CAT-04 | Phase 3 | Pending |
+| CAT-10 | Phase 3 | Pending |
+| VID-01 | Phase 4 | Pending |
+| VID-02 | Phase 4 | Pending |
+| VID-03 | Phase 4 | Pending |
+| VID-04 | Phase 4 | Pending |
+| VID-05 | Phase 4 | Pending |
+| VID-06 | Phase 4 | Pending |
+| VID-07 | Phase 4 | Pending |
+| UI-02 | Phase 4 | Pending |
+| UI-03 | Phase 4 | Pending |
+| UI-05 | Phase 4 | Pending |
+| UI-06 | Phase 4 | Pending |
+| ML-01 | Phase 5 | Pending |
+| ML-02 | Phase 5 | Pending |
+| ML-03 | Phase 5 | Pending |
+| ML-04 | Phase 5 | Pending |
+| ML-05 | Phase 6 | Pending |
+| ML-06 | Phase 6 | Pending |
+| ML-07 | Phase 6 | Pending |
+| ML-08 | Phase 6 | Pending |
+| UI-07 | Phase 6 | Pending |
+| UI-08 | Phase 6 | Pending |
+| UI-09 | Phase 6 | Pending |
+| SAFE-01 | Phase 7 | Pending |
+| SAFE-02 | Phase 7 | Pending |
+| SAFE-03 | Phase 7 | Pending |
+| SAFE-05 | Phase 7 | Pending |
+| SAFE-06 | Phase 7 | Pending |
+| SYNC-01 | Phase 8 | Pending |
+| SYNC-02 | Phase 8 | Pending |
+| SYNC-03 | Phase 8 | Pending |
+| SYNC-04 | Phase 8 | Pending |
+| SYNC-05 | Phase 8 | Pending |
+| SYNC-06 | Phase 8 | Pending |
+| SYNC-07 | Phase 8 | Pending |
+| SYNC-08 | Phase 8 | Pending |
+| SYNC-09 | Phase 8 | Pending |
+| SYNC-10 | Phase 8 | Pending |
+| SYNC-11 | Phase 8 | Pending |
+| SYNC-12 | Phase 8 | Pending |
+| UI-04 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 51 total
-- Mapped to phases: 0
-- Unmapped: 51 ⚠️
+- v1 requirements: 62 total
+- Mapped to phases: 62
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 after initial definition*
+*Last updated: 2026-02-05 after roadmap creation*
