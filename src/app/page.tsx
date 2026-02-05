@@ -1,17 +1,29 @@
-export default function Home() {
+import { getServerSession } from '@/lib/auth/session'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+
+export default async function HomePage() {
+  const session = await getServerSession()
+
+  // If already authenticated, redirect to dashboard
+  if (session) {
+    redirect('/dashboard')
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="text-center p-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          YouTube Playlist Organizer
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Organize your YouTube playlists with AI-powered categorization
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <div className="text-center space-y-6">
+        <h1 className="text-4xl font-bold">YouTube Playlist Organizer</h1>
+        <p className="text-xl text-gray-600">
+          Organize your 87 playlists and 4,000+ videos with AI-powered categorization
         </p>
-        <div className="text-sm text-gray-500">
-          Foundation established - Phase 1 in progress
-        </div>
+        <Link
+          href="/api/auth/signin"
+          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+        >
+          Sign in with Google
+        </Link>
       </div>
-    </div>
-  );
+    </main>
+  )
 }
