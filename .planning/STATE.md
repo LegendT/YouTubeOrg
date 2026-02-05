@@ -13,26 +13,26 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 Phase: 1 of 8 (Foundation & API Integration)
 Plan: 3 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed 01-03-PLAN.md
+Last activity: 2026-02-05 — Completed 01-02-PLAN.md
 
-Progress: [█░░░░░░░░░] ~25%
+Progress: [██░░░░░░░░] ~30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 5 min
+- Total plans completed: 3
+- Average duration: 4.3 min
 - Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 - Foundation & API Integration | 2 | 10 min | 5 min |
+| 1 - Foundation & API Integration | 3 | 13 min | 4.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (7min), 01-03 (3min)
-- Trend: Accelerating (infrastructure tasks faster than setup)
+- Last 5 plans: 01-01 (7min), 01-03 (3min), 01-02 (3min)
+- Trend: Stable (OAuth setup similar to infrastructure tasks)
 
 *Updated after each plan completion*
 
@@ -62,6 +62,13 @@ Recent decisions affecting current work:
 - Retry on 429 Rate Limit with exponential backoff, no retry on 403 quotaExceeded
 - Cache key generation from resource type + JSON.stringify(params) for unique identification
 
+**From 01-02 execution (2026-02-05):**
+- Force consent screen (prompt: "consent") to guarantee refresh_token on every login
+- Store access_token in JWT session (encrypted) rather than database for serverless compatibility
+- Implement token refresh in JWT callback using oauth2.googleapis.com/token endpoint
+- Handle revoked tokens (invalid_grant) by setting error flag to trigger re-authentication
+- Preserve refresh_token during rotation (newTokens.refresh_token ?? token.refresh_token)
+
 ### Pending Todos
 
 None yet.
@@ -80,12 +87,18 @@ None yet.
 - **Bottleneck reservoir timezone:** 24-hour refresh uses JavaScript Date, YouTube quota resets at midnight Pacific Time. May need timezone adjustment if running in different timezone.
 - **ETag If-None-Match header:** Current implementation documents need for ETags in request headers. googleapis library handling needs validation in Plan 04 with actual API calls.
 
+**From 01-02 execution (2026-02-05):**
+
+- **Google Cloud OAuth testing mode:** OAuth consent screen currently in "Testing" mode with limited test users. Will need Google verification process for production deployment with >100 users.
+- **OAuth flow end-to-end testing:** Full OAuth flow (sign-in button → Google → callback → session) deferred to Plan 05 when Dashboard UI is built. Current verification only confirms configuration and dev server startup.
+- **Refresh token rotation edge case:** Google may stop providing refresh_token in some refresh responses. Mitigated by preserving old refresh_token, but may need monitoring in production.
+
 ## Session Continuity
 
-Last session: 2026-02-05T15:52:15Z
-Stopped at: Completed 01-03-PLAN.md (Rate limiter, ETag caching, and quota tracking infrastructure)
+Last session: 2026-02-05T16:25:23Z
+Stopped at: Completed 01-02-PLAN.md (NextAuth OAuth with token refresh)
 Resume file: None
 
 ---
 
-**Next step:** Continue Phase 1 with Plan 02 (OAuth) or Plan 04 (YouTube API operations)
+**Next step:** Continue Phase 1 with Plan 04 (YouTube API operations) or Plan 05 (Dashboard UI)
