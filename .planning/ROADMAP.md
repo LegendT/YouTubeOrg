@@ -62,10 +62,13 @@ Plans:
   4. User can manually adjust consolidation proposal by merging different playlists
   5. System validates proposed structure has no category exceeding 4,500 videos (YouTube limit safety margin)
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 02-01-PLAN.md — Analysis backend (duplicate detection, clustering, validation)
+- [ ] 02-02-PLAN.md — Server actions for proposal workflow
+- [ ] 02-03-PLAN.md — Consolidation UI with approve/reject
+- [ ] 02-04-PLAN.md — Manual adjustment with drag-and-drop
 
 ---
 
@@ -207,7 +210,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & API Integration | 0/5 | Ready to execute | - |
-| 2. Playlist Analysis & Consolidation | 0/TBD | Not started | - |
+| 2. Playlist Analysis & Consolidation | 0/4 | Ready to execute | - |
 | 3. Category Management | 0/TBD | Not started | - |
 | 4. Video Display & Organization | 0/TBD | Not started | - |
 | 5. ML Categorization Engine | 0/TBD | Not started | - |
