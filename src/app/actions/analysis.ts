@@ -12,6 +12,12 @@ import { eq, desc, inArray } from 'drizzle-orm';
 import { createConsolidationProposals } from '@/lib/analysis/consolidation';
 import { findDuplicateVideos, calculateOverlapStats } from '@/lib/analysis/duplicates';
 import type { AlgorithmMode } from '@/lib/analysis/clustering';
+import type {
+  ProposalGenerationResult,
+  ProposalActionResult,
+  ProposalsQueryResult,
+  DuplicateStatsResult,
+} from '@/types/analysis';
 
 /**
  * Generate consolidation proposals from existing playlists.
@@ -25,7 +31,7 @@ import type { AlgorithmMode } from '@/lib/analysis/clustering';
  */
 export async function generateConsolidationProposal(
   mode: AlgorithmMode = 'aggressive'
-) {
+): Promise<ProposalGenerationResult> {
   try {
     // Step 1: Run clustering and validation
     const result = await createConsolidationProposals(mode);
@@ -102,7 +108,7 @@ export async function generateConsolidationProposal(
  * Approve a consolidation proposal. Sets status to 'approved'
  * with timestamp for when the user confirmed the merge.
  */
-export async function approveProposal(proposalId: number) {
+export async function approveProposal(proposalId: number): Promise<ProposalActionResult> {
   try {
     await db
       .update(consolidationProposals)
@@ -124,7 +130,7 @@ export async function approveProposal(proposalId: number) {
 /**
  * Reject a consolidation proposal with optional notes explaining why.
  */
-export async function rejectProposal(proposalId: number, notes?: string) {
+export async function rejectProposal(proposalId: number, notes?: string): Promise<ProposalActionResult> {
   try {
     await db
       .update(consolidationProposals)
@@ -147,7 +153,7 @@ export async function rejectProposal(proposalId: number, notes?: string) {
  * Fetch all consolidation proposals with their source playlist details.
  * Orders by total videos descending (largest categories first).
  */
-export async function getProposals() {
+export async function getProposals(): Promise<ProposalsQueryResult> {
   try {
     const proposals = await db
       .select()
@@ -194,7 +200,7 @@ export async function getProposals() {
  * Get duplicate video statistics across all playlists.
  * Returns total unique videos, duplicate count, and duplication percentage.
  */
-export async function getDuplicateStats() {
+export async function getDuplicateStats(): Promise<DuplicateStatsResult> {
   try {
     const stats = await calculateOverlapStats();
     return { success: true as const, stats };
