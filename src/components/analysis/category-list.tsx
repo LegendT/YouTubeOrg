@@ -13,11 +13,15 @@ import {
   ArrowUpDown,
   Search,
   AlertTriangle,
+  Pencil,
+  Trash2,
+  Plus,
+  FolderOpen,
 } from 'lucide-react'
 import type { ConsolidationProposal, ConfidenceLevel } from '@/types/analysis'
+import type { CategoryListItem } from '@/types/categories'
 
 type SortField = 'name' | 'videos' | 'playlists' | 'confidence'
-type SortOrder = 'asc' | 'desc'
 
 interface CategoryListProps {
   proposals: ConsolidationProposal[]
@@ -30,6 +34,12 @@ interface CategoryListProps {
     selectAll: (ids: number[]) => void
   }
   focusedIndex?: number
+  // Management mode props
+  managementMode?: boolean
+  items?: CategoryListItem[]
+  onRename?: (id: number, name: string) => void
+  onDelete?: (id: number, name: string, videoCount: number) => void
+  onAssignVideos?: (id: number, name: string, videoCount: number) => void
 }
 
 function getConfidenceLevel(score: number | null | undefined): ConfidenceLevel {
@@ -114,17 +124,270 @@ function sortProposals(
   })
 }
 
+type SortOrder = 'asc' | 'desc'
+
+// Management mode sort fields (no confidence)
+type ManagementSortField = 'name' | 'videos' | 'playlists'
+
+function sortCategories(
+  items: CategoryListItem[],
+  field: ManagementSortField,
+  order: SortOrder
+): CategoryListItem[] {
+  // Always put protected (Uncategorized) at the bottom
+  const regular = items.filter((c) => !c.isProtected)
+  const protectedItems = items.filter((c) => c.isProtected)
+
+  const sorted = [...regular].sort((a, b) => {
+    let comparison = 0
+    switch (field) {
+      case 'name':
+        comparison = a.name.localeCompare(b.name)
+        break
+      case 'videos':
+        comparison = a.videoCount - b.videoCount
+        break
+      case 'playlists':
+        comparison = a.sourcePlaylistNames.length - b.sourcePlaylistNames.length
+        break
+    }
+    return order === 'asc' ? comparison : -comparison
+  })
+
+  return [...sorted, ...protectedItems]
+}
+
 export function CategoryList({
   proposals,
   selectedId,
   onSelect,
   batchSelection,
   focusedIndex,
+  managementMode = false,
+  items,
+  onRename,
+  onDelete,
+  onAssignVideos,
 }: CategoryListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
   const listRef = useRef<HTMLDivElement>(null)
+
+  // ====================================================================
+  // MANAGEMENT MODE
+  // ====================================================================
+  if (managementMode && items) {
+    const managementSortField = (
+      sortField === 'confidence' ? 'name' : sortField
+    ) as ManagementSortField
+
+    const filtered = searchQuery.trim()
+      ? items.filter((c) =>
+          c.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : items
+
+    const sorted = sortCategories(filtered, managementSortField, sortOrder)
+
+    const allVisibleIds = sorted.map((c) => c.id)
+
+    const managementSortLabels: Record<ManagementSortField, string> = {
+      name: 'Name',
+      videos: 'Videos',
+      playlists: 'Playlists',
+    }
+
+    function toggleSort(field: ManagementSortField) {
+      if (managementSortField === field) {
+        setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'))
+      } else {
+        setSortField(field)
+        setSortOrder(field === 'name' ? 'asc' : 'desc')
+      }
+    }
+
+    return (
+      <div className="flex flex-col h-full">
+        {/* Search */}
+        <div className="p-3 space-y-2 border-b">
+          <div className="flex items-center gap-2">
+            {batchSelection && (
+              <Checkbox
+                checked={
+                  allVisibleIds.length > 0 &&
+                  allVisibleIds.every((id) => batchSelection.isSelected(id))
+                }
+                onCheckedChange={() => {
+                  const allSelected =
+                    allVisibleIds.length > 0 &&
+                    allVisibleIds.every((id) => batchSelection.isSelected(id))
+                  if (allSelected) {
+                    batchSelection.selectAll([])
+                  } else {
+                    batchSelection.selectAll(allVisibleIds)
+                  }
+                }}
+                aria-label="Select all categories"
+              />
+            )}
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search categories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-md border bg-transparent py-2 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          {/* Sort buttons */}
+          <div className="flex gap-1 flex-wrap">
+            {(Object.keys(managementSortLabels) as ManagementSortField[]).map(
+              (field) => (
+                <Button
+                  key={field}
+                  variant={managementSortField === field ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => toggleSort(field)}
+                >
+                  {managementSortLabels[field]}
+                  {managementSortField === field && (
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  )}
+                </Button>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Category list */}
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1" ref={listRef}>
+            {sorted.map((category, idx) => {
+              const isFocused = focusedIndex === idx
+              const isChecked =
+                batchSelection?.isSelected(category.id) ?? false
+
+              return (
+                <div
+                  key={category.id}
+                  data-category-item
+                  className={`group flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
+                    selectedId === category.id ? 'bg-accent' : ''
+                  } ${isFocused ? 'ring-2 ring-primary' : ''} ${
+                    category.isProtected ? 'opacity-70' : ''
+                  }`}
+                >
+                  {batchSelection && (
+                    <div className="pt-0.5">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() =>
+                          batchSelection.toggle(category.id)
+                        }
+                        aria-label={`Select ${category.name}`}
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => onSelect(category.id)}
+                    className="flex-1 text-left min-w-0"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <FolderOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="font-medium text-sm truncate">
+                            {category.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span>{category.videoCount} videos</span>
+                          <span>
+                            {category.sourcePlaylistNames.length} playlists
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Hover action buttons */}
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onRename?.(category.id, category.name)
+                      }}
+                      disabled={category.isProtected}
+                      title="Rename category"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDelete?.(
+                          category.id,
+                          category.name,
+                          category.videoCount
+                        )
+                      }}
+                      disabled={category.isProtected}
+                      title="Delete category"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onAssignVideos?.(
+                          category.id,
+                          category.name,
+                          category.videoCount
+                        )
+                      }}
+                      title="Assign videos"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
+
+            {sorted.length === 0 && !searchQuery && (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                No categories to display
+              </div>
+            )}
+
+            {sorted.length === 0 && searchQuery && (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                No categories match &quot;{searchQuery}&quot;
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    )
+  }
+
+  // ====================================================================
+  // ANALYSIS MODE (existing, unchanged)
+  // ====================================================================
 
   // Separate main list from "review needed"
   const { mainProposals, reviewNeeded } = useMemo(() => {
