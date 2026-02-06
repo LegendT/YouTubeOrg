@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 5 of 8 (ML Categorization Engine)
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-02-06 — Completed 05-01-PLAN.md
+Last activity: 2026-02-06 — Completed 05-02-PLAN.md
 
-Progress: [████████████████████████████████░] 28/31 plans (90%)
+Progress: [████████████████████████████████░] 29/31 plans (94%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
+- Total plans completed: 29
 - Average duration: 3.8 min
-- Total execution time: 1.81 hours
+- Total execution time: 1.89 hours
 
 **By Phase:**
 
@@ -32,11 +32,11 @@ Progress: [███████████████████████
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
-| 5 - ML Categorization Engine | 1/4 | 5 min | 5.0 min |
+| 5 - ML Categorization Engine | 2/4 | 9.5 min | 4.75 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2.9min), 04-03 (2min), 04-04 (3min), 04-05 (2min), 05-01 (5min)
-- Trend: Phase 5 started with foundational ML infrastructure
+- Last 5 plans: 04-03 (2min), 04-04 (3min), 04-05 (2min), 05-01 (5min), 05-02 (4.5min)
+- Trend: Phase 5 maintaining consistent velocity with ML infrastructure
 
 *Updated after each plan completion*
 
@@ -227,6 +227,15 @@ Recent decisions affecting current work:
 - Empirical confidence thresholds (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60) subject to calibration
 - Type assertion for Transformers.js pipeline (complex overload types)
 
+**From 05-02 execution (2026-02-06):**
+- Store similarity scores as 0-100 integers in mlCategorizations table (multiply cosine * 100 for UI display)
+- Batch processing with BATCH_SIZE=32 per RESEARCH.md browser performance recommendation
+- Cache-first strategy: check IndexedDB getBatch before generateEmbeddings to avoid recomputation
+- Pre-computed category embeddings reused across all video comparisons (compute once per batch run)
+- Lazy worker initialization defers model loading until categorizeVideos called
+- 60-second timeout per embeddings request to prevent indefinite hangs from worker errors
+- Null safety despite pre-computed categories guarantee (defensive programming with warning log)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -253,8 +262,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-06T22:50:31Z
-Stopped at: Completed 05-01-PLAN.md (ML Foundation)
+Last session: 2026-02-06T22:57:59Z
+Stopped at: Completed 05-02-PLAN.md (ML Schema & Orchestrator)
 Resume file: None
 
 ---
@@ -267,4 +276,6 @@ Resume file: None
 
 **Phase 4 Complete!** All 5 plans executed. Full video browsing at /videos with: category sidebar navigation, virtualized grid (@tanstack/react-virtual with ROW_HEIGHT 380px), debounced search (300ms) with scope toggle, 4-way sort (dateAdded/publishedAt/title/duration), multi-select with toolbar controls, move/copy dialog with bulk warning (5+ videos), optimistic UI updates, undo support (Cmd/Ctrl+Z), and all category badges displayed. All 7 Phase 4 success criteria verified. Ready for Phase 5 (ML Categorization Engine).
 
-**Phase 5 Plan 01 Complete!** ML foundation implemented: IndexedDB embeddings cache (EmbeddingsCache class with get/set/getBatch/setBatch), Web Worker with Transformers.js singleton (Xenova/all-MiniLM-L6-v2, 384-dim), cosine similarity functions (dot product for normalized vectors), and confidence scoring (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60). 4 files created (605 lines total), @huggingface/transformers dependency installed. Ready for Phase 5 Plan 02 (Category Embedding Generation).
+**Phase 5 Plan 01 Complete!** ML foundation implemented: IndexedDB embeddings cache (EmbeddingsCache class with get/set/getBatch/setBatch), Web Worker with Transformers.js singleton (Xenova/all-MiniLM-L6-v2, 384-dim), cosine similarity functions (dot product for normalized vectors), and confidence scoring (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60). 4 files created (605 lines total), @huggingface/transformers dependency installed.
+
+**Phase 5 Plan 02 Complete!** Database schema extended with mlCategorizations table (10 fields: videoId, suggestedCategoryId, confidence enum, similarityScore 0-100, modelVersion, timestamps for acceptance/rejection, manualCategoryId). MLCategorizationEngine orchestrator implemented (227 lines): batch processing (32 videos/batch), cache-first embeddings (getBatch before generateEmbeddings), pre-computed category embeddings, progress callbacks, worker lifecycle (lazy init, terminate), 60s timeout handling. Ready for Phase 5 Plan 03 (Database Migration & Server Actions).
