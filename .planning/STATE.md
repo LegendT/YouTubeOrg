@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 3 of 8 (Category Management)
-Plan: 05 of 6 in current phase
-Status: In progress
-Last activity: 2026-02-06 — Completed 03-05-PLAN.md
+Plan: 06 of 6 in current phase
+Status: Phase complete
+Last activity: 2026-02-06 — Completed 03-06-PLAN.md
 
-Progress: [█████████████████████░░░░░░░░░░░░] 21/22 plans (~95%)
+Progress: [██████████████████████░░░░░░░░░░░] 22/22 plans (~100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
-- Average duration: 4.2 min
-- Total execution time: 1.48 hours
+- Total plans completed: 22
+- Average duration: 4.1 min
+- Total execution time: 1.52 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [█████████████████████░░
 |-------|-------|-------|----------|
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
-| 3 - Category Management | 5/6 | 20 min | 4.0 min |
+| 3 - Category Management | 6/6 | 24 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4min), 03-02 (4min), 03-03 (3min), 03-04 (3min), 03-05 (6min)
+- Last 5 plans: 03-02 (4min), 03-03 (3min), 03-04 (3min), 03-05 (6min), 03-06 (4min)
 - Trend: Stable at ~4.0 min per plan
 
 *Updated after each plan completion*
@@ -180,7 +180,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None.
+- UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
+- UX: Approval should be a toggle (approved → click again → pending), not one-way. Reject should be a separate intentional action, distinct from un-approving.
+- UX: Checkboxes should be for batch selection only (merge, bulk approve/reject), not conflated with approval state
+- UX: Video assignment is pull-only (assign TO category). Need a "Move to..." action when viewing a category's videos to push videos OUT to another category — especially important for Uncategorised
+- i18n: All user-facing text must use British English (e.g., "Uncategorised" not "Uncategorized", "Organise" not "Organize", "Finalise" not "Finalize"). Sweep all UI strings across the codebase.
 
 ### Blockers/Concerns
 
@@ -201,8 +205,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-06T14:45:37Z
-Stopped at: Completed 03-05-PLAN.md (Management Page Layout)
+Last session: 2026-02-06T14:50:54Z
+Stopped at: Completed 03-06-PLAN.md (Final Polish and Verification)
 Resume file: None
 
 ---
@@ -211,4 +215,4 @@ Resume file: None
 
 **Phase 2 Complete!** All 12 plans executed. Full analysis workflow at /analysis with: clustering engine (aggressive/conservative modes), 18+ server actions, resizable split-panel dashboard, category detail with video list, batch operations, keyboard navigation, duplicate resolver, split wizard, manual adjustments, staleness detection, progress tracking, staged loading, and final review with finalizeConsolidation. Approved category structure persisted via finalizedAt timestamp, ready for Phase 3 (Category Management) and Phase 8 (Batch Sync).
 
-**Phase 3 In Progress:** Plan 05 complete. Management mode fully wired into /analysis dashboard: finalization detection, category list with hover CRUD actions, batch merge toolbar, undo banner, 4 dialogs (rename/delete/merge/assign), detail panel with management actions. Plan 06 (final integration) remaining.
+**Phase 3 Complete!** All 6 plans executed. Management mode fully functional with: categories/categoryVideos tables, 10 server actions, undo stack with Cmd/Ctrl+Z, rename/delete/merge/assign dialogs, management dashboard with hover CRUD actions, batch merge toolbar, video assignment dialog, and complete end-to-end verification. All 5 Phase 3 success criteria validated. UX improvements tracked for future enhancement.
