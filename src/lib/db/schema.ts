@@ -71,6 +71,21 @@ export const syncState = pgTable('sync_state', {
 // Enum for consolidation proposal status
 export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
 
+// Enum for algorithm mode presets
+export const algorithmModeEnum = pgEnum('algorithm_mode', ['conservative', 'aggressive']);
+
+// Analysis sessions table - tracks multi-session staleness detection
+export const analysisSessions = pgTable('analysis_sessions', {
+  id: serial('id').primaryKey(),
+  mode: algorithmModeEnum('mode').notNull().default('aggressive'),
+  playlistCount: integer('playlist_count').notNull(),
+  proposalCount: integer('proposal_count').notNull().default(0),
+  duplicateCount: integer('duplicate_count').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  playlistDataTimestamp: timestamp('playlist_data_timestamp').notNull(), // When playlist data was last synced - used for staleness detection
+  finalizedAt: timestamp('finalized_at'), // Set when user executes consolidation, marks session as target for future phases
+});
+
 // Consolidation proposals table - stores proposed category merges for user review
 export const consolidationProposals = pgTable('consolidation_proposals', {
   id: serial('id').primaryKey(),
@@ -81,6 +96,12 @@ export const consolidationProposals = pgTable('consolidation_proposals', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   approvedAt: timestamp('approved_at'),
   notes: text('notes'), // User comments on this proposal
+  sessionId: integer('session_id').references(() => analysisSessions.id), // Nullable for backward compat with Plan 02-01
+  confidenceScore: integer('confidence_score'), // 0-100 confidence in the proposed merge
+  confidenceReason: text('confidence_reason'), // Human-readable explanation of confidence
+  uniqueVideoCount: integer('unique_video_count'), // Deduplicated video count across merged playlists
+  duplicateVideoCount: integer('duplicate_video_count'), // How many dupes found within this proposal's playlists
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // Duplicate videos table - tracks videos appearing in multiple playlists
@@ -90,4 +111,6 @@ export const duplicateVideos = pgTable('duplicate_videos', {
   playlistIds: jsonb('playlist_ids').$type<number[]>().notNull(),
   occurrenceCount: integer('occurrence_count').notNull(),
   analyzedAt: timestamp('analyzed_at').notNull().defaultNow(),
+  resolvedPlaylistId: integer('resolved_playlist_id'), // Which playlist "wins" for this duplicate
+  sessionId: integer('session_id').references(() => analysisSessions.id), // Nullable for backward compat
 });
