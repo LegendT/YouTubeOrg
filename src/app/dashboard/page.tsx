@@ -23,16 +23,13 @@ export default async function DashboardPage() {
   const usedQuota = 10000 - remainingQuota
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <header className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">YouTube Organizer Dashboard</h1>
-          <a
-            href="/api/auth/signout"
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            Sign Out
-          </a>
+        <header>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-600 mt-1">
+            Manage your YouTube data sync and view quota usage
+          </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -48,40 +45,6 @@ export default async function DashboardPage() {
             <SyncButton />
           </div>
         </div>
-
-        {allPlaylists.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border rounded-lg p-6 bg-white shadow flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Ready to organise?</h2>
-                <p className="text-gray-600 mt-1">
-                  Analyse your {allPlaylists.length} playlists and consolidate them into categories.
-                </p>
-              </div>
-              <a
-                href="/analysis"
-                className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shrink-0"
-              >
-                Go to Analysis
-              </a>
-            </div>
-
-            <div className="border rounded-lg p-6 bg-white shadow flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Browse videos</h2>
-                <p className="text-gray-600 mt-1">
-                  View, search, and organise your video collection.
-                </p>
-              </div>
-              <a
-                href="/videos"
-                className="inline-flex items-center px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shrink-0"
-              >
-                Go to Videos
-              </a>
-            </div>
-          </div>
-        )}
 
         {allPlaylists.length > 0 && (
           <PlaylistList playlists={allPlaylists} />
