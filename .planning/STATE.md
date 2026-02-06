@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 3 - Category Management
+**Current focus:** Phase 4 - Video Display & Organization
 
 ## Current Position
 
-Phase: 3 of 8 (Category Management)
-Plan: 06 of 6 in current phase
-Status: Phase complete
-Last activity: 2026-02-06 — Completed 03-06-PLAN.md
+Phase: 4 of 8 (Video Display & Organization)
+Plan: 01 of 6 in current phase
+Status: In progress
+Last activity: 2026-02-06 — Completed 04-01-PLAN.md
 
-Progress: [██████████████████████░░░░░░░░░░░] 22/22 plans (~100%)
+Progress: [███████████████████████░░░░░░░░░░] 23/23 plans (~100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 4.1 min
-- Total execution time: 1.52 hours
+- Total plans completed: 23
+- Average duration: 4.2 min
+- Total execution time: 1.60 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: [██████████████████████░
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
+| 4 - Video Display & Organization | 1/6 | 4.6 min | 4.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (4min), 03-03 (3min), 03-04 (3min), 03-05 (6min), 03-06 (4min)
-- Trend: Stable at ~4.0 min per plan
+- Last 5 plans: 03-03 (3min), 03-04 (3min), 03-05 (6min), 03-06 (4min), 04-01 (4.6min)
+- Trend: Stable at ~4.1 min per plan
 
 *Updated after each plan completion*
 
@@ -178,6 +179,13 @@ Recent decisions affecting current work:
 - FolderOpen icon replaces status icons in management mode category list
 - prompt() for new category name (simple, adequate for MVP)
 
+**From 04-01 execution (2026-02-06):**
+- Extract format utilities from Phase 2 components to /lib/videos/ for reuse across video display
+- Use mqdefault (320x180) thumbnail quality as standard - available for all videos, good balance of size/quality
+- SortOption includes both dateAdded variants (newest/oldest) for flexible default sorting
+- VideoCardData includes categoryNames array for multi-category badge display
+- getCategoryColour uses HSL with fixed saturation/lightness for consistent visual appearance
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -205,8 +213,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-06T14:50:54Z
-Stopped at: Completed 03-06-PLAN.md (Final Polish and Verification)
+Last session: 2026-02-06T16:33:30Z
+Stopped at: Completed 04-01-PLAN.md (Foundation Types & Utilities)
 Resume file: None
 
 ---
@@ -216,3 +224,5 @@ Resume file: None
 **Phase 2 Complete!** All 12 plans executed. Full analysis workflow at /analysis with: clustering engine (aggressive/conservative modes), 18+ server actions, resizable split-panel dashboard, category detail with video list, batch operations, keyboard navigation, duplicate resolver, split wizard, manual adjustments, staleness detection, progress tracking, staged loading, and final review with finalizeConsolidation. Approved category structure persisted via finalizedAt timestamp, ready for Phase 3 (Category Management) and Phase 8 (Batch Sync).
 
 **Phase 3 Complete!** All 6 plans executed. Management mode fully functional with: categories/categoryVideos tables, 10 server actions, undo stack with Cmd/Ctrl+Z, rename/delete/merge/assign dialogs, management dashboard with hover CRUD actions, batch merge toolbar, video assignment dialog, and complete end-to-end verification. All 5 Phase 3 success criteria validated. UX improvements tracked for future enhancement.
+
+**Phase 4 Started!** Plan 04-01 complete: Installed @tanstack/react-virtual and dropdown-menu component, created shared video types (VideoCardData, SortOption, UndoData), extracted format utilities from Phase 2, added category colour and thumbnail URL generators. Foundation in place for video browsing interface.
