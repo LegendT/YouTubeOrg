@@ -136,3 +136,28 @@ export const categoryVideos = pgTable('category_videos', {
   addedAt: timestamp('added_at').notNull().defaultNow(),
   source: text('source').default('consolidation'), // Values: 'consolidation', 'manual', 'merge', 'orphan', 'undo'
 });
+
+// --- Phase 5: ML Categorization Engine ---
+
+// Confidence level enum for ML categorization results
+export const confidenceLevelEnum = pgEnum('confidence_level', ['HIGH', 'MEDIUM', 'LOW']);
+
+// ML Categorizations table - stores auto-categorization results from Transformers.js
+export const mlCategorizations = pgTable('ml_categorizations', {
+  id: serial('id').primaryKey(),
+  videoId: integer('video_id').references(() => videos.id, { onDelete: 'cascade' }).notNull(),
+  suggestedCategoryId: integer('suggested_category_id').references(() => categories.id, { onDelete: 'cascade' }).notNull(),
+  confidence: confidenceLevelEnum('confidence').notNull(),
+  similarityScore: integer('similarity_score').notNull(), // Store as 0-100 integer (score * 100) for easier display
+  modelVersion: text('model_version').notNull().default('all-MiniLM-L6-v2'), // Track model for future upgrades
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  acceptedAt: timestamp('accepted_at'), // Set when user accepts the suggestion
+  rejectedAt: timestamp('rejected_at'), // Set when user explicitly rejects
+  manualCategoryId: integer('manual_category_id').references(() => categories.id), // If user picks different category
+});
+
+// Index for efficient querying by video (review interface)
+// CREATE INDEX idx_ml_cat_video ON ml_categorizations(video_id);
+
+// Index for filtering by confidence level (low-confidence review workflow)
+// CREATE INDEX idx_ml_cat_confidence ON ml_categorizations(confidence, created_at);
