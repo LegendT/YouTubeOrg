@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, serial, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
 
 // Playlists table - stores YouTube playlist metadata with ETag support
 export const playlists = pgTable('playlists', {
@@ -64,4 +64,30 @@ export const syncState = pgTable('sync_state', {
   nextPageToken: text('next_page_token'),
   itemsFetched: integer('items_fetched').default(0),
   lastSyncAt: timestamp('last_sync_at').notNull().defaultNow(),
+});
+
+// --- Phase 2: Playlist Analysis & Consolidation ---
+
+// Enum for consolidation proposal status
+export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected']);
+
+// Consolidation proposals table - stores proposed category merges for user review
+export const consolidationProposals = pgTable('consolidation_proposals', {
+  id: serial('id').primaryKey(),
+  categoryName: text('category_name').notNull(),
+  sourcePlaylistIds: jsonb('source_playlist_ids').$type<number[]>().notNull(),
+  totalVideos: integer('total_videos').notNull(),
+  status: proposalStatusEnum('status').notNull().default('pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  approvedAt: timestamp('approved_at'),
+  notes: text('notes'), // User comments on this proposal
+});
+
+// Duplicate videos table - tracks videos appearing in multiple playlists
+export const duplicateVideos = pgTable('duplicate_videos', {
+  id: serial('id').primaryKey(),
+  videoId: integer('video_id').references(() => videos.id).notNull(),
+  playlistIds: jsonb('playlist_ids').$type<number[]>().notNull(),
+  occurrenceCount: integer('occurrence_count').notNull(),
+  analyzedAt: timestamp('analyzed_at').notNull().defaultNow(),
 });
