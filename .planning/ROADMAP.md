@@ -145,10 +145,13 @@ Plans:
   3. System completes categorization of 4,000 videos without browser crash or freeze (Web Worker execution)
   4. User can re-run categorization on newly added Watch Later videos without reprocessing entire library (cached embeddings)
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 05-01-PLAN.md — ML foundation (IndexedDB cache, Web Worker, cosine similarity)
+- [ ] 05-02-PLAN.md — Database schema and batch categorization engine
+- [ ] 05-03-PLAN.md — Server actions and UI components (trigger + progress)
+- [ ] 05-04-PLAN.md — Integration, navigation, and end-to-end verification
 
 ---
 
@@ -229,11 +232,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Playlist Analysis & Consolidation | 11/11 | Complete | 2026-02-06 |
 | 3. Category Management | 6/6 | Complete | 2026-02-06 |
 | 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
-| 5. ML Categorization Engine | 0/TBD | Not started | - |
+| 5. ML Categorization Engine | 0/4 | Not started | - |
 | 6. Review & Approval Interface | 0/TBD | Not started | - |
 | 7. Safety & Archive System | 0/TBD | Not started | - |
 | 8. Batch Sync Operations | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-06 (Phase 4 complete: 5 plans executed, goal verified)*
+*Last updated: 2026-02-06 (Phase 5 planned: 4 plans created, ready for execution)*
