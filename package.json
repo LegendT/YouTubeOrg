@@ -22,7 +22,9 @@
     "drizzle-orm": "^0.45.1",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.6",
+    "fast-dice-coefficient": "^1.0.3",
     "googleapis": "^171.3.0",
+    "ml-hclust": "^4.0.0",
     "next": "^15.5.12",
     "next-auth": "^5.0.0-beta.30",
     "pg": "^8.18.0",
@@ -36,6 +38,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@types/pg": "^8.16.0",
+    "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.8",
     "tsx": "^4.21.0"
   }
