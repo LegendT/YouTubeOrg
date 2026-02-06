@@ -787,3 +787,148 @@ export async function getDuplicateVideos(): Promise<{
     return { success: false, duplicates: [], error: message };
   }
 }
+
+/**
+ * Get detailed data for a single category/proposal.
+ *
+ * Fetches the proposal from DB, computes source playlist breakdown,
+ * unique/duplicate video counts, confidence info, validation status,
+ * and all video details for the paginated video list.
+ *
+ * Called on-demand when user selects a category in the dashboard
+ * (avoids pre-fetching all video data for all proposals upfront).
+ *
+ * @param proposalId - ID of the consolidation proposal
+ * @returns CategoryMetrics + VideoDetail[] or null if not found
+ */
+export async function getCategoryDetail(
+  proposalId: number
+): Promise<{ metrics: CategoryMetrics; videos: VideoDetail[] } | null> {
+  try {
+    // Get the proposal
+    const [proposal] = await db
+      .select()
+      .from(consolidationProposals)
+      .where(eq(consolidationProposals.id, proposalId))
+      .limit(1);
+
+    if (!proposal) return null;
+
+    const sourcePlaylistIds = proposal.sourcePlaylistIds as number[];
+
+    if (sourcePlaylistIds.length === 0) {
+      const score = proposal.confidenceScore ?? 0;
+      const level: ConfidenceLevel = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW';
+      return {
+        metrics: {
+          uniqueVideoCount: 0,
+          duplicateVideoCount: 0,
+          sourcePlaylistBreakdown: [],
+          confidence: {
+            score,
+            level,
+            reason: proposal.confidenceReason ?? 'No data',
+          },
+          validationStatus: 'safe',
+        },
+        videos: [],
+      };
+    }
+
+    // Get playlist details
+    const playlistDetails = await db
+      .select({ id: playlists.id, title: playlists.title })
+      .from(playlists)
+      .where(inArray(playlists.id, sourcePlaylistIds));
+
+    const playlistMap = new Map(playlistDetails.map((p) => [p.id, p.title]));
+
+    // Get video counts per source playlist
+    const perPlaylistCounts = await db
+      .select({
+        playlistId: playlistVideos.playlistId,
+        videoCount: count(playlistVideos.videoId),
+      })
+      .from(playlistVideos)
+      .where(inArray(playlistVideos.playlistId, sourcePlaylistIds))
+      .groupBy(playlistVideos.playlistId);
+
+    const sourcePlaylistBreakdown = perPlaylistCounts.map((row) => ({
+      playlistId: row.playlistId,
+      playlistTitle: playlistMap.get(row.playlistId) ?? 'Unknown',
+      videoCount: Number(row.videoCount),
+    }));
+
+    // Get all video details across source playlists (with deduplication)
+    const videoRows = await db
+      .select({
+        id: videos.id,
+        youtubeId: videos.youtubeId,
+        title: videos.title,
+        thumbnailUrl: videos.thumbnailUrl,
+        duration: videos.duration,
+        channelName: videos.channelTitle,
+        publishedAt: videos.publishedAt,
+        sourcePlaylistId: playlistVideos.playlistId,
+      })
+      .from(playlistVideos)
+      .innerJoin(videos, eq(playlistVideos.videoId, videos.id))
+      .where(inArray(playlistVideos.playlistId, sourcePlaylistIds));
+
+    // Deduplicate videos (keep first occurrence, track which playlist it came from)
+    const seen = new Set<number>();
+    const uniqueVideos: VideoDetail[] = [];
+    const allVideoIds = new Set<number>();
+
+    for (const row of videoRows) {
+      allVideoIds.add(row.id);
+      if (!seen.has(row.id)) {
+        seen.add(row.id);
+        uniqueVideos.push({
+          id: row.id,
+          youtubeId: row.youtubeId,
+          title: row.title,
+          thumbnailUrl: row.thumbnailUrl ?? undefined,
+          duration: row.duration ?? undefined,
+          channelName: row.channelName ?? undefined,
+          publishedAt: row.publishedAt ?? undefined,
+          sourcePlaylistId: row.sourcePlaylistId,
+          sourcePlaylistTitle: playlistMap.get(row.sourcePlaylistId) ?? 'Unknown',
+        });
+      }
+    }
+
+    const uniqueVideoCount = uniqueVideos.length;
+    const duplicateVideoCount = videoRows.length - uniqueVideoCount;
+
+    // Confidence info
+    const score = proposal.confidenceScore ?? 0;
+    const level: ConfidenceLevel = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW';
+
+    // Validation status
+    const validationStatus: 'safe' | 'warning' | 'danger' =
+      uniqueVideoCount > 4500
+        ? 'danger'
+        : uniqueVideoCount >= 3000
+          ? 'warning'
+          : 'safe';
+
+    return {
+      metrics: {
+        uniqueVideoCount,
+        duplicateVideoCount,
+        sourcePlaylistBreakdown,
+        confidence: {
+          score,
+          level,
+          reason: proposal.confidenceReason ?? 'No confidence data',
+        },
+        validationStatus,
+      },
+      videos: uniqueVideos,
+    };
+  } catch (error) {
+    console.error('Failed to get category detail:', error);
+    return null;
+  }
+}
