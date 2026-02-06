@@ -721,6 +721,7 @@ export async function assignVideosToCategory(
     // Warn at 4500 threshold (non-blocking)
     if (projectedCount >= 4500) {
       revalidatePath('/analysis');
+      revalidatePath('/videos');
       return {
         success: true,
         error: `Warning: Category now has ${projectedCount} videos (approaching 5,000 limit)`,
@@ -728,6 +729,7 @@ export async function assignVideosToCategory(
     }
 
     revalidatePath('/analysis');
+    revalidatePath('/videos');
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
