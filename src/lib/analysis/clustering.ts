@@ -23,9 +23,12 @@ const STOPWORDS = new Set([
 /**
  * Cluster playlists into proposed categories using combined distance
  * (name similarity via fast-dice-coefficient + video overlap) and
- * AGNES hierarchical clustering with group(k).
+ * AGNES hierarchical clustering with threshold-based cutting.
  *
- * @param mode - 'aggressive' (25 clusters, more merging) or 'conservative' (35 clusters, less merging)
+ * Only merges playlists whose combined distance falls below the
+ * threshold — playlists with no meaningful similarity stay separate.
+ *
+ * @param mode - 'aggressive' (lower threshold, merges more) or 'conservative' (higher bar for merging)
  * @returns Array of cluster results sorted by totalVideos descending, with confidence scores
  */
 export async function clusterPlaylists(
@@ -50,7 +53,6 @@ export async function clusterPlaylists(
     return [];
   }
 
-  // For a single playlist, return it as its own cluster with HIGH confidence
   if (filteredPlaylists.length === 1) {
     return [{
       categoryName: filteredPlaylists[0].title,
@@ -69,18 +71,13 @@ export async function clusterPlaylists(
   // Build combined distance matrix (name similarity + video overlap)
   const { distances, videoOverlaps } = await buildDistanceMatrix(playlistsForClustering, mode);
 
-  const n = playlistsForClustering.length;
-
   // AGNES hierarchical clustering with average linkage (UPGMA)
-  const tree = agnes(distances, { method: 'average' });
+  const tree = agnes(distances, { method: 'average', isDistanceMatrix: true });
 
-  // Use built-in group(k) to cut dendrogram into target number of clusters
-  const { targetClusters } = ALGORITHM_PRESETS[mode];
-  const k = Math.min(targetClusters, n);
-  const groupResult = tree.group(k);
-
-  // Extract clusters from group result
-  const clusters = groupResult.children;
+  // Cut dendrogram at distance threshold — only merge playlists that
+  // are actually similar. Unrelated playlists stay as their own category.
+  const { distanceThreshold } = ALGORITHM_PRESETS[mode];
+  const clusters = tree.cut(distanceThreshold);
 
   // Build result array with confidence scores
   const results: ClusterResult[] = clusters.map((cluster) => {
