@@ -86,24 +86,22 @@ export function VideoCard({
           </p>
         )}
 
-        {/* Category badge */}
+        {/* Category badges */}
         {showCategoryBadge && video.categoryNames.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Badge
-              style={{
-                backgroundColor: getCategoryColour(primaryCategory),
-                color: 'white',
-                borderColor: 'transparent',
-              }}
-              className="text-xs px-2 py-0.5"
-            >
-              {primaryCategory}
-            </Badge>
-            {additionalCategoryCount > 0 && (
-              <span className="text-xs text-muted-foreground">
-                +{additionalCategoryCount}
-              </span>
-            )}
+          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+            {video.categoryNames.map((categoryName) => (
+              <Badge
+                key={categoryName}
+                style={{
+                  backgroundColor: getCategoryColour(categoryName),
+                  color: 'white',
+                  borderColor: 'transparent',
+                }}
+                className="text-xs px-2 py-0.5"
+              >
+                {categoryName}
+              </Badge>
+            ))}
           </div>
         )}
       </div>
