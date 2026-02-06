@@ -413,6 +413,91 @@ export async function splitProposal(
 }
 
 /**
+ * Update the source playlists for an existing proposal.
+ *
+ * Recalculates deduplicated video counts and confidence after the change.
+ * Used by add/remove playlist controls in the manual adjustments UI.
+ *
+ * @param proposalId - ID of the proposal to update
+ * @param newPlaylistIds - Complete new set of playlist IDs
+ * @returns Result with updated video count or error
+ */
+export async function updateProposalPlaylists(
+  proposalId: number,
+  newPlaylistIds: number[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (newPlaylistIds.length === 0) {
+      return { success: false, error: 'At least one playlist is required' };
+    }
+
+    // Calculate new deduplicated video count
+    const dedupCount = await calculateDeduplicatedCount(newPlaylistIds);
+
+    // Recalculate confidence based on new playlist set
+    const playlistDetails = await db
+      .select({ id: playlists.id, title: playlists.title })
+      .from(playlists)
+      .where(inArray(playlists.id, newPlaylistIds));
+
+    const playlistNames = playlistDetails.map((p) => p.title);
+    const confidence = calculateConfidence(playlistNames, 0);
+
+    await db
+      .update(consolidationProposals)
+      .set({
+        sourcePlaylistIds: newPlaylistIds,
+        totalVideos: dedupCount,
+        uniqueVideoCount: dedupCount,
+        confidenceScore: confidence.score,
+        confidenceReason: `Updated: ${confidence.reason}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(consolidationProposals.id, proposalId));
+
+    revalidatePath('/analysis');
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: `Failed to update playlists: ${message}` };
+  }
+}
+
+/**
+ * Get all playlists with basic info for use in playlist selectors.
+ *
+ * Returns id, title, and itemCount for each playlist, excluding Watch Later.
+ * Used by AddPlaylistSelector and CreateCategoryDialog.
+ *
+ * @returns Array of playlist summaries
+ */
+export async function getAllPlaylistsForSelector(): Promise<
+  Array<{ id: number; title: string; itemCount: number }>
+> {
+  try {
+    const rows = await db
+      .select({
+        id: playlists.id,
+        title: playlists.title,
+        itemCount: playlists.itemCount,
+        youtubeId: playlists.youtubeId,
+      })
+      .from(playlists);
+
+    return rows
+      .filter((p) => p.youtubeId !== 'WL' && p.title !== 'Watch Later')
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        itemCount: p.itemCount ?? 0,
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Create a custom category from manually selected playlists.
  *
  * Validates the video count against the 4500 limit before creating.

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
@@ -7,6 +8,8 @@ import { ConfidenceBadge } from './confidence-badge'
 import { ValidationBadge } from './validation-badge'
 import { VideoListPaginated } from './video-list-paginated'
 import { ProposalActions } from './proposal-actions'
+import { SplitWizard } from './split-wizard'
+import { ManualAdjustments } from './manual-adjustments'
 import type {
   ConsolidationProposal,
   CategoryMetrics,
@@ -17,6 +20,7 @@ interface CategoryDetailProps {
   proposal: ConsolidationProposal
   metrics: CategoryMetrics
   videos: VideoDetail[]
+  allPlaylists: Array<{ id: number; title: string; itemCount: number }>
   onStatusChange?: () => void
 }
 
@@ -24,8 +28,11 @@ export function CategoryDetail({
   proposal,
   metrics,
   videos,
+  allPlaylists,
   onStatusChange,
 }: CategoryDetailProps) {
+  const [splitWizardOpen, setSplitWizardOpen] = useState(false)
+
   const sourcePlaylists = metrics.sourcePlaylistBreakdown.map((s) => ({
     id: s.playlistId,
     title: s.playlistTitle,
@@ -36,6 +43,14 @@ export function CategoryDetail({
   const breakdownText = metrics.sourcePlaylistBreakdown
     .map((s) => `${s.playlistTitle}: ${s.videoCount.toLocaleString()}`)
     .join(', ')
+
+  const isPending = proposal.status === 'pending'
+  const currentPlaylistIds = proposal.playlists.map((p) => p.id)
+
+  const handleAdjustmentUpdate = () => {
+    // Re-fetch detail data via parent callback
+    onStatusChange?.()
+  }
 
   return (
     <ScrollArea className="h-full">
@@ -95,6 +110,24 @@ export function CategoryDetail({
           </CardContent>
         </Card>
 
+        {/* Manual adjustments section - only for pending proposals */}
+        {isPending && (
+          <>
+            <Separator />
+            <ManualAdjustments
+              proposalId={proposal.id}
+              currentPlaylistIds={currentPlaylistIds}
+              allPlaylists={allPlaylists}
+              sourcePlaylists={metrics.sourcePlaylistBreakdown.map((s) => ({
+                playlistId: s.playlistId,
+                playlistTitle: s.playlistTitle,
+              }))}
+              onUpdate={handleAdjustmentUpdate}
+              onSplitClick={() => setSplitWizardOpen(true)}
+            />
+          </>
+        )}
+
         <Separator />
 
         {/* Video list */}
@@ -120,6 +153,16 @@ export function CategoryDetail({
           onStatusChange={onStatusChange}
         />
       </div>
+
+      {/* Split wizard dialog */}
+      {isPending && (
+        <SplitWizard
+          proposal={proposal}
+          open={splitWizardOpen}
+          onOpenChange={setSplitWizardOpen}
+          onComplete={handleAdjustmentUpdate}
+        />
+      )}
     </ScrollArea>
   )
 }
