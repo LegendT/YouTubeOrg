@@ -128,6 +128,12 @@ Recent decisions affecting current work:
 - AnalysisRunner coexists with RunAnalysisButton: Runner adds staged loading, Button stays simple for inline use
 - useCategoryKeyboardNav includes resetFocus callback for list filter/sort changes
 
+**From 02-08 execution (2026-02-06):**
+- On-demand detail fetching via getCategoryDetail server action to avoid loading all video data for 87 proposals upfront
+- ISO 8601 duration parsing for YouTube PT format (PT1H2M3S) to human-readable MM:SS or H:MM:SS
+- Relative date formatting for publishedAt ("2 months ago") instead of absolute dates
+- Deduplication in getCategoryDetail: keep first occurrence of each video across source playlists
+
 ### Pending Todos
 
 None yet.
@@ -151,12 +157,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T11:58:35Z
-Stopped at: Completed 02-09-PLAN.md (Duplicate Resolution & Batch Operations)
+Last session: 2026-02-06T11:59:00Z
+Stopped at: Completed 02-08-PLAN.md (Category Detail Panel)
 Resume file: None
 
 ---
 
 **Phase 1 Complete!** All 5 Phase 1 Success Criteria validated.
 
-**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, 09, and 11 complete. Full backend API with 14 server actions, resizable split-panel analysis dashboard, DuplicateResolver with smart defaults and preview dialog, BatchOperations toolbar with useBatchSelection hook, and 5 standalone supporting UI components. Ready for CategoryDetail (Plan 02-08) and remaining UI plans (02-10, 02-12).
+**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, 08, 09, and 11 complete. Full backend API with 15 server actions (including getCategoryDetail), resizable split-panel analysis dashboard with CategoryDetail right panel, DuplicateResolver with smart defaults and preview dialog, BatchOperations toolbar with useBatchSelection hook, and 5 standalone supporting UI components. Ready for remaining UI plans (02-10, 02-12).
