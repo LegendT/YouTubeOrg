@@ -1,24 +1,25 @@
 import { AnalysisDashboard } from '@/components/analysis/analysis-dashboard'
-import { DuplicateReport } from '@/components/analysis/duplicate-report'
+import { AnalysisRunner } from '@/components/analysis/analysis-loading'
 import { RunAnalysisButton } from '@/components/analysis/run-analysis-button'
 import {
   getProposals,
-  getDuplicateStats,
   getAnalysisSummary,
   checkStaleness,
+  getAllPlaylistsForSelector,
+  getLatestSession,
 } from '@/app/actions/analysis'
-import { AlertTriangle } from 'lucide-react'
 
 export default async function AnalysisPage() {
-  const [proposalsResult, statsResult, summary, staleness] = await Promise.all([
-    getProposals(),
-    getDuplicateStats(),
-    getAnalysisSummary(),
-    checkStaleness(),
-  ])
+  const [proposalsResult, summary, staleness, allPlaylists, session] =
+    await Promise.all([
+      getProposals(),
+      getAnalysisSummary(),
+      checkStaleness(),
+      getAllPlaylistsForSelector(),
+      getLatestSession(),
+    ])
 
   const proposals = proposalsResult.proposals
-  const duplicateStats = statsResult.stats
   const hasProposals = proposals.length > 0
 
   return (
@@ -35,42 +36,38 @@ export default async function AnalysisPage() {
               : 'Sync your playlists first, then analyze and consolidate them into categories'}
           </p>
         </div>
-        <RunAnalysisButton hasExistingProposals={hasProposals} />
+        {hasProposals && (
+          <RunAnalysisButton hasExistingProposals={true} />
+        )}
       </div>
-
-      {/* Staleness warning */}
-      {staleness.isStale && (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-medium">{staleness.message}</p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-              Click &quot;Re-analyze&quot; to update proposals with latest playlist data.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Dashboard or empty state */}
       {hasProposals ? (
-        <AnalysisDashboard proposals={proposals} summary={summary} />
+        <AnalysisDashboard
+          proposals={proposals}
+          summary={summary}
+          staleness={staleness}
+          allPlaylists={allPlaylists}
+        />
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="text-muted-foreground space-y-2">
-            <p className="text-lg font-medium">
-              No consolidation proposals yet
-            </p>
-            <p className="text-sm">
-              Click &quot;Run Analysis&quot; to analyze your playlists and create
-              category recommendations.
-            </p>
+          <div className="space-y-6 w-full max-w-md">
+            <div className="text-muted-foreground space-y-2">
+              <p className="text-lg font-medium">
+                No consolidation proposals yet
+              </p>
+              <p className="text-sm">
+                Choose an algorithm mode and run analysis to create
+                category recommendations from your playlists.
+              </p>
+            </div>
+            <AnalysisRunner
+              currentMode={session?.mode ?? 'aggressive'}
+              onComplete={() => {}}
+              hasExistingProposals={false}
+            />
           </div>
         </div>
-      )}
-
-      {/* Duplicate statistics below dashboard */}
-      {duplicateStats && duplicateStats.totalUniqueVideos > 0 && (
-        <DuplicateReport stats={duplicateStats} />
       )}
     </div>
   )
