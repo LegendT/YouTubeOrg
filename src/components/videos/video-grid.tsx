@@ -108,9 +108,10 @@ export function VideoGrid({
                 className="grid"
                 style={{
                   gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
-                  gap: '16px',
-                  paddingLeft: '32px',
-                  paddingRight: '32px',
+                  gap: '24px',
+                  paddingLeft: '48px',
+                  paddingRight: '48px',
+                  backgroundColor: 'transparent',
                 }}
               >
                 {rowVideos.map((video) => (
