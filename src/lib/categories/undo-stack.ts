@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 export interface UndoEntry {
   id: string
-  type: 'delete' | 'merge'
+  type: 'delete' | 'merge' | 'move' | 'copy'
   label: string
   /** Closure that calls the server action with serializable snapshot data captured at push time. */
   undoAction: () => Promise<{ success: boolean; error?: string }>

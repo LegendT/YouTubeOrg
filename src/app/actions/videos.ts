@@ -1,8 +1,9 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { videos, categoryVideos, categories } from '@/lib/db/schema';
-import { eq, inArray, desc, asc } from 'drizzle-orm';
+import { eq, inArray, desc, asc, and, count } from 'drizzle-orm';
 import type { VideoCardData } from '@/types/videos';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
 
@@ -132,5 +133,58 @@ export async function getVideosForCategory(
   } catch (error) {
     console.error('Failed to get videos for category:', error);
     return [];
+  }
+}
+
+/**
+ * Remove videos from a category.
+ *
+ * Used for copy undo: deletes categoryVideos entries for the specified videos
+ * in the target category, then recalculates the category's videoCount.
+ *
+ * @param categoryId - Category to remove videos from
+ * @param videoIds - Video IDs to remove
+ * @returns Success result
+ */
+export async function removeVideosFromCategory(
+  categoryId: number,
+  videoIds: number[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (videoIds.length === 0) {
+      return { success: true };
+    }
+
+    await db.transaction(async (tx) => {
+      // Delete categoryVideos rows
+      await tx
+        .delete(categoryVideos)
+        .where(
+          and(
+            eq(categoryVideos.categoryId, categoryId),
+            inArray(categoryVideos.videoId, videoIds)
+          )
+        );
+
+      // Recalculate videoCount
+      const [result] = await tx
+        .select({ cnt: count() })
+        .from(categoryVideos)
+        .where(eq(categoryVideos.categoryId, categoryId));
+
+      await tx
+        .update(categories)
+        .set({
+          videoCount: Number(result.cnt),
+          updatedAt: new Date(),
+        })
+        .where(eq(categories.id, categoryId));
+    });
+
+    revalidatePath('/videos');
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: `Failed to remove videos: ${message}` };
   }
 }
