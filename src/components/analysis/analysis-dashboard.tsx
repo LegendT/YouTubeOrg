@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/resizable'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Columns, Rows, Loader2, Shield } from 'lucide-react'
+import { Columns, Rows, Loader2, Shield, Merge, Plus } from 'lucide-react'
 import { SummaryCard } from './summary-card'
 import { CategoryList } from './category-list'
 import { CategoryDetail } from './category-detail'
@@ -19,12 +19,25 @@ import { StalenessBanner } from './staleness-banner'
 import { useBatchSelection } from './batch-operations'
 import { useCategoryKeyboardNav } from './keyboard-nav'
 import { CreateCategoryDialog } from './manual-adjustments'
+import { UndoBanner } from './undo-banner'
+import { RenameCategoryDialog } from './rename-category-dialog'
+import { DeleteCategoryDialog } from './delete-category-dialog'
+import { MergeCategoriesDialog } from './merge-categories-dialog'
+import { VideoAssignmentDialog } from './video-assignment-dialog'
+import { useUndoStack } from '@/lib/categories/undo-stack'
 import {
   getCategoryDetail,
   getAllPlaylistsForSelector,
   getDuplicateVideos,
   runAnalysis,
 } from '@/app/actions/analysis'
+import {
+  getCategories,
+  getCategoryDetailManagement,
+  undoDelete,
+  undoMerge,
+  createCategory,
+} from '@/app/actions/categories'
 import { useRouter } from 'next/navigation'
 import type {
   ConsolidationProposal,
@@ -34,6 +47,12 @@ import type {
   VideoDetail,
   DuplicateRecord,
 } from '@/types/analysis'
+import type {
+  CategoryListItem,
+  DeleteUndoData,
+  MergeUndoData,
+  VideoSearchResult,
+} from '@/types/categories'
 
 type Orientation = 'horizontal' | 'vertical'
 
@@ -42,6 +61,8 @@ interface AnalysisDashboardProps {
   summary: AnalysisSummary
   staleness?: StalenessCheck
   allPlaylists?: Array<{ id: number; title: string; itemCount: number }>
+  managementMode?: boolean
+  categories?: CategoryListItem[]
 }
 
 interface CategoryData {
@@ -49,11 +70,26 @@ interface CategoryData {
   videos: VideoDetail[]
 }
 
+interface ManagementDetailData {
+  category: {
+    id: number
+    name: string
+    videoCount: number
+    isProtected: boolean
+    createdAt: Date
+    updatedAt: Date
+  }
+  videos: VideoSearchResult[]
+  total: number
+}
+
 export function AnalysisDashboard({
   proposals,
   summary,
   staleness,
   allPlaylists: initialPlaylists,
+  managementMode = false,
+  categories: initialCategories,
 }: AnalysisDashboardProps) {
   const [orientation, setOrientation] = useState<Orientation>('horizontal')
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
@@ -69,6 +105,31 @@ export function AnalysisDashboard({
   const [duplicatesLoaded, setDuplicatesLoaded] = useState(false)
   const [rightPanelTab, setRightPanelTab] = useState<string>('detail')
 
+  // Management mode state
+  const [managedCategories, setManagedCategories] = useState<CategoryListItem[]>(
+    initialCategories ?? []
+  )
+  const [managementDetail, setManagementDetail] =
+    useState<ManagementDetailData | null>(null)
+  const [renameTarget, setRenameTarget] = useState<{
+    id: number
+    name: string
+  } | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number
+    name: string
+    videoCount: number
+  } | null>(null)
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
+  const [assignTarget, setAssignTarget] = useState<{
+    id: number
+    name: string
+    videoCount: number
+  } | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
+
+  const undoStack = useUndoStack()
+
   const router = useRouter()
   const selectedProposal =
     proposals.find((p) => p.id === selectedCategoryId) ?? null
@@ -76,9 +137,11 @@ export function AnalysisDashboard({
   // Batch selection hook
   const batchSelection = useBatchSelection()
 
-  // Keyboard navigation hook
+  // Keyboard navigation hook -- in management mode, use categories as navigation source
   const keyboardNav = useCategoryKeyboardNav({
-    categories: proposals,
+    categories: managementMode
+      ? managedCategories.map((c) => ({ id: c.id, categoryName: c.name }))
+      : proposals,
     onSelect: setSelectedCategoryId,
   })
 
@@ -89,6 +152,7 @@ export function AnalysisDashboard({
     }
   }, [initialPlaylists])
 
+  // === Analysis mode data fetching ===
   const fetchCategoryData = useCallback(async (proposalId: number) => {
     setIsLoading(true)
     setCategoryData(null)
@@ -103,20 +167,54 @@ export function AnalysisDashboard({
     }
   }, [])
 
+  // === Management mode data fetching ===
+  const fetchManagementDetail = useCallback(async (categoryId: number) => {
+    setIsLoading(true)
+    setManagementDetail(null)
+    try {
+      const data = await getCategoryDetailManagement(categoryId)
+      setManagementDetail(data)
+    } catch (error) {
+      console.error('Failed to fetch management detail:', error)
+      setManagementDetail(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (selectedCategoryId) {
-      fetchCategoryData(selectedCategoryId)
+      if (managementMode) {
+        fetchManagementDetail(selectedCategoryId)
+      } else {
+        fetchCategoryData(selectedCategoryId)
+      }
     } else {
       setCategoryData(null)
+      setManagementDetail(null)
     }
-  }, [selectedCategoryId, fetchCategoryData])
+  }, [selectedCategoryId, fetchCategoryData, fetchManagementDetail, managementMode])
 
-  const handleStatusChange = useCallback(() => {
+  // === Refresh pattern for management mode ===
+  const refreshManagementData = useCallback(async () => {
+    const updated = await getCategories()
+    setManagedCategories(updated)
     if (selectedCategoryId) {
-      fetchCategoryData(selectedCategoryId)
+      fetchManagementDetail(selectedCategoryId)
     }
     router.refresh()
-  }, [selectedCategoryId, fetchCategoryData, router])
+  }, [selectedCategoryId, fetchManagementDetail, router])
+
+  const handleStatusChange = useCallback(() => {
+    if (managementMode) {
+      refreshManagementData()
+    } else {
+      if (selectedCategoryId) {
+        fetchCategoryData(selectedCategoryId)
+      }
+      router.refresh()
+    }
+  }, [selectedCategoryId, fetchCategoryData, router, managementMode, refreshManagementData])
 
   // Load duplicates when switching to duplicates tab
   useEffect(() => {
@@ -146,6 +244,288 @@ export function AnalysisDashboard({
     router.refresh()
   }, [router])
 
+  // === Management mode handlers ===
+
+  const handleRename = useCallback(
+    (id: number, name: string) => {
+      setRenameTarget({ id, name })
+    },
+    []
+  )
+
+  const handleDelete = useCallback(
+    (id: number, name: string, videoCount: number) => {
+      setDeleteTarget({ id, name, videoCount })
+    },
+    []
+  )
+
+  const handleAssignVideos = useCallback(
+    (id: number, name: string, videoCount: number) => {
+      setAssignTarget({ id, name, videoCount })
+    },
+    []
+  )
+
+  const handleDeleteCompleted = useCallback(
+    (undoData: DeleteUndoData) => {
+      undoStack.push({
+        type: 'delete',
+        label: `Deleted "${undoData.categoryName}"`,
+        undoAction: () => undoDelete(undoData),
+      })
+      setDeleteTarget(null)
+      // If the deleted category was selected, clear selection
+      if (selectedCategoryId === undoData.categoryId) {
+        setSelectedCategoryId(null)
+      }
+      refreshManagementData()
+    },
+    [undoStack, selectedCategoryId, refreshManagementData]
+  )
+
+  const handleMergeCompleted = useCallback(
+    (undoData: MergeUndoData) => {
+      undoStack.push({
+        type: 'merge',
+        label: `Merged ${undoData.originalCategories.length} categories`,
+        undoAction: () => undoMerge(undoData),
+      })
+      setMergeDialogOpen(false)
+      batchSelection.clearAll()
+      setSelectedCategoryId(null)
+      refreshManagementData()
+    },
+    [undoStack, batchSelection, refreshManagementData]
+  )
+
+  const handleUndoAction = useCallback(async () => {
+    const result = await undoStack.undo()
+    if (result.success) {
+      refreshManagementData()
+    }
+  }, [undoStack, refreshManagementData])
+
+  const handleCreateCategory = useCallback(async () => {
+    const name = prompt('Enter new category name:')
+    if (!name?.trim()) return
+    setIsCreating(true)
+    try {
+      const result = await createCategory(name.trim())
+      if (result.success) {
+        refreshManagementData()
+      }
+    } finally {
+      setIsCreating(false)
+    }
+  }, [refreshManagementData])
+
+  // Build merge dialog source categories from batch selection
+  const mergeCandidates = useMemo(() => {
+    if (!managementMode) return []
+    return managedCategories
+      .filter((c) => batchSelection.isSelected(c.id))
+      .map((c) => ({ id: c.id, name: c.name, videoCount: c.videoCount }))
+  }, [managementMode, managedCategories, batchSelection])
+
+  // Get all categories for video assignment dialog (excluding target)
+  const allCategoriesForAssignment = useMemo(
+    () => managedCategories.map((c) => ({ id: c.id, name: c.name })),
+    [managedCategories]
+  )
+
+  // Get selected managed category for detail panel
+  const selectedManagedCategory = useMemo(
+    () => managedCategories.find((c) => c.id === selectedCategoryId) ?? null,
+    [managedCategories, selectedCategoryId]
+  )
+
+  // ====================================================================
+  // MANAGEMENT MODE RENDERING
+  // ====================================================================
+  if (managementMode) {
+    return (
+      <div className="space-y-4">
+        {/* Toolbar row: Summary + actions */}
+        <div className="flex items-center justify-between gap-4">
+          <SummaryCard summary={summary} />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCreateCategory}
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-1.5" />
+              )}
+              New Category
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setOrientation((o) =>
+                  o === 'horizontal' ? 'vertical' : 'horizontal'
+                )
+              }
+              title={`Switch to ${orientation === 'horizontal' ? 'vertical' : 'horizontal'} layout`}
+            >
+              {orientation === 'horizontal' ? (
+                <Rows className="h-4 w-4" />
+              ) : (
+                <Columns className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Split panel layout */}
+        <div className="h-[calc(100vh-320px)] rounded-lg border">
+          <ResizablePanelGroup direction={orientation}>
+            {/* Left panel: Category list with batch operations */}
+            <ResizablePanel defaultSize={35} minSize={25}>
+              <div className="relative flex flex-col h-full">
+                <div className="flex-1 overflow-hidden">
+                  <CategoryList
+                    proposals={proposals}
+                    selectedId={selectedCategoryId}
+                    onSelect={setSelectedCategoryId}
+                    batchSelection={batchSelection}
+                    focusedIndex={keyboardNav.focusedIndex}
+                    managementMode={true}
+                    items={managedCategories}
+                    onRename={handleRename}
+                    onDelete={handleDelete}
+                    onAssignVideos={handleAssignVideos}
+                  />
+                </div>
+
+                {/* Batch operations toolbar with Merge button */}
+                {batchSelection.selectedIds.size > 0 && (
+                  <ManagementBatchToolbar
+                    selectedIds={batchSelection.selectedIds}
+                    clearAll={batchSelection.clearAll}
+                    onMerge={() => setMergeDialogOpen(true)}
+                  />
+                )}
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+
+            {/* Right panel: Detail */}
+            <ResizablePanel defaultSize={65} minSize={30}>
+              <div className="h-full overflow-hidden">
+                {selectedCategoryId && selectedManagedCategory ? (
+                  isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Loading category details...</span>
+                      </div>
+                    </div>
+                  ) : managementDetail ? (
+                    <CategoryDetail
+                      proposal={null as unknown as ConsolidationProposal}
+                      metrics={null as unknown as CategoryMetrics}
+                      videos={[]}
+                      allPlaylists={allPlaylists}
+                      onStatusChange={handleStatusChange}
+                      managementMode={true}
+                      category={selectedManagedCategory}
+                      managementVideos={managementDetail.videos}
+                      onRename={handleRename}
+                      onDelete={handleDelete}
+                      onAssignVideos={handleAssignVideos}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      Failed to load category details
+                    </div>
+                  )
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    Select a category to view details
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+
+        {/* Management mode dialogs */}
+        {renameTarget && (
+          <RenameCategoryDialog
+            categoryId={renameTarget.id}
+            currentName={renameTarget.name}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) setRenameTarget(null)
+            }}
+            onRenamed={() => {
+              setRenameTarget(null)
+              refreshManagementData()
+            }}
+          />
+        )}
+
+        {deleteTarget && (
+          <DeleteCategoryDialog
+            categoryId={deleteTarget.id}
+            categoryName={deleteTarget.name}
+            videoCount={deleteTarget.videoCount}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) setDeleteTarget(null)
+            }}
+            onDeleted={handleDeleteCompleted}
+          />
+        )}
+
+        {mergeDialogOpen && mergeCandidates.length >= 2 && (
+          <MergeCategoriesDialog
+            categories={mergeCandidates}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) setMergeDialogOpen(false)
+            }}
+            onMerged={handleMergeCompleted}
+          />
+        )}
+
+        {assignTarget && (
+          <VideoAssignmentDialog
+            categoryId={assignTarget.id}
+            categoryName={assignTarget.name}
+            currentVideoCount={assignTarget.videoCount}
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) setAssignTarget(null)
+            }}
+            onAssigned={() => {
+              setAssignTarget(null)
+              refreshManagementData()
+            }}
+            allCategories={allCategoriesForAssignment}
+          />
+        )}
+
+        {/* Undo banner */}
+        <UndoBanner
+          canUndo={undoStack.canUndo}
+          latest={undoStack.latest}
+          onUndo={handleUndoAction}
+          isUndoing={undoStack.isUndoing}
+        />
+      </div>
+    )
+  }
+
+  // ====================================================================
+  // ANALYSIS MODE RENDERING (existing, unchanged)
+  // ====================================================================
   return (
     <div className="space-y-4">
       {/* Staleness banner */}
@@ -300,7 +680,7 @@ export function AnalysisDashboard({
   )
 }
 
-// === Batch toolbar (inline) ===
+// === Analysis mode batch toolbar (inline, unchanged) ===
 
 import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -391,6 +771,48 @@ function BatchToolbar({
           </Badge>
         </div>
       )}
+    </div>
+  )
+}
+
+// === Management mode batch toolbar ===
+
+function ManagementBatchToolbar({
+  selectedIds,
+  clearAll,
+  onMerge,
+}: {
+  selectedIds: Set<number>
+  clearAll: () => void
+  onMerge: () => void
+}) {
+  return (
+    <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium">
+          {selectedIds.size}{' '}
+          {selectedIds.size === 1 ? 'category' : 'categories'} selected
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={clearAll}
+          >
+            <X className="h-4 w-4 mr-1.5" />
+            Clear
+          </Button>
+          {selectedIds.size >= 2 && (
+            <Button
+              size="sm"
+              onClick={onMerge}
+            >
+              <Merge className="h-4 w-4 mr-1.5" />
+              Merge {selectedIds.size} categories
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

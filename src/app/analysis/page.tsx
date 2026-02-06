@@ -8,6 +8,7 @@ import {
   getAllPlaylistsForSelector,
   getLatestSession,
 } from '@/app/actions/analysis'
+import { getCategories } from '@/app/actions/categories'
 
 export default async function AnalysisPage() {
   const [proposalsResult, summary, staleness, allPlaylists, session] =
@@ -22,32 +23,42 @@ export default async function AnalysisPage() {
   const proposals = proposalsResult.proposals
   const hasProposals = proposals.length > 0
 
+  // Detect if analysis has been finalized -> switch to management mode
+  const managementMode = session?.finalizedAt != null
+  const categories = managementMode ? await getCategories() : []
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Playlist Analysis &amp; Consolidation
+            {managementMode
+              ? 'Category Management'
+              : 'Playlist Analysis & Consolidation'}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {summary.totalPlaylists > 0
-              ? `Analyze your ${summary.totalPlaylists} playlists and propose a consolidated category structure`
-              : 'Sync your playlists first, then analyze and consolidate them into categories'}
+            {managementMode
+              ? 'Manage your approved category structure'
+              : summary.totalPlaylists > 0
+                ? `Analyze your ${summary.totalPlaylists} playlists and propose a consolidated category structure`
+                : 'Sync your playlists first, then analyze and consolidate them into categories'}
           </p>
         </div>
-        {hasProposals && (
+        {!managementMode && hasProposals && (
           <RunAnalysisButton hasExistingProposals={true} />
         )}
       </div>
 
       {/* Dashboard or empty state */}
-      {hasProposals ? (
+      {hasProposals || managementMode ? (
         <AnalysisDashboard
           proposals={proposals}
           summary={summary}
           staleness={staleness}
           allPlaylists={allPlaylists}
+          managementMode={managementMode}
+          categories={categories}
         />
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
