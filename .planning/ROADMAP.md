@@ -121,10 +121,14 @@ Plans:
   6. User can select multiple videos for batch operations
   7. User can preview video by clicking through to YouTube
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 04-01-PLAN.md — Dependencies, types, and shared utilities (format, colours, thumbnails)
+- [ ] 04-02-PLAN.md — Server actions (getVideosForCategory) and category sidebar
+- [ ] 04-03-PLAN.md — Video card, virtualised grid, and toolbar (search/sort/select)
+- [ ] 04-04-PLAN.md — Page orchestration, move/copy dialog, undo wiring
+- [ ] 04-05-PLAN.md — End-to-end verification and polish
 
 ---
 
