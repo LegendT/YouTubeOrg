@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 5 of 8 (ML Categorization Engine)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-06 — Completed Phase 4
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-02-06 — Completed 05-01-PLAN.md
 
-Progress: [████████████████████████████████░] 27/27 plans (100%)
+Progress: [████████████████████████████████░] 28/31 plans (90%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
+- Total plans completed: 28
 - Average duration: 3.8 min
-- Total execution time: 1.73 hours
+- Total execution time: 1.81 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [███████████████████████
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
+| 5 - ML Categorization Engine | 1/4 | 5 min | 5.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (4.6min), 04-02 (2.9min), 04-03 (2min), 04-04 (3min), 04-05 (2min)
-- Trend: Phase 4 completed with fastest avg (3.1 min)
+- Last 5 plans: 04-02 (2.9min), 04-03 (2min), 04-04 (3min), 04-05 (2min), 05-01 (5min)
+- Trend: Phase 5 started with foundational ML infrastructure
 
 *Updated after each plan completion*
 
@@ -217,6 +218,15 @@ Recent decisions affecting current work:
 - Inline styles for grid spacing (24px gap, 48px padding) for cache-busting
 - Bulk warning fixed by passing currentCategoryName directly (not conditional null)
 
+**From 05-01 execution (2026-02-06):**
+- Use IndexedDB for embeddings cache (50-100MB browser limit sufficient for 4,000 videos at 6MB total)
+- Compound key [videoId, modelVersion] for model upgrade support
+- PipelineSingleton pattern ensures one-time model load per worker lifetime
+- Xenova/all-MiniLM-L6-v2 model (384-dim embeddings, ~50MB, cached in browser)
+- Mean pooling + normalization for cosine similarity optimization (dot product only)
+- Empirical confidence thresholds (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60) subject to calibration
+- Type assertion for Transformers.js pipeline (complex overload types)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -243,8 +253,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-06T17:15:30Z
-Stopped at: Completed Phase 4 (Video Display & Organization)
+Last session: 2026-02-06T22:50:31Z
+Stopped at: Completed 05-01-PLAN.md (ML Foundation)
 Resume file: None
 
 ---
@@ -256,3 +266,5 @@ Resume file: None
 **Phase 3 Complete!** All 6 plans executed. Management mode fully functional with: categories/categoryVideos tables, 10 server actions, undo stack with Cmd/Ctrl+Z, rename/delete/merge/assign dialogs, management dashboard with hover CRUD actions, batch merge toolbar, video assignment dialog, and complete end-to-end verification. All 5 Phase 3 success criteria validated.
 
 **Phase 4 Complete!** All 5 plans executed. Full video browsing at /videos with: category sidebar navigation, virtualized grid (@tanstack/react-virtual with ROW_HEIGHT 380px), debounced search (300ms) with scope toggle, 4-way sort (dateAdded/publishedAt/title/duration), multi-select with toolbar controls, move/copy dialog with bulk warning (5+ videos), optimistic UI updates, undo support (Cmd/Ctrl+Z), and all category badges displayed. All 7 Phase 4 success criteria verified. Ready for Phase 5 (ML Categorization Engine).
+
+**Phase 5 Plan 01 Complete!** ML foundation implemented: IndexedDB embeddings cache (EmbeddingsCache class with get/set/getBatch/setBatch), Web Worker with Transformers.js singleton (Xenova/all-MiniLM-L6-v2, 384-dim), cosine similarity functions (dot product for normalized vectors), and confidence scoring (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60). 4 files created (605 lines total), @huggingface/transformers dependency installed. Ready for Phase 5 Plan 02 (Category Embedding Generation).
