@@ -13,9 +13,9 @@ This roadmap transforms 5,523 videos across 87 fragmented playlists into an orga
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & API Integration** - YouTube OAuth, data fetching, quota tracking
-- [ ] **Phase 2: Playlist Analysis & Consolidation** - Analyze 87 playlists, propose ~25-35 categories
-- [ ] **Phase 3: Category Management** - CRUD operations for category structure
-- [ ] **Phase 4: Video Display & Organization** - Virtualized UI for browsing/searching videos
+- [x] **Phase 2: Playlist Analysis & Consolidation** - Analyze 87 playlists, propose ~25-35 categories
+- [x] **Phase 3: Category Management** - CRUD operations for category structure
+- [x] **Phase 4: Video Display & Organization** - Virtualized UI for browsing/searching videos
 - [ ] **Phase 5: ML Categorization Engine** - Auto-categorize Watch Later with Transformers.js
 - [ ] **Phase 6: Review & Approval Interface** - Batch review ML suggestions with keyboard shortcuts
 - [ ] **Phase 7: Safety & Archive System** - Backup mechanism before destructive operations
@@ -124,11 +124,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Dependencies, types, and shared utilities (format, colours, thumbnails)
-- [ ] 04-02-PLAN.md — Server actions (getVideosForCategory) and category sidebar
-- [ ] 04-03-PLAN.md — Video card, virtualised grid, and toolbar (search/sort/select)
-- [ ] 04-04-PLAN.md — Page orchestration, move/copy dialog, undo wiring
-- [ ] 04-05-PLAN.md — End-to-end verification and polish
+- [x] 04-01-PLAN.md — Dependencies, types, and shared utilities (format, colours, thumbnails)
+- [x] 04-02-PLAN.md — Server actions (getVideosForCategory) and category sidebar
+- [x] 04-03-PLAN.md — Video card, virtualised grid, and toolbar (search/sort/select)
+- [x] 04-04-PLAN.md — Page orchestration, move/copy dialog, undo wiring
+- [x] 04-05-PLAN.md — End-to-end verification and polish
 
 ---
 
@@ -228,7 +228,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation & API Integration | 5/5 | Complete | 2026-02-05 |
 | 2. Playlist Analysis & Consolidation | 11/11 | Complete | 2026-02-06 |
 | 3. Category Management | 6/6 | Complete | 2026-02-06 |
-| 4. Video Display & Organization | 0/TBD | Not started | - |
+| 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
 | 5. ML Categorization Engine | 0/TBD | Not started | - |
 | 6. Review & Approval Interface | 0/TBD | Not started | - |
 | 7. Safety & Archive System | 0/TBD | Not started | - |
@@ -236,4 +236,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-06 (Phase 3 complete: 6 plans executed, goal verified)*
+*Last updated: 2026-02-06 (Phase 4 complete: 5 plans executed, goal verified)*
