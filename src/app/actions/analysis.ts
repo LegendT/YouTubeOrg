@@ -886,6 +886,79 @@ export async function getDuplicateVideos(): Promise<{
  * @param proposalId - ID of the consolidation proposal
  * @returns CategoryMetrics + VideoDetail[] or null if not found
  */
+/**
+ * Finalize the consolidation by setting finalizedAt on the latest analysis session.
+ *
+ * Validates that approved proposals exist and none exceed the 4,500 video limit.
+ * This locks in the approved structure as the target for Phase 3 (Category Management)
+ * and Phase 8 (Batch Sync). Does NOT sync to YouTube -- that's Phase 8.
+ *
+ * @returns Result with count of finalized categories or errors
+ */
+export async function finalizeConsolidation(): Promise<{
+  success: boolean;
+  categoryCount?: number;
+  errors?: string[];
+}> {
+  try {
+    // 1. Get the latest analysis session
+    const sessions = await db
+      .select()
+      .from(analysisSessions)
+      .orderBy(desc(analysisSessions.createdAt))
+      .limit(1);
+
+    if (sessions.length === 0) {
+      return { success: false, errors: ['No analysis session found'] };
+    }
+
+    const session = sessions[0];
+
+    // 2. Get all approved proposals for this session
+    const approved = await db
+      .select()
+      .from(consolidationProposals)
+      .where(
+        and(
+          eq(consolidationProposals.sessionId, session.id),
+          eq(consolidationProposals.status, 'approved')
+        )
+      );
+
+    if (approved.length === 0) {
+      return { success: false, errors: ['No approved proposals to finalize'] };
+    }
+
+    // 3. Re-validate all approved proposals (recheck 4,500 limit)
+    for (const proposal of approved) {
+      if ((proposal.uniqueVideoCount ?? proposal.totalVideos) > 4500) {
+        return {
+          success: false,
+          errors: [
+            `Category "${proposal.categoryName}" exceeds 4,500 video limit`,
+          ],
+        };
+      }
+    }
+
+    // 4. Set finalizedAt on the analysis session
+    await db
+      .update(analysisSessions)
+      .set({ finalizedAt: new Date() })
+      .where(eq(analysisSessions.id, session.id));
+
+    // 5. Revalidate and return
+    revalidatePath('/analysis');
+    return { success: true, categoryCount: approved.length };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      errors: [`Failed to finalize consolidation: ${message}`],
+    };
+  }
+}
+
 export async function getCategoryDetail(
   proposalId: number
 ): Promise<{ metrics: CategoryMetrics; videos: VideoDetail[] } | null> {
