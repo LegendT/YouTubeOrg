@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 4 of 8 (Video Display & Organization)
-Plan: 02 of 6 in current phase
+Plan: 04 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-06 — Completed 04-02-PLAN.md
+Last activity: 2026-02-06 — Completed 04-04-PLAN.md
 
-Progress: [███████████████████████████░░░░░] 24/27 plans (~89%)
+Progress: [██████████████████████████████░░░] 26/27 plans (~96%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
-- Average duration: 4.0 min
-- Total execution time: 1.60 hours
+- Total plans completed: 26
+- Average duration: 3.9 min
+- Total execution time: 1.70 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [███████████████████████
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
-| 4 - Video Display & Organization | 2/6 | 7.5 min | 3.8 min |
+| 4 - Video Display & Organization | 4/6 | 13.5 min | 3.4 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-05 (6min), 03-06 (4min), 04-01 (4.6min), 04-02 (2.9min), 04-03 (2min)
-- Trend: Accelerating in Phase 4 (~3.6 min avg)
+- Last 5 plans: 04-01 (4.6min), 04-02 (2.9min), 04-03 (2min), 04-04 (3min)
+- Trend: Consistently fast in Phase 4 (~3.1 min avg)
 
 *Updated after each plan completion*
 
@@ -199,12 +199,22 @@ Recent decisions affecting current work:
 - Empty cells rendered in last row to maintain grid alignment
 - Scroll reset on videos array change via useEffect watching videos.length
 
+**From 04-04 execution (2026-02-06):**
+- Extended UndoEntry type to support 'move' | 'copy' alongside existing 'delete' | 'merge'
+- Move undo reverses by moving videos back to source category
+- Copy undo removes copied videos from target via removeVideosFromCategory
+- Search scope toggle: 'category' filters current category, 'all' loads all videos
+- Optimistic UI: remove moved videos immediately, refresh counts after server success
+- Single orchestrator pattern: VideoBrowsePage manages all page state, wires child components
+- Debounced search: 300ms setTimeout cleanup pattern in useEffect
+- Client-side filtering + sorting via useMemo chains: raw → filtered → sorted
+- Bulk operation warning: show amber alert for 5+ videos in move mode
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
 - UX: Approval should be a toggle (approved → click again → pending), not one-way. Reject should be a separate intentional action, distinct from un-approving.
 - UX: Checkboxes should be for batch selection only (merge, bulk approve/reject), not conflated with approval state
-- UX: Video assignment is pull-only (assign TO category). Need a "Move to..." action when viewing a category's videos to push videos OUT to another category — especially important for Uncategorised
 - i18n: All user-facing text must use British English (e.g., "Uncategorised" not "Uncategorized", "Organise" not "Organize", "Finalise" not "Finalize"). Sweep all UI strings across the codebase.
 
 ### Blockers/Concerns
@@ -226,8 +236,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-06T16:41:24Z
-Stopped at: Completed 04-02-PLAN.md (Server Actions & Category Sidebar)
+Last session: 2026-02-06T16:45:50Z
+Stopped at: Completed 04-04-PLAN.md (Page Orchestration)
 Resume file: None
 
 ---
@@ -238,4 +248,4 @@ Resume file: None
 
 **Phase 3 Complete!** All 6 plans executed. Management mode fully functional with: categories/categoryVideos tables, 10 server actions, undo stack with Cmd/Ctrl+Z, rename/delete/merge/assign dialogs, management dashboard with hover CRUD actions, batch merge toolbar, video assignment dialog, and complete end-to-end verification. All 5 Phase 3 success criteria validated. UX improvements tracked for future enhancement.
 
-**Phase 4 In Progress!** Plans 04-01, 04-02 complete. Foundation ready (types, utilities, colours, thumbnails). Data layer complete: getVideosForCategory server action with batch enrichment (2 queries, not N+1), CategorySidebar component with All Videos entry. Ready for video display components (VideoCard, VideoGrid, VideoToolbar) and page orchestration.
+**Phase 4 In Progress!** Plans 04-01 through 04-04 complete (4/6). Full video browsing operational at /videos with: category sidebar navigation, debounced search with scope toggle, 5-way sort (dateAdded/publishedAt/title/duration), multi-select with toolbar controls, move/copy dialog with bulk warning (5+ videos), optimistic UI updates, and undo support with Cmd/Ctrl+Z. Ready for inline video preview (04-05) and keyboard navigation polish (04-06).
