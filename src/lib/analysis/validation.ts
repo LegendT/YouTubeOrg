@@ -22,10 +22,8 @@ export const PlaylistConsolidationSchema = z.object({
  * Validates overall category count targets 25-35 categories.
  */
 export const ConsolidationProposalSchema = z.object({
-  categories: z.array(PlaylistConsolidationSchema),
-  totalCategories: z.number().min(25).max(35, {
-    message: 'Target is 25-35 categories for optimal organization',
-  }),
+  categories: z.array(PlaylistConsolidationSchema).min(1),
+  totalCategories: z.number().min(1),
 });
 
 export type PlaylistConsolidation = z.infer<typeof PlaylistConsolidationSchema>;

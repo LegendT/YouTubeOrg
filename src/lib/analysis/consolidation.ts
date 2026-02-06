@@ -103,5 +103,5 @@ export async function calculateDeduplicatedCount(
     .from(playlistVideos)
     .where(inArray(playlistVideos.playlistId, playlistIds));
 
-  return result[0]?.count ?? 0;
+  return Number(result[0]?.count ?? 0);
 }

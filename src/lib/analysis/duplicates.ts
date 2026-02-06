@@ -79,7 +79,7 @@ export async function calculateOverlapStats(): Promise<OverlapStats> {
     })
     .from(playlistVideos);
 
-  const totalUniqueVideos = totalResult?.count ?? 0;
+  const totalUniqueVideos = Number(totalResult?.count ?? 0);
 
   // Count videos appearing in more than one playlist
   const duplicateResult = await db
@@ -97,7 +97,7 @@ export async function calculateOverlapStats(): Promise<OverlapStats> {
         .as('duplicates')
     );
 
-  const duplicateVideoCount = duplicateResult[0]?.count ?? 0;
+  const duplicateVideoCount = Number(duplicateResult[0]?.count ?? 0);
 
   const duplicationPercentage =
     totalUniqueVideos > 0

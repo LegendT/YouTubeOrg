@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button'
 import { ConsolidationProposalTable } from '@/components/analysis/proposal-table'
 import { DuplicateReport } from '@/components/analysis/duplicate-report'
+import { GenerateProposalButton } from '@/components/analysis/generate-button'
 import {
-  generateConsolidationProposal,
   getProposals,
   getDuplicateStats,
   getAnalysisSummary,
@@ -15,11 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
-async function handleGenerateProposal() {
-  'use server'
-  await generateConsolidationProposal('aggressive')
-}
 
 export default async function AnalysisPage() {
   const [proposalsResult, statsResult, summary] = await Promise.all([
@@ -44,11 +38,7 @@ export default async function AnalysisPage() {
               : 'Sync your playlists first, then analyze and consolidate them into categories'}
           </p>
         </div>
-        <form action={handleGenerateProposal}>
-          <Button type="submit" size="lg">
-            Generate Consolidation Proposal
-          </Button>
-        </form>
+        <GenerateProposalButton />
       </div>
 
       {/* Summary cards */}
