@@ -11,28 +11,28 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 2 of 8 (Playlist Analysis & Consolidation)
-Plan: 6 of 11 in current phase
+Plan: 7 of 11 in current phase
 Status: In progress
-Last activity: 2026-02-06 — Completed 02-06-PLAN.md
+Last activity: 2026-02-06 — Completed 02-07-PLAN.md
 
-Progress: [█████████░░░░░░░] 9/16 plans (~56%)
+Progress: [██████████░░░░░░] 10/16 plans (~63%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 4.3 min
-- Total execution time: 0.65 hours
+- Total execution time: 0.72 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
-| 2 - Playlist Analysis & Consolidation | 4/11 | 16 min | 4.0 min |
+| 2 - Playlist Analysis & Consolidation | 5/11 | 20 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-05 (6.5min), 02-01 (5min), 02-05 (4min), 02-02 (4min), 02-06 (3min)
+- Last 5 plans: 02-01 (5min), 02-05 (4min), 02-02 (4min), 02-06 (3min), 02-07 (4min)
 - Trend: Stable at ~4.0 min per plan
 
 *Updated after each plan completion*
@@ -110,6 +110,12 @@ Recent decisions affecting current work:
 - bulkUpdateStatus uses inArray for efficient single-query batch updates
 - Manual proposals (split/custom) get confidenceScore: 100 with descriptive origin reason
 
+**From 02-07 execution (2026-02-06):**
+- react-resizable-panels v4 uses `orientation` instead of `direction` prop — added compatibility wrapper in resizable.tsx
+- RunAnalysisButton replaces GenerateProposalButton with mode selector and staleness-aware label
+- Review needed section filters by rejected status OR (low confidence + pending status)
+- CategoryList uses client-side sort/filter with useMemo for performance
+
 ### Pending Todos
 
 None yet.
@@ -133,12 +139,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T10:56:59Z
-Stopped at: Completed 02-06-PLAN.md (Enhanced Analysis Server Actions)
+Last session: 2026-02-06T11:52:25Z
+Stopped at: Completed 02-07-PLAN.md (Analysis Dashboard Layout)
 Resume file: None
 
 ---
 
 **Phase 1 Complete!** All 5 Phase 1 Success Criteria validated.
 
-**Phase 2 In Progress:** Plans 01, 05, 02, and 06 complete. Full backend API with 13 server actions covering analysis workflow: mode-based clustering, proposal CRUD, splitting, custom categories, duplicate resolution, batch operations, and staleness detection. Ready for UI integration (Plans 07-12).
+**Phase 2 In Progress:** Plans 01, 05, 02, 06, and 07 complete. Full backend API with 13 server actions, plus resizable split-panel analysis dashboard with sortable category list, summary card, mode-aware run button, and staleness detection. Ready for CategoryDetail (Plan 02-08) and remaining UI plans.
