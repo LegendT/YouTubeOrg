@@ -24,6 +24,7 @@ import {
   assignVideosToCategory,
 } from '@/app/actions/categories'
 import type { VideoSearchResult } from '@/types/categories'
+import { formatDuration } from '@/lib/videos/format'
 
 interface VideoAssignmentDialogProps {
   categoryId: number
@@ -220,18 +221,6 @@ export function VideoAssignmentDialog({
     onOpenChange,
   ])
 
-  // Parse ISO 8601 duration to readable format
-  const formatDuration = useCallback((duration: string | null): string => {
-    if (!duration) return ''
-    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
-    if (!match) return ''
-    const h = parseInt(match[1] || '0', 10)
-    const m = parseInt(match[2] || '0', 10)
-    const s = parseInt(match[3] || '0', 10)
-    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-    return `${m}:${String(s).padStart(2, '0')}`
-  }, [])
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] overflow-hidden flex flex-col">
@@ -368,7 +357,7 @@ export function VideoAssignmentDialog({
                             )}
                             {video.duration && (
                               <span className="shrink-0">
-                                {formatDuration(video.duration)}
+                                {formatDuration(video.duration) || ''}
                               </span>
                             )}
                           </div>
