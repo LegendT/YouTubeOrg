@@ -26,7 +26,7 @@ export function VideoCard({
   const additionalCategoryCount = video.categoryNames.length - 1;
 
   return (
-    <div className="group rounded-lg border bg-card overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="group rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-shadow">
       {/* Thumbnail area with link and checkbox */}
       <div className="relative aspect-video bg-muted">
         <a
@@ -66,9 +66,9 @@ export function VideoCard({
       </div>
 
       {/* Info area */}
-      <div className="p-3 space-y-1">
+      <div className="p-4 space-y-2">
         {/* Title */}
-        <h3 className="text-sm font-medium line-clamp-2 leading-tight">
+        <h3 className="text-sm font-medium line-clamp-2 leading-tight mb-2">
           {video.title}
         </h3>
 
@@ -88,7 +88,7 @@ export function VideoCard({
 
         {/* Category badge */}
         {showCategoryBadge && video.categoryNames.length > 0 && (
-          <div className="flex items-center gap-1 pt-1">
+          <div className="flex items-center gap-1.5 pt-1">
             <Badge
               style={{
                 backgroundColor: getCategoryColour(primaryCategory),
