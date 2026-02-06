@@ -20,7 +20,7 @@ export function QuotaDisplay({ used, total }: QuotaDisplayProps) {
         />
       </div>
       <p className="text-sm text-gray-600 mt-2">
-        Resets daily at midnight PT
+        (Resets daily at 8am GMT / midnight PT)
       </p>
     </div>
   )
