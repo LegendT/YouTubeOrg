@@ -50,19 +50,36 @@ export default async function DashboardPage() {
         </div>
 
         {allPlaylists.length > 0 && (
-          <div className="border rounded-lg p-6 bg-white shadow flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Ready to organize?</h2>
-              <p className="text-gray-600 mt-1">
-                Analyze your {allPlaylists.length} playlists and consolidate them into categories.
-              </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border rounded-lg p-6 bg-white shadow flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Ready to organise?</h2>
+                <p className="text-gray-600 mt-1">
+                  Analyse your {allPlaylists.length} playlists and consolidate them into categories.
+                </p>
+              </div>
+              <a
+                href="/analysis"
+                className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+              >
+                Go to Analysis
+              </a>
             </div>
-            <a
-              href="/analysis"
-              className="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shrink-0"
-            >
-              Go to Analysis
-            </a>
+
+            <div className="border rounded-lg p-6 bg-white shadow flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Browse videos</h2>
+                <p className="text-gray-600 mt-1">
+                  View, search, and organise your video collection.
+                </p>
+              </div>
+              <a
+                href="/videos"
+                className="inline-flex items-center px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shrink-0"
+              >
+                Go to Videos
+              </a>
+            </div>
           </div>
         )}
 
