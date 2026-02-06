@@ -66,9 +66,9 @@ export function VideoCard({
       </div>
 
       {/* Info area */}
-      <div className="p-4 space-y-2">
+      <div className="p-3 flex flex-col gap-1.5">
         {/* Title */}
-        <h3 className="text-sm font-medium line-clamp-2 leading-tight mb-2">
+        <h3 className="text-sm font-medium line-clamp-2 leading-tight">
           {video.title}
         </h3>
 
@@ -88,14 +88,14 @@ export function VideoCard({
 
         {/* Category badge */}
         {showCategoryBadge && video.categoryNames.length > 0 && (
-          <div className="flex items-center gap-1.5 pt-1">
+          <div className="flex items-center gap-1.5 mt-0.5">
             <Badge
               style={{
                 backgroundColor: getCategoryColour(primaryCategory),
                 color: 'white',
                 borderColor: 'transparent',
               }}
-              className="text-xs"
+              className="text-xs px-2 py-0.5"
             >
               {primaryCategory}
             </Badge>

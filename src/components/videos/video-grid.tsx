@@ -12,7 +12,7 @@ interface VideoGridProps {
   showCategoryBadges: boolean;
 }
 
-const ROW_HEIGHT = 340;
+const ROW_HEIGHT = 380;
 const MIN_CARD_WIDTH = 300;
 const MAX_COLUMNS = 4;
 const MIN_COLUMNS = 1;
