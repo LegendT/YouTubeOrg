@@ -1,50 +1,53 @@
 # Phase 2: Playlist Analysis & Consolidation - Research
 
-**Researched:** 2026-02-05
-**Domain:** Duplicate detection, text clustering, playlist consolidation analysis
-**Confidence:** MEDIUM-HIGH
+**Researched:** 2026-02-06
+**Domain:** Playlist duplicate detection, text similarity clustering, consolidation proposal UI, split-panel analysis views
+**Confidence:** HIGH
 
 ## Summary
 
-Phase 2 requires analyzing 87 playlists to detect duplicate videos, cluster similar playlists for intelligent consolidation proposals (~25-35 categories), and provide user interface for reviewing/approving merge suggestions. The standard approach combines PostgreSQL queries for duplicate detection across playlist_videos junction table, string similarity algorithms (Jaccard/Dice coefficient) for playlist name clustering, and interactive UI patterns with approve/reject actions similar to GitHub PR reviews.
+Phase 2 requires building a comprehensive analysis and consolidation system for 87 YouTube playlists. The work divides into three domains: (1) backend analysis -- duplicate video detection via SQL aggregation, playlist name clustering via Dice coefficient similarity + hierarchical clustering, and proposal generation with validation; (2) persistence -- new database tables for proposals, analysis sessions, and duplicate records; (3) UI -- a category-centric split-panel view with resizable panels, approval/rejection workflow, batch operations, detailed conflict resolution, and a guided split wizard.
 
-**Critical insight:** Duplicate video detection is a SQL problem (query playground_videos table for videoId appearing in multiple playlists), while playlist similarity is a text clustering problem (use string similarity + TF-IDF for grouping "JavaScript Tutorials" with "JS Advanced"). These are separate analyses with different algorithms. The 5,000 video per playlist YouTube limit must be validated before allowing consolidation approval (SAFE-04 requirement).
+The CONTEXT.md decisions are detailed and prescriptive, specifying exactly what the UI must include: side-by-side resizable panels, category-centric view, color-coded confidence badges, progress tracking with auto-save, bulk duplicate resolution, Conservative/Aggressive algorithm modes, and a comprehensive final review screen. The UI is substantially more complex than the original Phase 2 plans assumed.
 
-The research confirms that hierarchical clustering with string similarity (Dice coefficient via `string-similarity` npm) is the pragmatic approach for grouping 87 playlist names into ~25-35 categories. TF-IDF with cosine similarity is overkill for short playlist titles but valuable if analyzing video titles/descriptions later. For UI, shadcn/ui data tables with comparison blocks provide the foundation, supplemented by dnd-kit for manual drag-drop playlist reassignment.
+The standard approach uses: (a) `fast-dice-coefficient` for O(n) string similarity (the old `string-similarity` package is unmaintained), (b) `ml-hclust` v4.0.0 for hierarchical clustering with its built-in `group(k)` method to cut the dendrogram into exactly k clusters, (c) shadcn/ui Resizable component (built on `react-resizable-panels` v4.6.0) for the split-panel layout, (d) shadcn/ui DataTable + `@tanstack/react-table` for paginated, sortable, selectable lists, (e) `react-hotkeys-hook` for keyboard navigation, and (f) Drizzle ORM aggregate queries for duplicate detection.
 
-**Primary recommendation:** Use SQL aggregate queries for duplicate detection (GROUP BY videoId HAVING COUNT(*) > 1), `string-similarity` library (Dice coefficient) with `ml-hclust` hierarchical clustering for playlist name grouping, and shadcn/ui table with custom approve/reject/adjust actions. Validate consolidated categories against 4,500 video limit (safety margin below YouTube's 5,000) using Zod schema before persisting.
+**Primary recommendation:** Build the analysis engine as pure server-side functions (no API cost, all data is cached in PostgreSQL from Phase 1). Use shadcn/ui Resizable + DataTable for the split-panel category view, persist all state to database via debounced server actions for auto-save, and implement the algorithm with Conservative/Aggressive presets by varying the similarity threshold passed to `ml-hclust`'s `group()` method.
 
 ## Standard Stack
-
-The established libraries/tools for this domain:
 
 ### Core
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
-| string-similarity | 4.0+ | Dice coefficient for string matching | Most popular JS string similarity library, optimized algorithm (better than Levenshtein for playlist names), 2M+ weekly downloads |
-| ml-hclust | 4.0.0 | Hierarchical clustering (AGNES) | TypeScript-native, MIT licensed, supports agglomerative nesting for grouping similar playlists into category hierarchy |
-| @dnd-kit/sortable | 10.0.0 | Drag-and-drop list reordering | Modern, accessible, performant (10kb core), zero dependencies, 1,867 dependent projects, works perfectly with shadcn/ui |
-| zod | 3.23+ | Runtime schema validation | Already in stack (Phase 1), perfect for validating playlist limits before approval |
+| ml-hclust | 4.0.0 | Hierarchical clustering (AGNES) with `group(k)` method | TypeScript-native, MIT licensed, has built-in `group(k)` to cut dendrogram into exactly k clusters. Published Nov 2025, actively maintained by mljs org |
+| fast-dice-coefficient | 1.0.0 | Dice coefficient string similarity | O(n) linear time vs O(n^2) for string-similarity. 44k ops/sec vs 7.5k ops/sec. Zero dependencies |
+| @tanstack/react-table | 8.21.3 | Headless table with sort/filter/paginate/select | Standard for shadcn/ui data tables. Powers pagination, sorting, row selection with checkboxes. React 19 compatible |
+| react-resizable-panels | 4.6.0 | Resizable split-panel layouts | Underlies shadcn/ui Resizable component. Supports horizontal/vertical, keyboard nav, Server Components, pixel/percentage units |
+| react-hotkeys-hook | 5.2.1 | Keyboard shortcuts for navigation | Arrow keys, Enter, batch operations. Scoped hotkeys prevent conflicts. Used in Client Components with 'use client' |
+| lucide-react | 0.563.0 | Icons for status badges and actions | Standard icon library for shadcn/ui. Check, X, AlertTriangle, ChevronRight etc. |
+| zod | 4.3.6 | Validation for playlist limits and proposals | Already in stack from Phase 1. .max() for video count validation, schema types |
 
 ### Supporting
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| natural | 8.1.0 | TF-IDF text analysis (optional) | If analyzing video titles/descriptions for semantic similarity (Phase 5), not needed for playlist name clustering |
-| fast-cosine-similarity | Latest | Cosine similarity (optional) | If using TF-IDF vectors, 6x faster than compute-cosine-similarity, TypeScript support |
-| cmpstr | 3.2.1 | Advanced string algorithms (alternative) | If need multiple similarity metrics (Levenshtein, Jaro-Winkler, q-Gram), but string-similarity's Dice is sufficient |
+| drizzle-orm | 0.45.1 | SQL aggregation for duplicate detection | Already in stack. GROUP BY, HAVING, count, countDistinct for finding cross-playlist duplicates |
+| shadcn/ui components | latest | Resizable, DataTable, Badge, Progress, ScrollArea, Dialog, Checkbox, Button | Install individually via CLI: `npx shadcn@latest add [component]` |
 
 ### Alternatives Considered
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
-| string-similarity (Dice) | cmpstr with Levenshtein | Dice coefficient performs better for short strings like playlist names; Levenshtein is character-edit focused (overkill) |
-| ml-hclust | Manual k-means clustering | Hierarchical clustering produces dendrogram allowing user to adjust cluster granularity; k-means requires pre-specifying k=30 |
-| @dnd-kit/sortable | react-beautiful-dnd | dnd-kit is modern, maintained, and more performant (react-beautiful-dnd archived by Atlassian in 2023) |
-| SQL duplicate detection | MinHash/LSH algorithms | For 87 playlists × ~50 videos avg, SQL is fast enough (<100ms); MinHash needed for millions of documents |
+| fast-dice-coefficient | cmpstr (actively maintained, 11 metrics) | cmpstr is more featureful but heavier; fast-dice-coefficient is focused, O(n), sufficient for 87 short playlist titles |
+| fast-dice-coefficient | string-similarity 4.0.4 | string-similarity is unmaintained (5 years, no updates); fast-dice-coefficient is faster and sufficient |
+| ml-hclust group(k) | Custom threshold-based cutting | group(k) is built into the library and produces exactly k clusters. Custom code would be error-prone |
+| react-resizable-panels | CSS grid with fixed panels | User decision requires toggle between horizontal/vertical split and resizable panels |
+| @tanstack/react-table | Manual HTML tables | DataTable needed for pagination (50/100/250/all), sorting, checkbox selection per CONTEXT.md |
 
 **Installation:**
 ```bash
-npm install string-similarity ml-hclust @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
-# zod already installed in Phase 1
+npm install ml-hclust fast-dice-coefficient @tanstack/react-table react-hotkeys-hook
+npx shadcn@latest add resizable table badge progress scroll-area dialog checkbox button separator card tabs
+# lucide-react is typically already installed with shadcn/ui
+# zod, drizzle-orm already in project from Phase 1
 ```
 
 ## Architecture Patterns
@@ -52,681 +55,469 @@ npm install string-similarity ml-hclust @dnd-kit/core @dnd-kit/sortable @dnd-kit
 ### Recommended Project Structure
 ```
 src/
-├── app/
-│   ├── analysis/
-│   │   └── page.tsx                      # Analysis dashboard (Server Component)
-├── lib/
-│   ├── analysis/
-│   │   ├── duplicates.ts                 # Duplicate video detection SQL queries
-│   │   ├── clustering.ts                 # Playlist name similarity & hierarchical clustering
-│   │   ├── consolidation.ts              # Generate consolidation proposals
-│   │   └── validation.ts                 # Zod schemas for playlist limits
-│   ├── db/
-│   │   └── schema.ts                     # Add consolidation_proposals table
-└── components/
-    ├── analysis/
-    │   ├── duplicate-report.tsx          # Shows overlap analysis
-    │   ├── consolidation-proposal.tsx    # Approve/reject/adjust UI
-    │   └── playlist-merger.tsx           # Drag-drop manual adjustment
+  app/
+    analysis/
+      page.tsx                          # Analysis page (Server Component - loads data from DB)
+      layout.tsx                        # Layout with nav back to dashboard
+    actions/
+      analysis.ts                       # Server actions: runAnalysis, approveProposal, rejectProposal, etc.
+  lib/
+    analysis/
+      duplicates.ts                     # SQL aggregate queries for duplicate video detection
+      similarity.ts                     # Dice coefficient pairwise similarity matrix
+      clustering.ts                     # ml-hclust AGNES clustering + group(k)
+      proposals.ts                      # Generate consolidation proposals from clusters
+      validation.ts                     # Zod schemas + YouTube limit validation
+      category-naming.ts               # Extract meaningful category names from cluster titles
+    db/
+      schema.ts                         # ADD: analysisSession, consolidationProposals, duplicateRecords tables
+  components/
+    analysis/
+      analysis-dashboard.tsx            # Top-level client component orchestrating the view
+      summary-card.tsx                  # "87 playlists -> 28 categories, 234 duplicates" overview
+      category-list.tsx                 # Left panel: list of proposed categories with status badges
+      category-detail.tsx               # Right panel: detail view for selected category
+      duplicate-resolver.tsx            # Conflict resolution view with bulk actions
+      confidence-badge.tsx              # Color-coded HIGH/MEDIUM/LOW badge
+      video-list-paginated.tsx          # Paginated video list with search/filter
+      proposal-actions.tsx              # Approve/reject/adjust buttons
+      split-wizard.tsx                  # Guided split dialog (How many? -> Name -> Assign)
+      final-review.tsx                  # Pre-execution comprehensive review screen
+      progress-tracker.tsx              # "Reviewed: 12/25 categories" with progress bar
+      algorithm-mode-toggle.tsx         # Conservative/Aggressive mode selector
+      analysis-loading.tsx              # Staged loading: "Detecting duplicates... (1/3)"
 ```
 
-### Pattern 1: Duplicate Video Detection (SQL Aggregation)
-
-**What:** Query playlist_videos junction table with GROUP BY to find videos appearing in multiple playlists. Return video details with list of playlists containing each duplicate.
-
-**When to use:** Every time consolidation proposal is generated, to show user how many duplicates will be eliminated.
-
+### Pattern 1: Duplicate Video Detection via SQL Aggregation
+**What:** Use Drizzle ORM `countDistinct` with GROUP BY and HAVING to find videos appearing in multiple playlists. All data already in PostgreSQL from Phase 1 sync.
+**When to use:** During analysis generation, and when displaying overlap statistics.
 **Example:**
 ```typescript
-// Source: PostgreSQL aggregate query patterns
+// Source: Drizzle ORM docs (https://orm.drizzle.team/docs/select)
 import { db } from '@/lib/db'
 import { playlistVideos, videos, playlists } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, count, countDistinct } from 'drizzle-orm'
 
 export async function findDuplicateVideos() {
-  // Find videos appearing in multiple playlists
+  // Step 1: Find videos in multiple playlists
   const duplicates = await db
     .select({
       videoId: playlistVideos.videoId,
-      videoYoutubeId: videos.youtubeId,
-      title: videos.title,
-      playlistCount: sql<number>`count(distinct ${playlistVideos.playlistId})`,
+      playlistCount: sql<number>`count(distinct ${playlistVideos.playlistId})`.as('playlist_count'),
     })
     .from(playlistVideos)
-    .innerJoin(videos, eq(playlistVideos.videoId, videos.id))
-    .groupBy(playlistVideos.videoId, videos.youtubeId, videos.title)
+    .groupBy(playlistVideos.videoId)
     .having(sql`count(distinct ${playlistVideos.playlistId}) > 1`)
-    .orderBy(sql`count(distinct ${playlistVideos.playlistId}) desc`)
 
-  // For each duplicate, get the playlists containing it
-  const detailedDuplicates = await Promise.all(
+  // Step 2: For each duplicate, get full details
+  const detailed = await Promise.all(
     duplicates.map(async (dup) => {
-      const playlistsContaining = await db
+      const [video] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, dup.videoId))
+        .limit(1)
+
+      const containingPlaylists = await db
         .select({
           playlistId: playlists.id,
           playlistTitle: playlists.title,
+          playlistYoutubeId: playlists.youtubeId,
         })
         .from(playlistVideos)
         .innerJoin(playlists, eq(playlistVideos.playlistId, playlists.id))
         .where(eq(playlistVideos.videoId, dup.videoId))
 
       return {
-        ...dup,
-        playlists: playlistsContaining,
+        video,
+        playlistCount: dup.playlistCount,
+        playlists: containingPlaylists,
       }
     })
   )
 
-  return detailedDuplicates
+  return detailed
 }
 
-// Calculate overlap statistics
-export async function calculateOverlapStats() {
-  const totalVideos = await db
-    .select({ count: sql<number>`count(distinct ${playlistVideos.videoId})` })
-    .from(playlistVideos)
-
-  const duplicateVideos = await db
+// Count unique videos for a set of playlists (for consolidated category size)
+export async function countUniqueVideosForPlaylists(playlistIds: number[]): Promise<number> {
+  const result = await db
     .select({
-      count: sql<number>`count(distinct ${playlistVideos.videoId})`
+      count: countDistinct(playlistVideos.videoId),
     })
     .from(playlistVideos)
-    .groupBy(playlistVideos.videoId)
-    .having(sql`count(distinct ${playlistVideos.playlistId}) > 1`)
+    .where(sql`${playlistVideos.playlistId} IN (${sql.join(playlistIds.map(id => sql`${id}`), sql`, `)})`)
 
-  return {
-    totalUniqueVideos: totalVideos[0].count,
-    duplicateVideoCount: duplicateVideos.length,
-    duplicationPercentage: (duplicateVideos.length / totalVideos[0].count) * 100,
-  }
+  return result[0]?.count ?? 0
 }
 ```
 
-### Pattern 2: Playlist Similarity Clustering (Hierarchical with Dice Coefficient)
-
-**What:** Use string-similarity library to compute pairwise Dice coefficient between all playlist titles, then apply hierarchical clustering (ml-hclust AGNES) to group similar playlists into proposed categories.
-
-**When to use:** One-time during initial analysis phase, or whenever user requests re-analysis after manual playlist renames.
-
+### Pattern 2: Playlist Similarity + Hierarchical Clustering with group(k)
+**What:** Compute pairwise Dice coefficient similarity between all 87 playlist titles. Feed distance matrix to ml-hclust AGNES. Use built-in `group(k)` method to cut dendrogram into target number of clusters.
+**When to use:** When generating initial consolidation proposals.
 **Example:**
 ```typescript
-// Source: string-similarity + ml-hclust documentation patterns
-import stringSimilarity from 'string-similarity'
+// Source: ml-hclust GitHub (https://github.com/mljs/hclust), fast-dice-coefficient npm
 import { agnes } from 'ml-hclust'
-import { db } from '@/lib/db'
-import { playlists } from '@/lib/db/schema'
+import { similarity } from 'fast-dice-coefficient'
 
-interface PlaylistCluster {
-  categoryName: string
-  playlists: { id: number; title: string }[]
-  totalVideos: number
-}
-
-export async function clusterPlaylists(
-  targetCategoryCount: number = 30
-): Promise<PlaylistCluster[]> {
-  // Fetch all playlists with video counts
-  const allPlaylists = await db
-    .select({
-      id: playlists.id,
-      title: playlists.title,
-      itemCount: playlists.itemCount,
-    })
-    .from(playlists)
-    .orderBy(playlists.title)
-
-  // Build distance matrix using Dice coefficient (1 - similarity)
-  const titles = allPlaylists.map(p => p.title)
-  const distanceMatrix: number[][] = []
-
-  for (let i = 0; i < titles.length; i++) {
-    distanceMatrix[i] = []
-    for (let j = 0; j < titles.length; j++) {
-      if (i === j) {
-        distanceMatrix[i][j] = 0
-      } else {
-        const similarity = stringSimilarity.compareTwoStrings(titles[i], titles[j])
-        distanceMatrix[i][j] = 1 - similarity // Convert similarity to distance
-      }
-    }
-  }
-
-  // Apply hierarchical clustering (AGNES - Agglomerative Nesting)
-  const tree = agnes(distanceMatrix, {
-    method: 'average', // Average linkage (good balance)
-  })
-
-  // Cut tree to get desired number of clusters
-  const clusters = cutTreeToClusters(tree, targetCategoryCount)
-
-  // Generate category names and aggregate video counts
-  const categoryProposals: PlaylistCluster[] = clusters.map((cluster) => {
-    const clusterPlaylists = cluster.map(idx => allPlaylists[idx])
-    const totalVideos = clusterPlaylists.reduce((sum, p) => sum + (p.itemCount || 0), 0)
-
-    // Generate category name from most common words in cluster playlist titles
-    const categoryName = generateCategoryName(clusterPlaylists.map(p => p.title))
-
-    return {
-      categoryName,
-      playlists: clusterPlaylists,
-      totalVideos,
-    }
-  })
-
-  // Sort by total video count descending
-  return categoryProposals.sort((a, b) => b.totalVideos - a.totalVideos)
-}
-
-function cutTreeToClusters(tree: any, targetCount: number): number[][] {
-  // Simplified cluster extraction - real implementation needs tree traversal
-  // This is a placeholder showing the concept
-  const clusters: number[][] = []
-  // TODO: Traverse dendrogram and cut at height that produces ~targetCount clusters
-  return clusters
-}
-
-function generateCategoryName(titles: string[]): string {
-  // Extract most common meaningful words (exclude common words like "the", "and")
-  const allWords = titles.flatMap(t =>
-    t.toLowerCase()
-      .split(/\s+/)
-      .filter(w => w.length > 3 && !['playlist', 'videos', 'watch'].includes(w))
-  )
-
-  const wordFreq = allWords.reduce((freq, word) => {
-    freq[word] = (freq[word] || 0) + 1
-    return freq
-  }, {} as Record<string, number>)
-
-  // Return most common word, capitalized
-  const mostCommon = Object.entries(wordFreq).sort((a, b) => b[1] - a[1])[0]
-  return mostCommon ? mostCommon[0].charAt(0).toUpperCase() + mostCommon[0].slice(1) : 'Uncategorized'
-}
-```
-
-### Pattern 3: Consolidation Validation (Zod Schema)
-
-**What:** Define Zod schema to validate that no proposed category exceeds 4,500 videos (safety margin below YouTube's 5,000 limit). Run validation before allowing user to approve consolidation.
-
-**When to use:** Before saving approved consolidation proposals, and whenever user manually adjusts category membership.
-
-**Example:**
-```typescript
-// Source: Zod validation patterns
-import { z } from 'zod'
-
-const YOUTUBE_PLAYLIST_LIMIT = 5000
-const SAFETY_MARGIN = 500
-const MAX_VIDEOS_PER_CATEGORY = YOUTUBE_PLAYLIST_LIMIT - SAFETY_MARGIN // 4,500
-
-export const PlaylistConsolidationSchema = z.object({
-  categoryName: z.string().min(1).max(100),
-  playlistIds: z.array(z.number()).min(1),
-  totalVideos: z.number()
-    .max(MAX_VIDEOS_PER_CATEGORY, {
-      message: `Category exceeds safe limit of ${MAX_VIDEOS_PER_CATEGORY} videos (YouTube limit: ${YOUTUBE_PLAYLIST_LIMIT})`
-    }),
-})
-
-export const ConsolidationProposalSchema = z.object({
-  categories: z.array(PlaylistConsolidationSchema),
-  totalCategories: z.number().min(25).max(35, {
-    message: 'Target is 25-35 categories, adjust consolidation proposal'
-  }),
-})
-
-export async function validateConsolidation(
-  proposal: unknown
-): Promise<{ valid: boolean; errors?: string[] }> {
-  const result = ConsolidationProposalSchema.safeParse(proposal)
-
-  if (!result.success) {
-    return {
-      valid: false,
-      errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
-    }
-  }
-
-  // Additional business logic validation
-  const categories = result.data.categories
-  const overLimitCategories = categories.filter(c => c.totalVideos > MAX_VIDEOS_PER_CATEGORY)
-
-  if (overLimitCategories.length > 0) {
-    return {
-      valid: false,
-      errors: overLimitCategories.map(c =>
-        `Category "${c.categoryName}" has ${c.totalVideos} videos (limit: ${MAX_VIDEOS_PER_CATEGORY})`
-      ),
-    }
-  }
-
-  return { valid: true }
-}
-```
-
-### Pattern 4: Interactive Consolidation UI (shadcn/ui + dnd-kit)
-
-**What:** Build comparison table showing proposed consolidations with approve/reject actions per category. Support manual adjustment via drag-drop to move playlists between categories.
-
-**When to use:** Main UI for Phase 2 user interaction.
-
-**Example:**
-```tsx
-// Source: shadcn/ui table + dnd-kit sortable patterns
-'use client'
-
-import { useState } from 'react'
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Check, X, AlertTriangle } from 'lucide-react'
-
-interface ConsolidationProposal {
-  id: string
-  categoryName: string
-  playlists: { id: number; title: string }[]
-  totalVideos: number
-  status: 'pending' | 'approved' | 'rejected'
-}
-
-export function ConsolidationProposalTable({
-  proposals,
-  onApprove,
-  onReject,
-  onReorder
-}: {
-  proposals: ConsolidationProposal[]
-  onApprove: (id: string) => void
-  onReject: (id: string) => void
-  onReorder: (proposals: ConsolidationProposal[]) => void
-}) {
-  const [items, setItems] = useState(proposals)
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    const oldIndex = items.findIndex(item => item.id === active.id)
-    const newIndex = items.findIndex(item => item.id === over.id)
-
-    const reordered = arrayMove(items, oldIndex, newIndex)
-    setItems(reordered)
-    onReorder(reordered)
-  }
-
-  return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Proposed Category</TableHead>
-            <TableHead>Source Playlists</TableHead>
-            <TableHead>Total Videos</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            {items.map((proposal) => (
-              <SortableRow
-                key={proposal.id}
-                proposal={proposal}
-                onApprove={() => onApprove(proposal.id)}
-                onReject={() => onReject(proposal.id)}
-              />
-            ))}
-          </SortableContext>
-        </TableBody>
-      </Table>
-    </DndContext>
-  )
-}
-
-function SortableRow({
-  proposal,
-  onApprove,
-  onReject
-}: {
-  proposal: ConsolidationProposal
-  onApprove: () => void
-  onReject: () => void
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: proposal.id
-  })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
-  const isOverLimit = proposal.totalVideos > 4500
-  const isNearLimit = proposal.totalVideos > 4000 && proposal.totalVideos <= 4500
-
-  return (
-    <TableRow ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TableCell className="font-medium">
-        {proposal.categoryName}
-        {isOverLimit && (
-          <Badge variant="destructive" className="ml-2">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            Over Limit
-          </Badge>
-        )}
-        {isNearLimit && (
-          <Badge variant="warning" className="ml-2">
-            Near Limit
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>
-        <div className="text-sm text-muted-foreground">
-          {proposal.playlists.slice(0, 3).map(p => p.title).join(', ')}
-          {proposal.playlists.length > 3 && ` +${proposal.playlists.length - 3} more`}
-        </div>
-      </TableCell>
-      <TableCell>{proposal.totalVideos.toLocaleString()}</TableCell>
-      <TableCell>
-        <Badge variant={
-          proposal.status === 'approved' ? 'success' :
-          proposal.status === 'rejected' ? 'secondary' :
-          'outline'
-        }>
-          {proposal.status}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="default"
-            onClick={onApprove}
-            disabled={isOverLimit || proposal.status === 'approved'}
-          >
-            <Check className="w-4 h-4 mr-1" />
-            Approve
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onReject}
-            disabled={proposal.status === 'rejected'}
-          >
-            <X className="w-4 h-4 mr-1" />
-            Reject
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
-  )
-}
-
-function arrayMove<T>(array: T[], from: number, to: number): T[] {
-  const newArray = array.slice()
-  newArray.splice(to, 0, newArray.splice(from, 1)[0])
-  return newArray
-}
-```
-
-### Pattern 5: Database Schema for Consolidation Proposals
-
-**What:** Store consolidation proposals with approval status before executing actual playlist merges (Phase 3).
-
-**When to use:** Persist analysis results and user decisions for review/adjustment before committing to YouTube sync.
-
-**Example:**
-```typescript
-// Source: Drizzle ORM schema patterns
-import { pgTable, serial, text, timestamp, integer, jsonb, pgEnum } from 'drizzle-orm/pg-core'
-
-export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected'])
-
-export const consolidationProposals = pgTable('consolidation_proposals', {
-  id: serial('id').primaryKey(),
-  categoryName: text('category_name').notNull(),
-  sourcePlaylistIds: jsonb('source_playlist_ids').$type<number[]>().notNull(), // Array of playlist IDs
-  totalVideos: integer('total_videos').notNull(),
-  status: proposalStatusEnum('status').notNull().default('pending'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  approvedAt: timestamp('approved_at'),
-  notes: text('notes'), // User notes about why approved/rejected
-})
-
-export const duplicateVideos = pgTable('duplicate_videos', {
-  id: serial('id').primaryKey(),
-  videoId: integer('video_id').references(() => videos.id).notNull(),
-  playlistIds: jsonb('playlist_ids').$type<number[]>().notNull(), // Playlists containing this video
-  occurrenceCount: integer('occurrence_count').notNull(),
-  analyzedAt: timestamp('analyzed_at').notNull().defaultNow(),
-})
-```
-
-### Anti-Patterns to Avoid
-
-- **Don't use Levenshtein distance for playlist names:** Character-edit distance is overkill for short strings like "JavaScript" vs "JS". Dice coefficient (bigram-based) works better for abbreviated/similar terms.
-- **Don't cluster videos instead of playlists:** The goal is grouping 87 playlists into ~30 categories, not clustering 4,000 videos. Playlist names contain semantic meaning; cluster those.
-- **Don't allow approval of over-limit categories:** 5,000 is YouTube's hard limit. Always validate with 4,500 safety margin before persisting. User must manually split if exceeded.
-- **Don't run clustering on every page load:** Hierarchical clustering on 87×87 distance matrix is fast (~10ms), but cache results in database. Only re-cluster when playlists change or user explicitly requests.
-- **Don't fetch all video metadata for duplicate detection:** Use junction table (playlist_videos) with SQL aggregation. Don't pull video objects into memory for counting.
-
-## Don't Hand-Roll
-
-Problems that look simple but have existing solutions:
-
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| String similarity algorithm | Custom character matching or fuzzy search | string-similarity library (Dice coefficient) | Dice coefficient handles abbreviations/acronyms better than character edits, 2M+ weekly downloads, battle-tested |
-| Hierarchical clustering | Manual recursive grouping by threshold | ml-hclust AGNES algorithm | Produces proper dendrogram allowing flexible cluster count adjustment, handles linkage methods (average/complete/single), TypeScript-native |
-| Drag-and-drop list reordering | Custom mouse event handlers | @dnd-kit/sortable | Accessibility (keyboard nav, screen readers), touch support, collision detection, smooth animations, 10kb core |
-| Playlist limit validation | Manual if-statements checking counts | Zod schema with .max() validator | Type-safe, composable, generates TypeScript types, provides detailed error messages, already in stack |
-| Duplicate video SQL query | Manual looping through playlists in JS | PostgreSQL GROUP BY with HAVING COUNT(*) > 1 | Database does the work, returns only duplicates (not all videos), supports JOIN for playlist details, sub-100ms query |
-
-**Key insight:** Duplicate detection is NOT a complex algorithm problem. It's a SQL aggregation problem. The complexity is in presenting results clearly to users and handling the consolidation approval flow. Over-engineering with MinHash/LSH for 87 playlists wastes time.
-
-## Common Pitfalls
-
-### Pitfall 1: Clustering Videos Instead of Playlists
-
-**What goes wrong:** Developer applies clustering algorithms to 4,000+ video titles/descriptions, producing video-level clusters instead of playlist-level consolidation.
-
-**Why it happens:** Misunderstanding the requirement. Phase 2 goal is "consolidate 87 playlists to ~30 categories", not "cluster 4,000 videos into groups". Playlist names already contain semantic structure (user created them with intent).
-
-**How to avoid:**
-- Cluster playlist titles, not video titles
-- Use playlist itemCount for category size validation
-- Treat playlists as the unit of analysis
-
-**Warning signs:**
-- Clustering algorithm runs on 4,000+ items instead of 87
-- Proposed categories contain individual videos instead of source playlists
-- Performance is slow (clustering thousands vs dozens)
-
-### Pitfall 2: Ignoring YouTube's 5,000 Video Per Playlist Limit
-
-**What goes wrong:** User approves consolidation that would create category with 6,000 videos. System syncs to YouTube (Phase 8), hitting API error 400 "Playlist item count exceeds maximum" after adding 5,000 videos. Remaining 1,000 videos lost or require manual recovery.
-
-**Why it happens:** Not validating totalVideos before approval. Developer assumes user won't consolidate too many large playlists together, or forgets YouTube's hard limit.
-
-**How to avoid:**
-- Use Zod schema with .max(4500) validation (safety margin)
-- Display warning badge when category approaches 4,000 videos
-- Disable approve button if category exceeds limit
-- Show "Split Category" suggestion with automatic sub-category creation
-
-**Warning signs:**
-- Validation only checks at sync time (Phase 8) instead of approval time
-- No visual indicators for categories near limit
-- User can approve any consolidation regardless of size
-
-### Pitfall 3: Poor Category Name Generation from Clustering
-
-**What goes wrong:** Hierarchical clustering groups playlists correctly, but generated category names are generic ("Cluster 1", "Group A") or nonsensical ("The Tutorial Playlist Videos").
-
-**Why it happens:** Category name generation is treated as afterthought. Simply concatenating playlist names or using cluster IDs instead of extracting semantic meaning.
-
-**How to avoid:**
-- Extract meaningful words from playlist titles (filter stopwords: "the", "playlist", "videos")
-- Find most common word in cluster, capitalize as category name
-- Allow user to edit proposed category names before approval
-- Fallback to first playlist name in cluster if word frequency fails
-
-**Warning signs:**
-- Category names like "Cluster_0", "Group_12"
-- Names are full concatenated playlist titles (50+ characters)
-- Users must manually rename every single category
-
-### Pitfall 4: Inefficient Duplicate Detection (N×N Comparison in Memory)
-
-**What goes wrong:** Application loads all videos from all playlists into JavaScript arrays, then nested loops to compare every video against every other video. For 4,000 videos, this is 16 million comparisons, taking 10+ seconds and potentially crashing browser.
-
-**Why it happens:** Not leveraging database for aggregation. Treating duplicate detection as an "algorithm problem" instead of a SQL query problem.
-
-**How to avoid:**
-- Use SQL GROUP BY with HAVING clause to let PostgreSQL find duplicates
-- Database query returns only duplicates (not all 4,000 videos)
-- Query executes in <100ms with proper indexes on playlist_videos.videoId
-- Only fetch duplicate video details after identifying which ones are duplicated
-
-**Warning signs:**
-- Fetching all videos from database to JS for duplicate detection
-- Nested loops in application code comparing video IDs
-- Browser freeze or memory issues during analysis
-- Query takes >1 second for 87 playlists
-
-### Pitfall 5: Not Handling Playlist Renames/Additions After Analysis
-
-**What goes wrong:** User runs analysis, gets consolidation proposal. Before approving, user renames 5 playlists in YouTube. Now proposal references old playlist names, causing confusion or sync errors.
-
-**Why it happens:** Storing playlist names in consolidation proposal instead of playlist IDs. Not detecting when cached data is stale compared to YouTube source.
-
-**How to avoid:**
-- Store playlist IDs in consolidation proposals, not names
-- Display current playlist titles fetched from database when showing proposal
-- Check playlist lastFetched timestamp; warn if >24 hours old before approval
-- Provide "Refresh Analysis" button to re-run clustering with current data
-
-**Warning signs:**
-- Consolidation proposal shows playlist names that don't match dashboard
-- Errors during approval: "Playlist not found"
-- User confusion: "I renamed that playlist yesterday, why does this still show old name?"
-
-## Code Examples
-
-Verified patterns from official sources:
-
-### Hierarchical Clustering with ml-hclust and String Similarity
-
-```typescript
-// Source: ml-hclust GitHub + string-similarity npm docs
-import { agnes } from 'ml-hclust'
-import stringSimilarity from 'string-similarity'
-
-interface Playlist {
+interface PlaylistForClustering {
   id: number
   title: string
   itemCount: number
 }
 
-export function clusterPlaylistsByTitle(
-  playlists: Playlist[],
-  targetClusters: number = 30
+// Aggressive mode: lower target count (more merging), Conservative: higher target count (less merging)
+const ALGORITHM_PRESETS = {
+  aggressive: { targetClusters: 25 },
+  conservative: { targetClusters: 35 },
+} as const
+
+export function clusterPlaylists(
+  playlists: PlaylistForClustering[],
+  mode: 'aggressive' | 'conservative' = 'aggressive'
 ): number[][] {
   const n = playlists.length
-  const titles = playlists.map(p => p.title)
+  const titles = playlists.map(p => p.title.toLowerCase())
 
   // Build distance matrix: distance = 1 - similarity
-  const distances: number[][] = Array(n).fill(0).map(() => Array(n).fill(0))
+  const distances: number[][] = Array.from({ length: n }, () => Array(n).fill(0))
 
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      const similarity = stringSimilarity.compareTwoStrings(titles[i], titles[j])
-      const distance = 1 - similarity
+      const sim = similarity(titles[i], titles[j])
+      const distance = 1 - sim
       distances[i][j] = distance
-      distances[j][i] = distance // Symmetric matrix
+      distances[j][i] = distance
     }
   }
 
-  // Apply AGNES hierarchical clustering
-  const tree = agnes(distances, {
-    method: 'average', // UPGMA (average linkage)
-  })
+  // AGNES hierarchical clustering with average linkage
+  const tree = agnes(distances, { method: 'average' })
 
-  // Cut dendrogram at level that produces target cluster count
-  const clusters = cutDendrogram(tree, targetClusters)
+  // Use built-in group() to cut into target number of clusters
+  const { targetClusters } = ALGORITHM_PRESETS[mode]
+  const clusters = tree.group(targetClusters)
 
-  return clusters // Returns array of arrays, each containing playlist indices
-}
-
-// Helper to cut dendrogram tree into clusters
-function cutDendrogram(tree: any, k: number): number[][] {
-  // Implementation depends on ml-hclust tree structure
-  // This is a simplified version - real implementation needs tree traversal
-  const clusters: number[][] = []
-  // TODO: Traverse tree and cut at appropriate height
-  return clusters
+  // clusters is an array of Cluster objects; extract leaf indices
+  return clusters.map(cluster => cluster.indices())
 }
 ```
 
-### Server Action for Generating Consolidation Proposal
+### Pattern 3: Resizable Split-Panel Layout
+**What:** Category-centric view with resizable left/right panels. Left panel shows category list, right panel shows detail when selected. User can toggle between horizontal and vertical orientation.
+**When to use:** Main analysis page layout.
+**Example:**
+```tsx
+// Source: shadcn/ui Resizable docs (https://ui.shadcn.com/docs/components/radix/resizable)
+'use client'
 
+import { useState } from 'react'
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '@/components/ui/resizable'
+
+type Orientation = 'horizontal' | 'vertical'
+
+export function AnalysisLayout() {
+  const [orientation, setOrientation] = useState<Orientation>('horizontal')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
+
+  return (
+    <div className="h-[calc(100vh-200px)]">
+      <ResizablePanelGroup direction={orientation}>
+        <ResizablePanel defaultSize={35} minSize={25}>
+          <CategoryList
+            onSelect={setSelectedCategoryId}
+            selectedId={selectedCategoryId}
+          />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={65} minSize={30}>
+          {selectedCategoryId ? (
+            <CategoryDetail categoryId={selectedCategoryId} />
+          ) : (
+            <EmptyState message="Select a category to view details" />
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  )
+}
+```
+
+### Pattern 4: Auto-Save State via Debounced Server Actions
+**What:** All approvals/rejections save automatically to database. Use debounced server action calls so rapid changes batch together.
+**When to use:** Every user interaction that changes proposal state (approve, reject, adjust).
+**Example:**
 ```typescript
-// Source: Next.js 15 Server Actions + Drizzle patterns
+// Server action (src/app/actions/analysis.ts)
 'use server'
 
 import { db } from '@/lib/db'
-import { playlists, consolidationProposals } from '@/lib/db/schema'
-import { clusterPlaylists } from '@/lib/analysis/clustering'
-import { validateConsolidation } from '@/lib/analysis/validation'
+import { consolidationProposals } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
-export async function generateConsolidationProposal(targetCategories: number = 30) {
-  // Fetch all playlists
-  const allPlaylists = await db.select().from(playlists)
-
-  // Run clustering algorithm
-  const clusters = await clusterPlaylists(targetCategories)
-
-  // Validate that no cluster exceeds video limit
-  const validation = await validateConsolidation({ categories: clusters })
-
-  if (!validation.valid) {
-    return {
-      success: false,
-      errors: validation.errors
-    }
-  }
-
-  // Store proposals in database
-  for (const cluster of clusters) {
-    await db.insert(consolidationProposals).values({
-      categoryName: cluster.categoryName,
-      sourcePlaylistIds: cluster.playlists.map(p => p.id),
-      totalVideos: cluster.totalVideos,
-      status: 'pending',
-    })
-  }
-
-  revalidatePath('/analysis')
-
-  return {
-    success: true,
-    proposalCount: clusters.length
-  }
-}
-
-export async function approveProposal(proposalId: number) {
+export async function updateProposalStatus(
+  proposalId: number,
+  status: 'pending' | 'approved' | 'rejected'
+) {
   await db
     .update(consolidationProposals)
     .set({
-      status: 'approved',
-      approvedAt: new Date()
+      status,
+      updatedAt: new Date(),
+      ...(status === 'approved' ? { approvedAt: new Date() } : {}),
     })
     .where(eq(consolidationProposals.id, proposalId))
+
+  revalidatePath('/analysis')
+  return { success: true }
+}
+
+// Client-side usage with immediate save
+// No debouncing needed for discrete approve/reject actions
+// But debounce manual edits (playlist reassignment, etc.)
+```
+
+### Pattern 5: Database Schema for Analysis State
+**What:** New tables to persist analysis sessions, proposals, and duplicate records. Enables multi-session workflow with staleness detection.
+**When to use:** Store all analysis results and user decisions.
+**Example:**
+```typescript
+// Source: Drizzle ORM schema patterns + existing project conventions
+import { pgTable, serial, text, timestamp, integer, jsonb, pgEnum, boolean } from 'drizzle-orm/pg-core'
+
+export const proposalStatusEnum = pgEnum('proposal_status', ['pending', 'approved', 'rejected'])
+export const algorithmModeEnum = pgEnum('algorithm_mode', ['conservative', 'aggressive'])
+
+// Track analysis sessions for staleness detection
+export const analysisSessions = pgTable('analysis_sessions', {
+  id: serial('id').primaryKey(),
+  mode: algorithmModeEnum('mode').notNull().default('aggressive'),
+  playlistCount: integer('playlist_count').notNull(),
+  proposalCount: integer('proposal_count').notNull(),
+  duplicateCount: integer('duplicate_count').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  playlistDataTimestamp: timestamp('playlist_data_timestamp').notNull(), // When playlist data was last synced
+})
+
+// Individual consolidation proposals
+export const consolidationProposals = pgTable('consolidation_proposals', {
+  id: serial('id').primaryKey(),
+  sessionId: integer('session_id').references(() => analysisSessions.id).notNull(),
+  categoryName: text('category_name').notNull(),
+  sourcePlaylistIds: jsonb('source_playlist_ids').$type<number[]>().notNull(),
+  uniqueVideoCount: integer('unique_video_count').notNull(), // After deduplication
+  duplicateVideoCount: integer('duplicate_video_count').notNull(),
+  confidenceScore: integer('confidence_score').notNull(), // 0-100
+  confidenceReason: text('confidence_reason').notNull(),
+  status: proposalStatusEnum('status').notNull().default('pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  approvedAt: timestamp('approved_at'),
+})
+
+// Track duplicate videos found during analysis
+export const duplicateRecords = pgTable('duplicate_records', {
+  id: serial('id').primaryKey(),
+  sessionId: integer('session_id').references(() => analysisSessions.id).notNull(),
+  videoId: integer('video_id').references(() => videos.id).notNull(),
+  playlistIds: jsonb('playlist_ids').$type<number[]>().notNull(),
+  occurrenceCount: integer('occurrence_count').notNull(),
+  resolvedPlaylistId: integer('resolved_playlist_id'), // Which playlist "wins" (null = unresolved)
+  analyzedAt: timestamp('analyzed_at').notNull().defaultNow(),
+})
+```
+
+### Anti-Patterns to Avoid
+- **Do not cluster videos instead of playlists.** Phase 2 clusters 87 playlist titles into ~25-35 categories. Video-level categorization is Phase 5 (ML).
+- **Do not use Levenshtein distance for short playlist names.** Dice coefficient handles abbreviations ("JS" vs "JavaScript") better than character-edit distance.
+- **Do not load all videos into memory for duplicate detection.** Use SQL GROUP BY with HAVING -- the database does the work.
+- **Do not run analysis on page load.** Analysis is triggered by explicit "Run Analysis" button (user decision). Cache results in database.
+- **Do not store playlist names in proposals.** Store playlist IDs. Display current names fetched from playlists table (handles renames).
+- **Do not skip validation before approval.** Validate at pre-approval check time (user decision), not real-time. But always validate when user clicks "Execute consolidation".
+- **Do not hand-roll resizable panels.** Use shadcn/ui Resizable (react-resizable-panels) which handles keyboard nav, touch, RTL, and accessibility.
+
+## Don't Hand-Roll
+
+| Problem | Don't Build | Use Instead | Why |
+|---------|-------------|-------------|-----|
+| String similarity algorithm | Custom bigram matcher | fast-dice-coefficient | O(n) performance, zero deps, well-tested implementation |
+| Hierarchical clustering | Manual threshold-based grouping | ml-hclust AGNES + group(k) | Built-in `group(k)` method cuts dendrogram into exactly k clusters; handles linkage methods properly |
+| Resizable split panels | CSS flexbox with drag handler | shadcn/ui Resizable (react-resizable-panels) | Keyboard nav, touch support, pixel/percentage units, Server Component compatible, min/max size constraints |
+| Paginated data table | Custom table with manual pagination | shadcn/ui DataTable + @tanstack/react-table | Sorting, filtering, row selection, pagination with configurable page sizes -- all built in |
+| Keyboard shortcuts | addEventListener('keydown') handlers | react-hotkeys-hook | Scoped shortcuts prevent conflicts, works with 'use client', handles modifier keys |
+| Duplicate detection | Nested loops comparing video arrays | PostgreSQL GROUP BY + HAVING | Database returns only duplicates, sub-100ms for 87 playlists, proper indexing |
+| YouTube limit validation | Manual if-statements | Zod schema with .max(4500) | Type-safe, composable, already in stack, generates TS types from schema |
+
+**Key insight:** The analysis engine is entirely server-side (data already in PostgreSQL from Phase 1). No YouTube API calls needed. The complexity is in the UI -- the CONTEXT.md decisions specify a feature-rich interface with split panels, batch operations, keyboard nav, progress tracking, guided wizards, and a comprehensive final review. Plan accordingly.
+
+## Common Pitfalls
+
+### Pitfall 1: Unmaintained string-similarity Package
+**What goes wrong:** Using `string-similarity` (4.0.4, unmaintained for 5 years) introduces security/compatibility risk with no path for bug fixes.
+**Why it happens:** Old research recommended it. npm page still shows high download counts.
+**How to avoid:** Use `fast-dice-coefficient` instead. Same algorithm (Dice/Sorensen), faster (44k vs 7.5k ops/sec), O(n) vs O(n^2). API is `similarity(str1, str2)` returning 0-1.
+**Warning signs:** npm audit warnings, TypeScript type issues with `@types/string-similarity`.
+
+### Pitfall 2: Not Using ml-hclust's Built-in group(k)
+**What goes wrong:** Developer implements custom dendrogram cutting logic that produces wrong cluster counts, misses edge cases (empty clusters, single-item clusters).
+**Why it happens:** Old research noted `cutDendrogram` as TODO. The `group(k)` method was not discovered.
+**How to avoid:** Use `tree.group(k)` which is built into ml-hclust. It uses a max-heap to merge leaves until reaching exactly k clusters. Returns array of Cluster objects with `.indices()` for leaf indices.
+**Warning signs:** Custom tree traversal code, cluster count not matching target, off-by-one errors.
+
+### Pitfall 3: Ignoring YouTube's 5,000 Video Limit During Validation
+**What goes wrong:** User approves category with 6,000 videos. Phase 8 sync fails after adding 5,000.
+**Why it happens:** Validation only at sync time, not during analysis approval.
+**How to avoid:** Per CONTEXT.md, validate at pre-approval check time (when user clicks finalize). Use `countUniqueVideosForPlaylists()` to get ACTUAL unique count after dedup (not raw sum). Color-code: Green <3000, Yellow 3000-4500, Red >4500.
+**Warning signs:** No validation before "Execute consolidation" button, using raw itemCount sum instead of deduplicated count.
+
+### Pitfall 4: Calculating Video Counts from Raw Sums Instead of Deduplicated Counts
+**What goes wrong:** Category shows "4,800 videos" based on sum of source playlists' itemCount. After dedup, actual count is 3,200. User unnecessarily splits category.
+**Why it happens:** Using `SUM(playlists.itemCount)` instead of `COUNT(DISTINCT videoId)` across source playlists.
+**How to avoid:** Always use `countUniqueVideosForPlaylists(playlistIds)` which counts DISTINCT videoId across the playlist_videos table for the given playlist set.
+**Warning signs:** Category video counts don't match what user sees in YouTube.
+
+### Pitfall 5: Not Persisting Analysis State for Multi-Session Workflow
+**What goes wrong:** User reviews 10/25 categories, closes browser. Returns next day -- all progress lost, must start over.
+**Why it happens:** Storing approval state only in React state (client-side), not in database.
+**How to avoid:** Per CONTEXT.md, auto-save all state to database. Each approve/reject immediately persists via server action. Analysis page loads from database on mount, restoring all progress.
+**Warning signs:** No database table for proposal status, using only useState/useReducer for approval tracking.
+
+### Pitfall 6: Stale Analysis After New Data Sync
+**What goes wrong:** User runs analysis, then syncs new YouTube data (adding videos). Old analysis proposals show incorrect video counts.
+**Why it happens:** Analysis session doesn't track when playlist data was last synced.
+**How to avoid:** Per CONTEXT.md, implement staleness detection. Store `playlistDataTimestamp` in `analysisSessions` table. Compare against latest `playlists.lastFetched`. If newer data exists, show "Data has changed since analysis. Re-analyze?" prompt.
+**Warning signs:** No timestamp tracking, analysis always shows cached results regardless of data changes.
+
+### Pitfall 7: Poor Category Name Generation
+**What goes wrong:** Cluster containing "JavaScript Tutorials", "JS Advanced", "Web Dev" gets named "Cluster 0" or "the".
+**Why it happens:** Naive word-frequency approach picks common stopwords or generic terms.
+**How to avoid:** Extract meaningful words, filter stopwords (the, and, of, videos, playlist, my), prefer longer/more descriptive words. Use the longest playlist name in cluster as default, allow user edit later (in Phase 3 per CONTEXT.md).
+**Warning signs:** Category names are "Cluster_N", single common words, or very long concatenations.
+
+### Pitfall 8: Aggressive Algorithm Mode Producing Too Few Categories
+**What goes wrong:** Aggressive mode (targetClusters=25) merges unrelated playlists. "Bardcore" and "Post punk" end up in same music category alongside "MUSIC" and "Music Vids".
+**Why it happens:** With only 87 playlists and target of 25, average linkage clustering must merge some dissimilar playlists. String similarity alone cannot detect that "Bardcore" and "Post punk" are music-related.
+**How to avoid:** For clusters where all members have low pairwise similarity (<0.2), mark confidence as LOW and place in "Review needed" section. Also consider video overlap as a secondary signal -- playlists sharing many videos are likely related regardless of name similarity.
+**Warning signs:** Many LOW confidence proposals, unrelated playlists grouped together, user rejects most proposals.
+
+## Code Examples
+
+### Confidence Score Calculation
+```typescript
+// Confidence based on name similarity + video overlap
+export function calculateConfidence(
+  clusterTitles: string[],
+  videoOverlapPercent: number
+): { score: number; reason: string } {
+  // Average pairwise name similarity within cluster
+  let totalSim = 0
+  let pairs = 0
+  for (let i = 0; i < clusterTitles.length; i++) {
+    for (let j = i + 1; j < clusterTitles.length; j++) {
+      totalSim += similarity(clusterTitles[i].toLowerCase(), clusterTitles[j].toLowerCase())
+      pairs++
+    }
+  }
+  const avgNameSim = pairs > 0 ? totalSim / pairs : 1
+
+  // Combined score: 60% name similarity, 40% video overlap
+  const score = Math.round((avgNameSim * 0.6 + (videoOverlapPercent / 100) * 0.4) * 100)
+
+  const level = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
+  const reason = `Name similarity: ${Math.round(avgNameSim * 100)}%, Video overlap: ${videoOverlapPercent}%`
+
+  return { score, reason }
+}
+```
+
+### Category Naming from Cluster
+```typescript
+const STOPWORDS = new Set([
+  'the', 'and', 'of', 'in', 'for', 'to', 'a', 'an', 'my',
+  'videos', 'playlist', 'watch', 'later', 'vids',
+])
+
+export function generateCategoryName(playlistTitles: string[]): string {
+  if (playlistTitles.length === 1) return playlistTitles[0]
+
+  // Score each title: prefer longer, more descriptive names
+  const scored = playlistTitles.map(title => ({
+    title,
+    wordCount: title.split(/\s+/).filter(w => !STOPWORDS.has(w.toLowerCase())).length,
+    length: title.length,
+  }))
+
+  // Return the most descriptive title (most meaningful words, then longest)
+  scored.sort((a, b) => b.wordCount - a.wordCount || b.length - a.length)
+  return scored[0].title
+}
+```
+
+### Keyboard Navigation in Category List
+```typescript
+// Source: react-hotkeys-hook docs (https://react-hotkeys-hook.vercel.app/)
+'use client'
+
+import { useHotkeys } from 'react-hotkeys-hook'
+import { useState } from 'react'
+
+export function useCategoryNavigation(categories: { id: number }[]) {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  useHotkeys('up, k', () => {
+    setSelectedIndex(prev => Math.max(0, prev - 1))
+  }, { preventDefault: true })
+
+  useHotkeys('down, j', () => {
+    setSelectedIndex(prev => Math.min(categories.length - 1, prev + 1))
+  }, { preventDefault: true })
+
+  useHotkeys('enter', () => {
+    // Expand/select current category
+  }, { preventDefault: true })
+
+  return { selectedIndex, selectedCategory: categories[selectedIndex] }
+}
+```
+
+### Split Wizard Flow
+```typescript
+// Guided split: How many? -> Name each -> Assign playlists
+interface SplitWizardState {
+  step: 'count' | 'name' | 'assign'
+  splitCount: number
+  names: string[]
+  assignments: Record<string, number[]> // categoryName -> playlistIds
+}
+
+// Server action to execute split
+export async function splitProposal(
+  proposalId: number,
+  newCategories: { name: string; playlistIds: number[] }[]
+) {
+  // 1. Mark original proposal as rejected
+  await updateProposalStatus(proposalId, 'rejected')
+
+  // 2. Create new proposals for each split category
+  for (const cat of newCategories) {
+    const uniqueCount = await countUniqueVideosForPlaylists(cat.playlistIds)
+    await db.insert(consolidationProposals).values({
+      sessionId: /* current session */,
+      categoryName: cat.name,
+      sourcePlaylistIds: cat.playlistIds,
+      uniqueVideoCount: uniqueCount,
+      duplicateVideoCount: 0, // Recalculated
+      confidenceScore: 100, // User-created
+      confidenceReason: 'Manually created via split wizard',
+      status: 'pending',
+    })
+  }
 
   revalidatePath('/analysis')
 }
@@ -736,77 +527,68 @@ export async function approveProposal(proposalId: number) {
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| react-beautiful-dnd | @dnd-kit/sortable | 2023 (library archived) | dnd-kit more performant (10kb vs 40kb), better TypeScript support, maintained by active community |
-| Levenshtein string distance | Dice coefficient (bigram similarity) | Ongoing research 2020s | Dice handles abbreviations/acronyms better ("JS" vs "JavaScript"), more intuitive similarity scores for short strings |
-| K-means clustering for playlists | Hierarchical clustering (dendrogram) | Domain-specific preference | Hierarchical allows flexible cluster count adjustment without re-running algorithm; k-means requires pre-specifying k |
-| Client-side only validation | Zod schema with runtime + static types | TypeScript ecosystem 2021+ | Eliminates type/validation drift, single source of truth, generates TypeScript types from schemas |
-| Manual SQL queries for duplicates | Drizzle ORM with sql tagged template | Drizzle 2023-2025 adoption | Type-safe SQL, no raw string queries, better IDE autocomplete, prevents SQL injection |
+| string-similarity 4.0.4 (unmaintained) | fast-dice-coefficient 1.0.0 OR cmpstr 3.2+ | string-similarity unmaintained since ~2021 | Must use alternative; fast-dice-coefficient provides same algo with better performance |
+| Custom dendrogram cutting code | ml-hclust group(k) built-in method | Available in ml-hclust 4.0.0 | Eliminates custom tree traversal; produces exactly k clusters |
+| react-beautiful-dnd (archived 2023) | Not needed for Phase 2 (deferred drag-drop decision) | 2023 | CONTEXT.md specifies add/remove buttons and guided wizard instead of drag-drop for Phase 2 |
+| Manual HTML table | shadcn/ui DataTable + @tanstack/react-table | 2024-2025 | Built-in pagination, sorting, selection with shadcn styling |
+| Fixed panel layout | react-resizable-panels 4.6.0 | v4 released 2025 | Server Component support, pixel/percentage units, keyboard accessibility |
 
 **Deprecated/outdated:**
-- **react-beautiful-dnd:** Archived by Atlassian in 2023, no longer maintained. Migrate to dnd-kit or pragmatic-drag-and-drop.
-- **MinHash/LSH for small datasets:** Overkill for 87 playlists. Use simple pairwise comparison with string-similarity (completes in <50ms). Save LSH for 10k+ items.
-- **TF-IDF for playlist title clustering:** Playlist titles too short (2-5 words) for TF-IDF to add value over bigram similarity. Save TF-IDF for video title/description analysis (Phase 5).
+- **string-similarity:** Unmaintained for 5 years. Use fast-dice-coefficient or cmpstr.
+- **react-beautiful-dnd:** Archived by Atlassian in 2023. Use @dnd-kit if drag-drop needed (but CONTEXT.md specifies buttons/wizard for Phase 2 adjustments, not drag-drop).
+- **Custom cutDendrogram function:** ml-hclust has built-in `group(k)`. Do not write custom tree traversal.
 
 ## Open Questions
 
-Things that couldn't be fully resolved:
+1. **How should video overlap be incorporated into clustering signal?**
+   - What we know: Name similarity alone cannot detect that "Bardcore" and "Post punk" are both music. Video overlap (shared videos between playlists) is a strong signal.
+   - What's unclear: Should video overlap be a separate distance metric combined with name similarity before clustering, or a post-clustering validation step?
+   - Recommendation: Use a combined distance matrix: `distance = w1 * (1 - nameSimilarity) + w2 * (1 - videoOverlapPercent/100)` where w1=0.6, w2=0.4. This way playlists with many shared videos cluster together even if names differ. Start with these weights as the aggressive mode; conservative mode could use w1=0.8, w2=0.2.
 
-1. **How should dendrogram be cut to produce exactly 25-35 clusters?**
-   - What we know: ml-hclust produces hierarchical tree, can cut at any height. Average linkage (UPGMA) is standard method.
-   - What's unclear: Automatic height selection to hit target cluster count requires tree traversal logic not documented in ml-hclust. Alternative libraries don't expose this clearly.
-   - Recommendation: Implement custom `cutDendrogram` function that traverses tree top-down, counts clusters at each level, stops when count reaches target range (25-35). Alternative: Use fixed similarity threshold (e.g., 0.4) and accept whatever cluster count results, then manually merge if needed.
+2. **What is the actual data shape of 87 playlists?**
+   - What we know: From exported CSV files, playlists include: CSS, css animations, CSS Animations & Transitions, css grid, css tidbit (5 CSS-related). Also JS, js libs (2 JS-related). Storybook, storybook (duplicate). Recipes - Low Carb, recipies (typo), Food (3 food-related). Multiple music: Bardcore, MUSIC, Music 4 Roisin, Music Vids, Post punk.
+   - What's unclear: Exact video counts per playlist (stored in DB but varies). Whether all 87 playlists have synced videos yet (Phase 1 sync may not be complete).
+   - Recommendation: Analysis must work with whatever data is synced. Show warning if some playlists have 0 synced videos. The actual data shows that name-based clustering will work well for many groups (CSS*, JS*, Storybook*, Drupal*) but music/food categories need video overlap signal.
 
-2. **Should duplicate detection count same video at different positions as duplicate?**
-   - What we know: SQL query finds videoId in multiple playlists. YouTube allows same video multiple times in one playlist (different positions).
-   - What's unclear: User intent - is "JavaScript Intro" video at positions 1 and 50 in same playlist considered "duplicate" for consolidation purposes?
-   - Recommendation: Count unique (playlistId, videoId) pairs, not (playlistId, videoId, position). If same video appears twice in one playlist, that's intentional user organization, not duplication error. Only flag cross-playlist duplicates.
+3. **Should "Watch Later" playlist be excluded from clustering analysis?**
+   - What we know: Watch Later (4,000 videos) is the target for Phase 5 ML categorization, not a source for Phase 2 consolidation.
+   - What's unclear: CONTEXT.md doesn't explicitly state whether Watch Later should be in the analysis.
+   - Recommendation: Exclude Watch Later from clustering. It would skew all categories (it likely shares videos with many playlists). Mark it as excluded in the UI with explanation.
 
-3. **What if user wants more granular control than approve/reject entire category?**
-   - What we know: Requirements specify "manually adjust consolidation proposal by merging different playlists" (CAT-09). Current proposal: drag-drop playlists between categories.
-   - What's unclear: Should user be able to split one playlist across multiple categories? (e.g., "Web Dev" playlist split into "JavaScript" and "CSS" categories based on video titles)
-   - Recommendation: Phase 2 supports playlist-level reassignment only (drag whole playlist to different category). Defer video-level categorization to Phase 5 (ML categorization of Watch Later). Keep Phase 2 scoped to playlist consolidation.
-
-4. **How to handle edge case: Category exceeds limit after duplicate removal?**
-   - What we know: Consolidation proposal shows totalVideos assuming all videos kept. After deduplication, category may have fewer videos.
-   - What's unclear: If category shows 4,800 videos (over limit), but after dedup only 4,200 remain, should system allow approval?
-   - Recommendation: Validation should calculate totalVideos AFTER duplicate removal. Adjust SQL query to count DISTINCT videoIds across source playlists: `SELECT COUNT(DISTINCT videoId) FROM playlist_videos WHERE playlistId IN (...)`. This gives accurate post-consolidation count.
+4. **How to handle the "keep from most specific playlist" duplicate resolution default?**
+   - What we know: CONTEXT.md specifies "keep from most specific playlist" with "longer, more descriptive playlist names preferred."
+   - What's unclear: Algorithm for determining "specificity" -- is it just name length? Or something more nuanced?
+   - Recommendation: Use name length as primary signal. Longer name = more specific. "Advanced JavaScript Patterns" (length 30) beats "JS" (length 2). Tiebreaker: playlist with fewer total videos (more focused = more specific). Store resolved_playlist_id in duplicate_records table.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **YouTube Data API Official Docs:**
-  - https://developers.google.com/youtube/v3/determine_quota_cost - Verified playlists.insert costs 50 units, playlistItems.insert costs 50 units
-  - Community sources verified 5,000 video limit per playlist (standard cap, brand channels may exceed)
-- **PostgreSQL Official Docs:**
-  - https://www.postgresql.org/docs/current/tutorial-join.html - JOIN queries for duplicate detection across tables
-  - GROUP BY + HAVING patterns for aggregate queries
-- **string-similarity npm:** https://www.npmjs.com/package/string-similarity - 4.0+ version, Dice coefficient implementation, 2M+ weekly downloads
-- **ml-hclust GitHub:** https://github.com/mljs/hclust - v4.0.0 (Nov 2025), AGNES algorithm, TypeScript-native
-- **@dnd-kit/sortable npm:** https://www.npmjs.com/package/@dnd-kit/sortable - v10.0.0, 1,867 dependents, zero-dependency core
-- **Zod Official Docs:** https://zod.dev/ - v3.23+, .max() validation for numbers/arrays
+- **ml-hclust GitHub source code** (https://github.com/mljs/hclust) - Confirmed `group(k)` method on Cluster class, `indices()` for leaf extraction, `cut(threshold)` for height-based cutting. v4.0.0 published Nov 2025.
+- **react-resizable-panels npm** (https://www.npmjs.com/package/react-resizable-panels) - v4.6.0, actively maintained (published Feb 2026), Server Component support confirmed.
+- **shadcn/ui Resizable docs** (https://ui.shadcn.com/docs/components/radix/resizable) - Built on react-resizable-panels, supports horizontal/vertical orientation, keyboard navigation.
+- **shadcn/ui Data Table docs** (https://ui.shadcn.com/docs/components/radix/data-table) - Requires @tanstack/react-table, supports pagination, sorting, row selection with checkboxes.
+- **Drizzle ORM Select docs** (https://orm.drizzle.team/docs/select) - GROUP BY, HAVING, count, countDistinct, sql template literal for complex queries.
+- **YouTube Data API** - 5,000 video per playlist limit confirmed by multiple sources (https://outofthe925.com/youtube-playlist-limit/).
+- **react-hotkeys-hook** (https://react-hotkeys-hook.vercel.app/) - v5.2.1, scoped hotkeys, 'use client' compatible.
 
 ### Secondary (MEDIUM confidence)
-- **Web search findings verified with multiple sources:**
-  - Dice coefficient superior to Levenshtein for short strings (GeeksforGeeks, academic papers)
-  - Hierarchical clustering patterns for text (CRAN R documentation, academic sources)
-  - TF-IDF with cosine similarity for document clustering (Medium, academic papers, GitHub implementations)
-  - PostgreSQL duplicate detection patterns (CommandPrompt.com, Theodo blog, multiple tutorials)
-  - dnd-kit vs react-beautiful-dnd comparison (Puck blog 2026, community discussions)
-  - Data deduplication UI patterns from 2026 tools (DataGroomr, Dedupely, Creatio)
-  - GitHub PR review UI patterns (official GitHub docs) as model for approve/reject workflow
+- **fast-dice-coefficient npm** (https://www.npmjs.com/package/fast-dice-coefficient) - O(n) performance confirmed, 44k ops/sec benchmark. Package inactive maintenance but algorithm is stable/complete.
+- **string-similarity npm** (https://www.npmjs.com/package/string-similarity) - v4.0.4, confirmed unmaintained. Validated as reason to use alternative.
+- **@tanstack/react-table npm** (https://www.npmjs.com/package/@tanstack/react-table) - v8.21.3, React 19 compatible.
+- **lucide-react npm** (https://www.npmjs.com/package/lucide-react) - v0.563.0, standard icon library for shadcn/ui.
 
-### Tertiary (LOW confidence - marked for validation)
-- **String similarity algorithm performance comparisons:** Benchmarks from npm package READMEs (cos-similarity claiming 57x faster) should be validated with actual testing on playlist-sized datasets
-- **Dendrogram cutting algorithms:** No authoritative source found for optimal height selection to produce target cluster count. Custom implementation needed.
+### Tertiary (LOW confidence)
+- **fast-dice-coefficient maintenance status:** Package is functionally complete but inactive maintenance (no updates in 12 months). The algorithm itself is mathematically stable and unlikely to need changes. If maintenance becomes a concern, cmpstr (actively maintained, 11 metrics) is a drop-in alternative.
+- **Video overlap as clustering signal:** The combined distance matrix approach (w1*nameSim + w2*videoOverlap) is standard in information retrieval but the specific weights (0.6/0.4) are unverified for YouTube playlist data. May need tuning during implementation.
 
 ## Metadata
 
 **Confidence breakdown:**
-- Standard stack: **HIGH** - All libraries verified via npm/GitHub with current versions and active maintenance
-- Duplicate detection pattern: **HIGH** - SQL GROUP BY is standard PostgreSQL, tested approach
-- Clustering approach: **MEDIUM-HIGH** - string-similarity + ml-hclust verified, but dendrogram cutting logic needs custom implementation
-- UI patterns: **MEDIUM** - shadcn/ui + dnd-kit verified combinations from 2026 sources, but custom approve/reject workflow needs building
-- Validation patterns: **HIGH** - Zod already in stack, .max() validator well-documented
+- Standard stack: **HIGH** - All libraries verified via npm/GitHub with current versions, maintenance status confirmed, APIs verified from source code
+- Architecture: **HIGH** - Patterns follow existing Phase 1 conventions (Server Components, server actions, Drizzle ORM), new patterns (Resizable, DataTable) verified from official shadcn/ui docs
+- Pitfalls: **HIGH** - Critical issues verified (unmaintained string-similarity, YouTube 5k limit, group(k) existence), all mitigation strategies use verified library features
+- Algorithm design: **MEDIUM** - Dice coefficient + AGNES clustering is well-established, but video overlap weighting and category naming heuristics need validation on actual data
+- UI complexity: **MEDIUM** - CONTEXT.md specifies extensive UI features. Individual components verified, but integration complexity (split wizard, bulk operations, keyboard nav across panels) will require careful implementation
 
-**Research date:** 2026-02-05
-**Valid until:** March 7, 2026 (30 days - stable domain, but verify npm package updates if major versions released)
+**Research date:** 2026-02-06
+**Valid until:** March 8, 2026 (30 days -- stable domain, verify npm package updates for react-resizable-panels v4.x and ml-hclust)
