@@ -328,9 +328,7 @@ export function VideoBrowsePage({
         selectedVideoIds={Array.from(selectedIds)}
         categories={categories}
         currentCategoryId={selectedCategoryId}
-        currentCategoryName={
-          selectedCategoryId === null ? null : currentCategoryName
-        }
+        currentCategoryName={currentCategoryName}
         onConfirm={handleMoveCopyConfirm}
       />
 
