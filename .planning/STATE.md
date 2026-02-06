@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 4 of 8 (Video Display & Organization)
-Plan: 03 of 6 in current phase
+Plan: 02 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-06 — Completed 04-03-PLAN.md
+Last activity: 2026-02-06 — Completed 04-02-PLAN.md
 
-Progress: [█████████████████████████░░░░░░░░] 25/31 plans (~81%)
+Progress: [███████████████████████████░░░░░] 24/27 plans (~89%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
-- Average duration: 3.9 min
-- Total execution time: 1.62 hours
+- Total plans completed: 24
+- Average duration: 4.0 min
+- Total execution time: 1.60 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [███████████████████████
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
 | 2 - Playlist Analysis & Consolidation | 11/11 | 45 min | 4.1 min |
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
-| 4 - Video Display & Organization | 3/6 | 8.6 min | 2.9 min |
+| 4 - Video Display & Organization | 2/6 | 7.5 min | 3.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (3min), 03-05 (6min), 03-06 (4min), 04-01 (4.6min), 04-03 (2min)
-- Trend: Accelerating in Phase 4 (~2.9 min avg)
+- Last 5 plans: 03-05 (6min), 03-06 (4min), 04-01 (4.6min), 04-02 (2.9min), 04-03 (2min)
+- Trend: Accelerating in Phase 4 (~3.6 min avg)
 
 *Updated after each plan completion*
 
@@ -186,6 +186,12 @@ Recent decisions affecting current work:
 - VideoCardData includes categoryNames array for multi-category badge display
 - getCategoryColour uses HSL with fixed saturation/lightness for consistent visual appearance
 
+**From 04-02 execution (2026-02-06):**
+- Batch enrichment pattern: 2 DB queries max (1 join + 1 batch) instead of N+1 for category names
+- All Videos mode uses natural title sort, specific category uses dateAdded DESC
+- CategorySidebar uses button elements for accessibility (keyboard nav, screen readers)
+- Added revalidatePath('/videos') to assignVideosToCategory for cache invalidation
+
 **From 04-03 execution (2026-02-06):**
 - Row-based virtualization with CSS grid columns (not per-card virtualization) for simpler responsive logic
 - ResizeObserver for dynamic column count calculation based on container width (1-4 columns)
@@ -220,8 +226,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-06T17:45:25Z
-Stopped at: Completed 04-03-PLAN.md (Video Display Components)
+Last session: 2026-02-06T16:41:24Z
+Stopped at: Completed 04-02-PLAN.md (Server Actions & Category Sidebar)
 Resume file: None
 
 ---
@@ -232,4 +238,4 @@ Resume file: None
 
 **Phase 3 Complete!** All 6 plans executed. Management mode fully functional with: categories/categoryVideos tables, 10 server actions, undo stack with Cmd/Ctrl+Z, rename/delete/merge/assign dialogs, management dashboard with hover CRUD actions, batch merge toolbar, video assignment dialog, and complete end-to-end verification. All 5 Phase 3 success criteria validated. UX improvements tracked for future enhancement.
 
-**Phase 4 In Progress!** Plans 04-01, 04-03 complete. Foundation ready (types, utilities, colours, thumbnails). Core components built: VideoCard (YouTube-style with lazy thumbnails, duration overlay, category badges), VideoGrid (row virtualization with 1-4 responsive columns), VideoToolbar (search, sort, selection, batch actions). Ready for browsing page integration.
+**Phase 4 In Progress!** Plans 04-01, 04-02 complete. Foundation ready (types, utilities, colours, thumbnails). Data layer complete: getVideosForCategory server action with batch enrichment (2 queries, not N+1), CategorySidebar component with All Videos entry. Ready for video display components (VideoCard, VideoGrid, VideoToolbar) and page orchestration.
