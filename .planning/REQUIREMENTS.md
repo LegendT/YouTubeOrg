@@ -25,16 +25,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Category Management
 
-- [ ] **CAT-01**: User can view all existing playlist categories with video counts
-- [ ] **CAT-02**: User can create new categories
-- [ ] **CAT-03**: User can rename existing categories
-- [ ] **CAT-04**: User can delete categories
+- [x] **CAT-01**: User can view all existing playlist categories with video counts
+- [x] **CAT-02**: User can create new categories
+- [x] **CAT-03**: User can rename existing categories
+- [x] **CAT-04**: User can delete categories
 - [ ] **CAT-05**: System analyzes 87 playlists and proposes consolidation to ~25-35 categories
 - [ ] **CAT-06**: System shows overlap analysis (duplicate videos across playlists)
 - [ ] **CAT-07**: User can approve proposed category consolidations
 - [ ] **CAT-08**: User can reject proposed consolidations
 - [ ] **CAT-09**: User can manually adjust proposed consolidations (merge different playlists)
-- [ ] **CAT-10**: User can manually merge two categories
+- [x] **CAT-10**: User can manually merge two categories
 
 ### Video Organization
 
@@ -164,11 +164,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CAT-08 | Phase 2 | Pending |
 | CAT-09 | Phase 2 | Pending |
 | SAFE-04 | Phase 2 | Pending |
-| CAT-01 | Phase 3 | Pending |
-| CAT-02 | Phase 3 | Pending |
-| CAT-03 | Phase 3 | Pending |
-| CAT-04 | Phase 3 | Pending |
-| CAT-10 | Phase 3 | Pending |
+| CAT-01 | Phase 3 | Complete |
+| CAT-02 | Phase 3 | Complete |
+| CAT-03 | Phase 3 | Complete |
+| CAT-04 | Phase 3 | Complete |
+| CAT-10 | Phase 3 | Complete |
 | VID-01 | Phase 4 | Pending |
 | VID-02 | Phase 4 | Pending |
 | VID-03 | Phase 4 | Pending |
