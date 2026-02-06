@@ -49,26 +49,34 @@ Plans:
 ---
 
 ### Phase 2: Playlist Analysis & Consolidation
-**Goal**: System analyzes existing 87 playlists for overlap and duplication, proposes intelligent consolidation to ~25-35 categories, and user can approve or adjust the structure.
+**Goal**: System analyzes existing 87 playlists for overlap and duplication, proposes intelligent consolidation to ~25-35 categories, and user can approve or adjust the structure via a comprehensive split-panel analysis interface with keyboard navigation, batch operations, and guided split wizard.
 
 **Depends on**: Phase 1 (requires cached playlist data)
 
 **Requirements**: CAT-05, CAT-06, CAT-07, CAT-08, CAT-09, SAFE-04
 
 **Success Criteria** (what must be TRUE):
-  1. User sees proposed category consolidation structure showing merged playlists (e.g., "JavaScript Tutorials + JS Advanced → JavaScript")
+  1. User sees proposed category consolidation structure showing merged playlists (e.g., "JavaScript Tutorials + JS Advanced -> JavaScript")
   2. User sees overlap analysis showing how many duplicate videos exist across playlists
   3. User can approve proposed consolidations with single action
   4. User can manually adjust consolidation proposal by merging different playlists
   5. System validates proposed structure has no category exceeding 4,500 videos (YouTube limit safety margin)
 
-**Plans**: 4 plans
+**Plans**: 12 plans
 
 Plans:
 - [ ] 02-01-PLAN.md — Analysis backend (duplicate detection, clustering, validation)
 - [ ] 02-02-PLAN.md — Server actions for proposal workflow
-- [ ] 02-03-PLAN.md — Consolidation UI with approve/reject
+- [ ] 02-03-PLAN.md — Basic consolidation UI with approve/reject
 - [ ] 02-04-PLAN.md — Manual adjustment with drag-and-drop
+- [ ] 02-05-PLAN.md — Backend fixes: fast-dice-coefficient, group(k), confidence scores, algorithm modes, sessions
+- [ ] 02-06-PLAN.md — Enhanced server actions: split, create, resolve duplicates, batch, staleness
+- [ ] 02-07-PLAN.md — Resizable split-panel layout, summary card, sortable category list
+- [ ] 02-08-PLAN.md — Category detail panel with paginated video list, confidence/validation badges
+- [ ] 02-09-PLAN.md — Duplicate resolver with bulk actions, batch approve/reject toolbar
+- [ ] 02-10-PLAN.md — Split wizard, manual adjustment buttons, create custom category
+- [ ] 02-11-PLAN.md — Progress tracking, keyboard navigation, loading states, staleness detection
+- [ ] 02-12-PLAN.md — Final review screen, full integration, end-to-end verification
 
 ---
 
@@ -205,12 +213,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & API Integration | 5/5 | ✓ Complete | 2026-02-05 |
-| 2. Playlist Analysis & Consolidation | 0/4 | Ready to execute | - |
+| 1. Foundation & API Integration | 5/5 | Complete | 2026-02-05 |
+| 2. Playlist Analysis & Consolidation | 0/12 | Ready to execute | - |
 | 3. Category Management | 0/TBD | Not started | - |
 | 4. Video Display & Organization | 0/TBD | Not started | - |
 | 5. ML Categorization Engine | 0/TBD | Not started | - |
@@ -220,4 +228,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-05 (Phase 1 complete)*
+*Last updated: 2026-02-06 (Phase 2 expanded to 12 plans)*
