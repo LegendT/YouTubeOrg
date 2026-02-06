@@ -1,7 +1,7 @@
 interface Playlist {
   id: number
   title: string
-  itemCount: number
+  itemCount: number | null
   youtubeId: string
 }
 
@@ -21,7 +21,7 @@ export function PlaylistList({ playlists }: PlaylistListProps) {
       {watchLater && (
         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
           <h3 className="font-semibold">Watch Later</h3>
-          <p className="text-lg">{watchLater.itemCount.toLocaleString()} videos</p>
+          <p className="text-lg">{(watchLater.itemCount ?? 0).toLocaleString()} videos</p>
         </div>
       )}
 
@@ -31,7 +31,7 @@ export function PlaylistList({ playlists }: PlaylistListProps) {
           .map(playlist => (
             <li key={playlist.id} className="flex justify-between border-b pb-2">
               <span className="truncate">{playlist.title}</span>
-              <span className="text-gray-600">{playlist.itemCount} videos</span>
+              <span className="text-gray-600">{playlist.itemCount ?? 0} videos</span>
             </li>
           ))}
       </ul>
