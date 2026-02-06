@@ -20,19 +20,19 @@ Progress: [████████████░░░░] 12/16 plans (~75%)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 4.1 min
-- Total execution time: 0.75 hours
+- Total execution time: 0.82 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
-| 2 - Playlist Analysis & Consolidation | 6/11 | 23 min | 3.8 min |
+| 2 - Playlist Analysis & Consolidation | 7/11 | 27 min | 3.9 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-05 (4min), 02-02 (4min), 02-06 (3min), 02-07 (4min), 02-11 (3min)
+- Last 5 plans: 02-02 (4min), 02-06 (3min), 02-07 (4min), 02-11 (3min), 02-09 (4min)
 - Trend: Stable at ~3.6 min per plan
 
 *Updated after each plan completion*
@@ -116,6 +116,13 @@ Recent decisions affecting current work:
 - Review needed section filters by rejected status OR (low confidence + pending status)
 - CategoryList uses client-side sort/filter with useMemo for performance
 
+**From 02-09 execution (2026-02-06):**
+- Specificity heuristic: longest playlist title first, fewest videos as tiebreaker (per CONTEXT.md)
+- Added getDuplicateVideos server action to fetch enriched records from duplicateVideos table with DB IDs
+- DuplicateRecord type bridges duplicateVideos table ID to DuplicateResolution.duplicateRecordId
+- Preview-before-apply pattern: Dialog groups resolutions by target playlist for clarity
+- useBatchSelection hook: reusable selection state (toggle, selectAll, clearAll, isSelected)
+
 **From 02-11 execution (2026-02-06):**
 - Timer-based stage progression (2s/stage) for loading feedback since server actions don't stream progress
 - AnalysisRunner coexists with RunAnalysisButton: Runner adds staged loading, Button stays simple for inline use
@@ -144,12 +151,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T11:58:00Z
-Stopped at: Completed 02-11-PLAN.md (Supporting UI Components)
+Last session: 2026-02-06T11:58:35Z
+Stopped at: Completed 02-09-PLAN.md (Duplicate Resolution & Batch Operations)
 Resume file: None
 
 ---
 
 **Phase 1 Complete!** All 5 Phase 1 Success Criteria validated.
 
-**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, and 11 complete. Full backend API with 13 server actions, resizable split-panel analysis dashboard, and 5 standalone supporting UI components (progress tracker, keyboard nav, algorithm toggle, staged loading, staleness banner). Ready for CategoryDetail (Plan 02-08) and remaining UI plans.
+**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, 09, and 11 complete. Full backend API with 14 server actions, resizable split-panel analysis dashboard, DuplicateResolver with smart defaults and preview dialog, BatchOperations toolbar with useBatchSelection hook, and 5 standalone supporting UI components. Ready for CategoryDetail (Plan 02-08) and remaining UI plans (02-10, 02-12).
