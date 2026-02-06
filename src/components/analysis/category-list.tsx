@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Check,
   X,
@@ -22,6 +23,13 @@ interface CategoryListProps {
   proposals: ConsolidationProposal[]
   selectedId: number | null
   onSelect: (id: number) => void
+  batchSelection?: {
+    selectedIds: Set<number>
+    toggle: (id: number) => void
+    isSelected: (id: number) => boolean
+    selectAll: (ids: number[]) => void
+  }
+  focusedIndex?: number
 }
 
 function getConfidenceLevel(score: number | null | undefined): ConfidenceLevel {
@@ -110,10 +118,13 @@ export function CategoryList({
   proposals,
   selectedId,
   onSelect,
+  batchSelection,
+  focusedIndex,
 }: CategoryListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+  const listRef = useRef<HTMLDivElement>(null)
 
   // Separate main list from "review needed"
   const { mainProposals, reviewNeeded } = useMemo(() => {
@@ -180,19 +191,59 @@ export function CategoryList({
     confidence: 'Confidence',
   }
 
+  // All visible proposal IDs (for select-all)
+  const allVisibleIds = useMemo(
+    () => [...sortedMain, ...sortedReview].map((p) => p.id),
+    [sortedMain, sortedReview]
+  )
+
+  const allVisibleProposals = useMemo(
+    () => [...sortedMain, ...sortedReview],
+    [sortedMain, sortedReview]
+  )
+
+  // Auto-scroll focused item into view
+  useEffect(() => {
+    if (focusedIndex == null || !listRef.current) return
+    const items = listRef.current.querySelectorAll('[data-category-item]')
+    const item = items[focusedIndex] as HTMLElement | undefined
+    item?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [focusedIndex])
+
   return (
     <div className="flex flex-col h-full">
       {/* Search */}
       <div className="p-3 space-y-2 border-b">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search categories..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-md border bg-transparent py-2 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
+        <div className="flex items-center gap-2">
+          {batchSelection && (
+            <Checkbox
+              checked={
+                allVisibleIds.length > 0 &&
+                allVisibleIds.every((id) => batchSelection.isSelected(id))
+              }
+              onCheckedChange={() => {
+                const allSelected =
+                  allVisibleIds.length > 0 &&
+                  allVisibleIds.every((id) => batchSelection.isSelected(id))
+                if (allSelected) {
+                  batchSelection.selectAll([])
+                } else {
+                  batchSelection.selectAll(allVisibleIds)
+                }
+              }}
+              aria-label="Select all categories"
+            />
+          )}
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-md border bg-transparent py-2 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
         </div>
 
         {/* Sort buttons */}
@@ -216,49 +267,63 @@ export function CategoryList({
 
       {/* Category list */}
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
-          {sortedMain.map((proposal) => {
+        <div className="p-2 space-y-1" ref={listRef}>
+          {sortedMain.map((proposal, idx) => {
             const confidenceLevel =
               proposal.confidence?.level ??
               getConfidenceLevel(proposal.confidenceScore)
             const confidenceScore =
               proposal.confidence?.score ?? proposal.confidenceScore
+            const isFocused = focusedIndex === idx
+            const isChecked = batchSelection?.isSelected(proposal.id) ?? false
 
             return (
-              <button
+              <div
                 key={proposal.id}
-                onClick={() => onSelect(proposal.id)}
-                className={`w-full text-left rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
-                  selectedId === proposal.id
-                    ? 'bg-accent'
-                    : ''
-                }`}
+                data-category-item
+                className={`flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
+                  selectedId === proposal.id ? 'bg-accent' : ''
+                } ${isFocused ? 'ring-2 ring-primary' : ''}`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <StatusIcon status={proposal.status} />
-                      <span className="font-medium text-sm truncate">
-                        {proposal.categoryName}
-                      </span>
+                {batchSelection && (
+                  <div className="pt-0.5">
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={() => batchSelection.toggle(proposal.id)}
+                      aria-label={`Select ${proposal.categoryName}`}
+                    />
+                  </div>
+                )}
+                <button
+                  onClick={() => onSelect(proposal.id)}
+                  className="flex-1 text-left min-w-0"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <StatusIcon status={proposal.status} />
+                        <span className="font-medium text-sm truncate">
+                          {proposal.categoryName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{proposal.totalVideos} videos</span>
+                        <span>{proposal.playlists.length} playlists</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span>{proposal.totalVideos} videos</span>
-                      <span>{proposal.playlists.length} playlists</span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <StatusBadge status={proposal.status} />
+                      {confidenceScore != null && (
+                        <span
+                          className={`text-xs font-medium ${getConfidenceColor(confidenceLevel)}`}
+                        >
+                          {Math.round(confidenceScore)}%
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <StatusBadge status={proposal.status} />
-                    {confidenceScore != null && (
-                      <span
-                        className={`text-xs font-medium ${getConfidenceColor(confidenceLevel)}`}
-                      >
-                        {Math.round(confidenceScore)}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </button>
+                </button>
+              </div>
             )
           })}
 
@@ -273,66 +338,83 @@ export function CategoryList({
               No categories match &quot;{searchQuery}&quot;
             </div>
           )}
-        </div>
 
-        {/* Review needed section */}
-        {sortedReview.length > 0 && (
-          <>
-            <Separator className="my-2" />
-            <div className="p-2">
+          {/* Review needed section */}
+          {sortedReview.length > 0 && (
+            <>
+              <Separator className="my-2" />
               <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-amber-600">
                 <AlertTriangle className="h-4 w-4" />
                 Review needed ({sortedReview.length})
               </div>
               <div className="space-y-1">
-                {sortedReview.map((proposal) => {
+                {sortedReview.map((proposal, reviewIdx) => {
                   const confidenceLevel =
                     proposal.confidence?.level ??
                     getConfidenceLevel(proposal.confidenceScore)
                   const confidenceScore =
                     proposal.confidence?.score ?? proposal.confidenceScore
+                  const globalIdx = sortedMain.length + reviewIdx
+                  const isFocused = focusedIndex === globalIdx
+                  const isChecked = batchSelection?.isSelected(proposal.id) ?? false
 
                   return (
-                    <button
+                    <div
                       key={proposal.id}
-                      onClick={() => onSelect(proposal.id)}
-                      className={`w-full text-left rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
-                        selectedId === proposal.id
-                          ? 'bg-accent'
-                          : ''
-                      }`}
+                      data-category-item
+                      className={`flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
+                        selectedId === proposal.id ? 'bg-accent' : ''
+                      } ${isFocused ? 'ring-2 ring-primary' : ''}`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <StatusIcon status={proposal.status} />
-                            <span className="font-medium text-sm truncate">
-                              {proposal.categoryName}
-                            </span>
+                      {batchSelection && (
+                        <div className="pt-0.5">
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={() =>
+                              batchSelection.toggle(proposal.id)
+                            }
+                            aria-label={`Select ${proposal.categoryName}`}
+                          />
+                        </div>
+                      )}
+                      <button
+                        onClick={() => onSelect(proposal.id)}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <StatusIcon status={proposal.status} />
+                              <span className="font-medium text-sm truncate">
+                                {proposal.categoryName}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              <span>{proposal.totalVideos} videos</span>
+                              <span>
+                                {proposal.playlists.length} playlists
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            <span>{proposal.totalVideos} videos</span>
-                            <span>{proposal.playlists.length} playlists</span>
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <StatusBadge status={proposal.status} />
+                            {confidenceScore != null && (
+                              <span
+                                className={`text-xs font-medium ${getConfidenceColor(confidenceLevel)}`}
+                              >
+                                {Math.round(confidenceScore)}%
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <StatusBadge status={proposal.status} />
-                          {confidenceScore != null && (
-                            <span
-                              className={`text-xs font-medium ${getConfidenceColor(confidenceLevel)}`}
-                            >
-                              {Math.round(confidenceScore)}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                   )
                 })}
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </ScrollArea>
     </div>
   )
