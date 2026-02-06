@@ -11,7 +11,8 @@ import { Columns, Rows, Loader2 } from 'lucide-react'
 import { SummaryCard } from './summary-card'
 import { CategoryList } from './category-list'
 import { CategoryDetail } from './category-detail'
-import { getCategoryDetail } from '@/app/actions/analysis'
+import { getCategoryDetail, getAllPlaylistsForSelector } from '@/app/actions/analysis'
+import { CreateCategoryDialog } from './manual-adjustments'
 import type {
   ConsolidationProposal,
   AnalysisSummary,
@@ -41,8 +42,16 @@ export function AnalysisDashboard({
   )
   const [categoryData, setCategoryData] = useState<CategoryData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [allPlaylists, setAllPlaylists] = useState<
+    Array<{ id: number; title: string; itemCount: number }>
+  >([])
 
   const selectedProposal = proposals.find((p) => p.id === selectedCategoryId) ?? null
+
+  // Fetch all playlists for selectors on mount
+  useEffect(() => {
+    getAllPlaylistsForSelector().then(setAllPlaylists)
+  }, [])
 
   const fetchCategoryData = useCallback(async (proposalId: number) => {
     setIsLoading(true)
@@ -77,7 +86,12 @@ export function AnalysisDashboard({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <SummaryCard summary={summary} />
-        <Button
+        <div className="flex items-center gap-2">
+          <CreateCategoryDialog
+            allPlaylists={allPlaylists}
+            onCreated={handleStatusChange}
+          />
+          <Button
           variant="outline"
           size="sm"
           onClick={() =>
@@ -93,6 +107,7 @@ export function AnalysisDashboard({
             <Columns className="h-4 w-4" />
           )}
         </Button>
+        </div>
       </div>
 
       <div className="h-[calc(100vh-280px)] rounded-lg border">
@@ -119,6 +134,7 @@ export function AnalysisDashboard({
                   proposal={selectedProposal}
                   metrics={categoryData.metrics}
                   videos={categoryData.videos}
+                  allPlaylists={allPlaylists}
                   onStatusChange={handleStatusChange}
                 />
               ) : (
