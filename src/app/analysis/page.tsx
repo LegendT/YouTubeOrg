@@ -63,7 +63,6 @@ export default async function AnalysisPage() {
             </div>
             <AnalysisRunner
               currentMode={session?.mode ?? 'aggressive'}
-              onComplete={() => {}}
               hasExistingProposals={false}
             />
           </div>

@@ -176,7 +176,7 @@ function useStageProgression(isRunning: boolean): LoadingStage {
 
 interface AnalysisRunnerProps {
   currentMode?: AlgorithmMode
-  onComplete: () => void
+  onComplete?: () => void
   hasExistingProposals?: boolean
 }
 
@@ -230,7 +230,7 @@ export function AnalysisRunner({
       setTimeout(() => {
         setShowComplete(false)
         router.refresh()
-        onComplete()
+        onComplete?.()
       }, 1500)
     } catch (err) {
       setIsRunning(false)

@@ -244,6 +244,10 @@ export async function runAnalysis(
   mode: AlgorithmMode = 'aggressive'
 ): Promise<RunAnalysisResult> {
   try {
+    // Step 0: Clear previous proposals and duplicates so we don't accumulate stale data
+    await db.delete(consolidationProposals);
+    await db.delete(duplicateVideos);
+
     // Step 1: Count playlists and get latest data timestamp
     const allPlaylistRows = await db
       .select({
