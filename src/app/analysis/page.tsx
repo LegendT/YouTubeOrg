@@ -1,36 +1,33 @@
-import { ConsolidationProposalTable } from '@/components/analysis/proposal-table'
+import { AnalysisDashboard } from '@/components/analysis/analysis-dashboard'
 import { DuplicateReport } from '@/components/analysis/duplicate-report'
-import { GenerateProposalButton } from '@/components/analysis/generate-button'
+import { RunAnalysisButton } from '@/components/analysis/run-analysis-button'
 import {
   getProposals,
   getDuplicateStats,
   getAnalysisSummary,
+  checkStaleness,
 } from '@/app/actions/analysis'
-import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { AlertTriangle } from 'lucide-react'
 
 export default async function AnalysisPage() {
-  const [proposalsResult, statsResult, summary] = await Promise.all([
+  const [proposalsResult, statsResult, summary, staleness] = await Promise.all([
     getProposals(),
     getDuplicateStats(),
     getAnalysisSummary(),
+    checkStaleness(),
   ])
 
   const proposals = proposalsResult.proposals
   const duplicateStats = statsResult.stats
+  const hasProposals = proposals.length > 0
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <div className="container mx-auto py-8 space-y-6">
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Playlist Analysis & Consolidation
+            Playlist Analysis &amp; Consolidation
           </h1>
           <p className="text-muted-foreground mt-2">
             {summary.totalPlaylists > 0
@@ -38,98 +35,25 @@ export default async function AnalysisPage() {
               : 'Sync your playlists first, then analyze and consolidate them into categories'}
           </p>
         </div>
-        <GenerateProposalButton />
+        <RunAnalysisButton hasExistingProposals={hasProposals} />
       </div>
 
-      {/* Summary cards */}
-      {summary.proposedCategories > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Proposed Categories</CardDescription>
-              <CardTitle className="text-2xl">
-                {summary.proposedCategories}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                From {summary.totalPlaylists} playlists
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Reviewed</CardDescription>
-              <CardTitle className="text-2xl">
-                {summary.reviewedCount}/{summary.proposedCategories}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                {summary.pendingCount} pending review
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Approved</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
-                {summary.approvedCount}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Categories confirmed
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Duplicates Found</CardDescription>
-              <CardTitle className="text-2xl">
-                {summary.duplicatesFound}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Videos in multiple playlists
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Duplicate statistics */}
-      {duplicateStats && duplicateStats.totalUniqueVideos > 0 && (
-        <DuplicateReport stats={duplicateStats} />
-      )}
-
-      {/* Proposal table or empty state */}
-      {proposals.length > 0 ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Proposed Consolidations
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Review and approve proposed category consolidations below.
-                Categories over 4,500 videos cannot be approved.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="outline">{summary.pendingCount} pending</Badge>
-              <Badge variant="default">{summary.approvedCount} approved</Badge>
-              <Badge variant="secondary">
-                {summary.rejectedCount} rejected
-              </Badge>
-            </div>
+      {/* Staleness warning */}
+      {staleness.isStale && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">{staleness.message}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+              Click &quot;Re-analyze&quot; to update proposals with latest playlist data.
+            </p>
           </div>
-          <ConsolidationProposalTable proposals={proposals} />
         </div>
+      )}
+
+      {/* Dashboard or empty state */}
+      {hasProposals ? (
+        <AnalysisDashboard proposals={proposals} summary={summary} />
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="text-muted-foreground space-y-2">
@@ -137,11 +61,16 @@ export default async function AnalysisPage() {
               No consolidation proposals yet
             </p>
             <p className="text-sm">
-              Click &quot;Generate Consolidation Proposal&quot; to analyze your
-              playlists and create category recommendations.
+              Click &quot;Run Analysis&quot; to analyze your playlists and create
+              category recommendations.
             </p>
           </div>
         </div>
+      )}
+
+      {/* Duplicate statistics below dashboard */}
+      {duplicateStats && duplicateStats.totalUniqueVideos > 0 && (
+        <DuplicateReport stats={duplicateStats} />
       )}
     </div>
   )
