@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, serial, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, serial, text, integer, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
 
 // Playlists table - stores YouTube playlist metadata with ETag support
 export const playlists = pgTable('playlists', {
@@ -113,4 +113,26 @@ export const duplicateVideos = pgTable('duplicate_videos', {
   analyzedAt: timestamp('analyzed_at').notNull().defaultNow(),
   resolvedPlaylistId: integer('resolved_playlist_id'), // Which playlist "wins" for this duplicate
   sessionId: integer('session_id').references(() => analysisSessions.id), // Nullable for backward compat
+});
+
+// --- Phase 3: Category Management ---
+
+// Categories table - proper category entities created from finalized Phase 2 proposals
+export const categories = pgTable('categories', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  sourceProposalId: integer('source_proposal_id').references(() => consolidationProposals.id), // Tracks origin for traceability
+  videoCount: integer('video_count').notNull().default(0), // Denormalized for fast list rendering -- avoids COUNT joins
+  isProtected: boolean('is_protected').notNull().default(false), // true for "Uncategorized" -- prevents rename/delete
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Category-Video join table - many-to-many relationship between categories and individual videos
+export const categoryVideos = pgTable('category_videos', {
+  id: serial('id').primaryKey(),
+  categoryId: integer('category_id').references(() => categories.id, { onDelete: 'cascade' }).notNull(),
+  videoId: integer('video_id').references(() => videos.id).notNull(),
+  addedAt: timestamp('added_at').notNull().defaultNow(),
+  source: text('source').default('consolidation'), // Values: 'consolidation', 'manual', 'merge', 'orphan', 'undo'
 });
