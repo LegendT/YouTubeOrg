@@ -105,7 +105,7 @@ export function VideoGrid({
               }}
             >
               <div
-                className="grid gap-3 px-4"
+                className="grid gap-2 px-6"
                 style={{
                   gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
                 }}
