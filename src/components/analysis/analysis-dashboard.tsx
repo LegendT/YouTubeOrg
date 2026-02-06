@@ -127,6 +127,7 @@ export function AnalysisDashboard({
     videoCount: number
   } | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   const undoStack = useUndoStack()
 
@@ -306,15 +307,15 @@ export function AnalysisDashboard({
     }
   }, [undoStack, refreshManagementData])
 
-  const handleCreateCategory = useCallback(async () => {
-    const name = prompt('Enter new category name:')
-    if (!name?.trim()) return
+  const handleCreateCategorySubmit = useCallback(async (name: string) => {
     setIsCreating(true)
     try {
       const result = await createCategory(name.trim())
       if (result.success) {
+        setCreateDialogOpen(false)
         refreshManagementData()
       }
+      return result
     } finally {
       setIsCreating(false)
     }
@@ -353,7 +354,7 @@ export function AnalysisDashboard({
             <Button
               variant="outline"
               size="sm"
-              onClick={handleCreateCategory}
+              onClick={() => setCreateDialogOpen(true)}
               disabled={isCreating}
             >
               {isCreating ? (
@@ -511,6 +512,14 @@ export function AnalysisDashboard({
             allCategories={allCategoriesForAssignment}
           />
         )}
+
+        {/* Create new category dialog */}
+        <CreateNewCategoryDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onSubmit={handleCreateCategorySubmit}
+          isCreating={isCreating}
+        />
 
         {/* Undo banner */}
         <UndoBanner
@@ -814,5 +823,124 @@ function ManagementBatchToolbar({
         </div>
       </div>
     </div>
+  )
+}
+
+// === Create new category dialog ===
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+
+function CreateNewCategoryDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  isCreating,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSubmit: (name: string) => Promise<{ success: boolean; error?: string }>
+  isCreating: boolean
+}) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  // Reset state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setName('')
+      setError(null)
+    }
+  }, [open])
+
+  const handleSubmit = async () => {
+    const trimmed = name.trim()
+    if (!trimmed) {
+      setError('Category name cannot be empty')
+      return
+    }
+    if (trimmed.length > 150) {
+      setError('Category name must be 150 characters or less')
+      return
+    }
+    setError(null)
+    const result = await onSubmit(trimmed)
+    if (!result.success) {
+      setError(result.error ?? 'Failed to create category')
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>New Category</DialogTitle>
+          <DialogDescription>
+            Create an empty category. You can assign videos to it afterward.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div>
+          <label
+            htmlFor="new-category-name"
+            className="block text-sm font-medium mb-1"
+          >
+            Category name
+          </label>
+          <input
+            id="new-category-name"
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value)
+              setError(null)
+            }}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            placeholder="e.g. Machine Learning Tutorials"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+          {error && (
+            <p className="text-sm text-destructive mt-1">{error}</p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isCreating}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isCreating || !name.trim()}
+          >
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
