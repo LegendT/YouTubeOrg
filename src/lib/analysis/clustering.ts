@@ -1,26 +1,18 @@
 import { agnes } from 'ml-hclust';
-import diceCoefficient from 'fast-dice-coefficient';
 import { db } from '@/lib/db';
 import { playlists } from '@/lib/db/schema';
+import { buildDistanceMatrix, ALGORITHM_PRESETS, type AlgorithmMode } from './similarity';
+import { calculateConfidence, type ConfidenceResult } from './confidence';
 
-interface PlaylistForClustering {
-  id: number;
-  title: string;
-  itemCount: number | null;
-}
+export { type AlgorithmMode } from './similarity';
+export { ALGORITHM_PRESETS } from './similarity';
 
 export interface ClusterResult {
   categoryName: string;
   playlists: Array<{ id: number; title: string }>;
   totalVideos: number;
+  confidence: ConfidenceResult;
 }
-
-// Aggressive mode: fewer categories (more merging)
-// Conservative mode: more categories (less merging)
-const ALGORITHM_PRESETS = {
-  aggressive: { targetClusters: 25 },
-  conservative: { targetClusters: 35 },
-} as const;
 
 // Words to filter out when generating category names
 const STOPWORDS = new Set([
@@ -29,83 +21,100 @@ const STOPWORDS = new Set([
 ]);
 
 /**
- * Cluster playlists into proposed categories using Dice coefficient
- * string similarity and AGNES hierarchical clustering.
+ * Cluster playlists into proposed categories using combined distance
+ * (name similarity via fast-dice-coefficient + video overlap) and
+ * AGNES hierarchical clustering with group(k).
  *
- * @param mode - 'aggressive' (25 clusters) or 'conservative' (35 clusters)
- * @returns Array of cluster results sorted by totalVideos descending
+ * @param mode - 'aggressive' (25 clusters, more merging) or 'conservative' (35 clusters, less merging)
+ * @returns Array of cluster results sorted by totalVideos descending, with confidence scores
  */
 export async function clusterPlaylists(
-  mode: 'aggressive' | 'conservative' = 'aggressive'
+  mode: AlgorithmMode = 'aggressive'
 ): Promise<ClusterResult[]> {
-  // Fetch all playlists from database
+  // Fetch all playlists from database, excluding Watch Later
   const allPlaylists = await db
     .select({
       id: playlists.id,
       title: playlists.title,
       itemCount: playlists.itemCount,
+      youtubeId: playlists.youtubeId,
     })
     .from(playlists);
 
-  if (allPlaylists.length === 0) {
+  // Filter out Watch Later playlist
+  const filteredPlaylists = allPlaylists.filter(
+    p => p.youtubeId !== 'WL' && p.title !== 'Watch Later'
+  );
+
+  if (filteredPlaylists.length === 0) {
     return [];
   }
 
-  // For a single playlist, return it as its own cluster
-  if (allPlaylists.length === 1) {
+  // For a single playlist, return it as its own cluster with HIGH confidence
+  if (filteredPlaylists.length === 1) {
     return [{
-      categoryName: allPlaylists[0].title,
-      playlists: [{ id: allPlaylists[0].id, title: allPlaylists[0].title }],
-      totalVideos: allPlaylists[0].itemCount ?? 0,
+      categoryName: filteredPlaylists[0].title,
+      playlists: [{ id: filteredPlaylists[0].id, title: filteredPlaylists[0].title }],
+      totalVideos: filteredPlaylists[0].itemCount ?? 0,
+      confidence: { score: 100, level: 'HIGH', reason: 'Single playlist, no merge needed' },
     }];
   }
 
-  const n = allPlaylists.length;
-  const titles = allPlaylists.map(p => p.title.toLowerCase());
+  const playlistsForClustering = filteredPlaylists.map(p => ({
+    id: p.id,
+    title: p.title,
+    itemCount: p.itemCount,
+  }));
 
-  // Build distance matrix: distance = 1 - Dice coefficient similarity
-  const distances: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
+  // Build combined distance matrix (name similarity + video overlap)
+  const { distances, videoOverlaps } = await buildDistanceMatrix(playlistsForClustering, mode);
 
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      const sim = diceCoefficient(titles[i], titles[j]);
-      const distance = 1 - sim;
-      distances[i][j] = distance;
-      distances[j][i] = distance;
-    }
-  }
+  const n = playlistsForClustering.length;
 
   // AGNES hierarchical clustering with average linkage (UPGMA)
   const tree = agnes(distances, { method: 'average' });
 
   // Use built-in group(k) to cut dendrogram into target number of clusters
   const { targetClusters } = ALGORITHM_PRESETS[mode];
-  // Ensure target does not exceed number of playlists
   const k = Math.min(targetClusters, n);
   const groupResult = tree.group(k);
 
   // Extract clusters from group result
-  // group(k) returns a Cluster whose children are the k clusters
   const clusters = groupResult.children;
 
-  // Build result array from clusters
+  // Build result array with confidence scores
   const results: ClusterResult[] = clusters.map((cluster) => {
     const indices = cluster.indices();
-    const clusterPlaylists = indices.map((idx: number) => ({
-      id: allPlaylists[idx].id,
-      title: allPlaylists[idx].title,
+    const clusterPlaylistItems = indices.map((idx: number) => ({
+      id: playlistsForClustering[idx].id,
+      title: playlistsForClustering[idx].title,
     }));
 
-    const clusterTitles = indices.map((idx: number) => allPlaylists[idx].title);
+    const clusterTitles = indices.map((idx: number) => playlistsForClustering[idx].title);
     const totalVideos = indices.reduce(
-      (sum: number, idx: number) => sum + (allPlaylists[idx].itemCount ?? 0),
+      (sum: number, idx: number) => sum + (playlistsForClustering[idx].itemCount ?? 0),
       0
     );
 
+    // Calculate average video overlap percentage within this cluster
+    let totalOverlap = 0;
+    let overlapPairs = 0;
+    for (let i = 0; i < indices.length; i++) {
+      for (let j = i + 1; j < indices.length; j++) {
+        totalOverlap += videoOverlaps[indices[i]][indices[j]];
+        overlapPairs++;
+      }
+    }
+    const avgVideoOverlap = overlapPairs > 0 ? totalOverlap / overlapPairs : 0;
+    const videoOverlapPercent = Math.round(avgVideoOverlap * 100);
+
+    const confidence = calculateConfidence(clusterTitles, videoOverlapPercent);
+
     return {
       categoryName: generateCategoryName(clusterTitles),
-      playlists: clusterPlaylists,
+      playlists: clusterPlaylistItems,
       totalVideos,
+      confidence,
     };
   });
 
