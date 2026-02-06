@@ -7,6 +7,8 @@ import {
   duplicateVideos,
   analysisSessions,
   playlists,
+  playlistVideos,
+  videos,
 } from '@/lib/db/schema';
 import { eq, desc, inArray, sql, count, max, ne, and } from 'drizzle-orm';
 import { createConsolidationProposals, calculateDeduplicatedCount } from '@/lib/analysis/consolidation';
@@ -23,7 +25,11 @@ import type {
   AnalysisSummary,
   AnalysisSession,
   DuplicateResolution,
+  DuplicateRecord,
   SplitInput,
+  CategoryMetrics,
+  VideoDetail,
+  ConfidenceLevel,
 } from '@/types/analysis';
 import type { AlgorithmMode } from '@/types/analysis';
 
@@ -713,5 +719,71 @@ export async function getLatestSession(): Promise<AnalysisSession | null> {
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Get all duplicate video records enriched with video titles and playlist details.
+ *
+ * Fetches from the duplicateVideos table (persisted during analysis) and joins
+ * with videos and playlists tables for display-ready data including itemCount
+ * for the specificity heuristic.
+ *
+ * @returns Array of enriched duplicate records or error
+ */
+export async function getDuplicateVideos(): Promise<{
+  success: boolean;
+  duplicates: DuplicateRecord[];
+  error?: string;
+}> {
+  try {
+    const records = await db
+      .select()
+      .from(duplicateVideos)
+      .orderBy(desc(duplicateVideos.occurrenceCount));
+
+    const enriched: DuplicateRecord[] = await Promise.all(
+      records.map(async (record) => {
+        // Get video details
+        const [video] = await db
+          .select({ youtubeId: videos.youtubeId, title: videos.title })
+          .from(videos)
+          .where(eq(videos.id, record.videoId))
+          .limit(1);
+
+        // Get playlist details with itemCount for specificity heuristic
+        const playlistIds = record.playlistIds as number[];
+        const playlistDetails =
+          playlistIds.length > 0
+            ? await db
+                .select({
+                  playlistId: playlists.id,
+                  playlistTitle: playlists.title,
+                  itemCount: playlists.itemCount,
+                })
+                .from(playlists)
+                .where(inArray(playlists.id, playlistIds))
+            : [];
+
+        return {
+          id: record.id,
+          videoId: record.videoId,
+          videoTitle: video?.title ?? 'Unknown Video',
+          videoYoutubeId: video?.youtubeId ?? '',
+          playlistCount: record.occurrenceCount,
+          playlists: playlistDetails.map((p) => ({
+            playlistId: p.playlistId,
+            playlistTitle: p.playlistTitle,
+            itemCount: p.itemCount ?? 0,
+          })),
+          resolvedPlaylistId: record.resolvedPlaylistId,
+        };
+      })
+    );
+
+    return { success: true, duplicates: enriched };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, duplicates: [], error: message };
   }
 }

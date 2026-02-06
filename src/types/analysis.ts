@@ -100,6 +100,17 @@ export interface SplitInput {
   playlistIds: number[];
 }
 
+/** Enriched duplicate record from the database with video and playlist details */
+export interface DuplicateRecord {
+  id: number; // duplicateVideos table primary key
+  videoId: number;
+  videoTitle: string;
+  videoYoutubeId: string;
+  playlistCount: number;
+  playlists: Array<{ playlistId: number; playlistTitle: string; itemCount: number }>;
+  resolvedPlaylistId: number | null;
+}
+
 /** Input for resolving a single duplicate video to a winning playlist */
 export interface DuplicateResolution {
   duplicateRecordId: number;
