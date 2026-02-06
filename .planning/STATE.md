@@ -11,17 +11,17 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 2 of 8 (Playlist Analysis & Consolidation)
-Plan: 1 of 11 in current phase
+Plan: 5 of 11 in current phase
 Status: In progress
-Last activity: 2026-02-06 — Completed 02-01-PLAN.md
+Last activity: 2026-02-06 — Completed 02-05-PLAN.md
 
-Progress: [██████░░░░░░░░░░] 6/16 plans (~38%)
+Progress: [███████░░░░░░░░░] 7/16 plans (~44%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 4.8 min
+- Total plans completed: 7
+- Average duration: 4.6 min
 - Total execution time: 0.5 hours
 
 **By Phase:**
@@ -29,11 +29,11 @@ Progress: [██████░░░░░░░░░░] 6/16 plans (~38%)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
-| 2 - Playlist Analysis & Consolidation | 1/11 | 5 min | 5 min |
+| 2 - Playlist Analysis & Consolidation | 2/11 | 9 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (3min), 01-02 (3min), 01-04 (3.5min), 01-05 (6.5min), 02-01 (5min)
-- Trend: Stable at ~5 min per plan
+- Last 5 plans: 01-02 (3min), 01-04 (3.5min), 01-05 (6.5min), 02-01 (5min), 02-05 (4min)
+- Trend: Stable at ~4.5 min per plan
 
 *Updated after each plan completion*
 
@@ -89,6 +89,14 @@ Recent decisions affecting current work:
 - Aggressive/conservative presets via targetClusters parameter (25 vs 35)
 - Analysis functions are pure server-side, operating on cached PostgreSQL data (no YouTube API calls)
 
+**From 02-05 execution (2026-02-06):**
+- Combined distance metric: nameWeight * (1 - nameSim) + overlapWeight * (1 - videoOverlap) per algorithm mode
+- Confidence scoring: 60% name similarity + 40% video overlap, scaled 0-100, with HIGH/MEDIUM/LOW levels
+- Aggressive preset: 25 clusters, 0.6 name / 0.4 overlap weight; Conservative: 35 clusters, 0.8/0.2
+- analysisSessions table tracks staleness via playlistDataTimestamp, finalizedAt marks approved structure
+- All new columns nullable for backward compat with 02-01 data
+- Watch Later excluded from clustering by both youtubeId='WL' and title check
+
 ### Pending Todos
 
 None yet.
@@ -112,12 +120,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T10:37:05Z
-Stopped at: Completed 02-01-PLAN.md (Analysis Engine Backend)
+Last session: 2026-02-06T10:44:14Z
+Stopped at: Completed 02-05-PLAN.md (Backend Analysis Enhancements)
 Resume file: None
 
 ---
 
 **Phase 1 Complete!** All 5 Phase 1 Success Criteria validated.
 
-**Phase 2 In Progress:** Plan 01 (Analysis Engine Backend) complete. Analysis functions ready for server action integration in Plan 02.
+**Phase 2 In Progress:** Plans 01 and 05 complete. Analysis engine has combined distance metric, confidence scoring, and session tracking. Ready for server actions (Plan 06) and UI (Plans 07-08).
