@@ -62,13 +62,12 @@ Plans:
   4. User can manually adjust consolidation proposal by merging different playlists
   5. System validates proposed structure has no category exceeding 4,500 videos (YouTube limit safety margin)
 
-**Plans**: 12 plans
+**Plans**: 11 plans
 
 Plans:
 - [ ] 02-01-PLAN.md — Analysis backend (duplicate detection, clustering, validation)
 - [ ] 02-02-PLAN.md — Server actions for proposal workflow
 - [ ] 02-03-PLAN.md — Basic consolidation UI with approve/reject
-- [ ] 02-04-PLAN.md — Manual adjustment with drag-and-drop
 - [ ] 02-05-PLAN.md — Backend fixes: fast-dice-coefficient, group(k), confidence scores, algorithm modes, sessions
 - [ ] 02-06-PLAN.md — Enhanced server actions: split, create, resolve duplicates, batch, staleness
 - [ ] 02-07-PLAN.md — Resizable split-panel layout, summary card, sortable category list
@@ -218,7 +217,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & API Integration | 5/5 | Complete | 2026-02-05 |
-| 2. Playlist Analysis & Consolidation | 0/12 | Ready to execute | - |
+| 2. Playlist Analysis & Consolidation | 0/11 | Ready to execute | - |
 | 3. Category Management | 0/TBD | Not started | - |
 | 4. Video Display & Organization | 0/TBD | Not started | - |
 | 5. ML Categorization Engine | 0/TBD | Not started | - |
@@ -228,4 +227,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-06 (Phase 2 expanded to 12 plans)*
+*Last updated: 2026-02-06 (Phase 2 revised to 11 plans, removed drag-drop plan)*
