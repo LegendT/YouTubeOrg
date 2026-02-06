@@ -11,29 +11,29 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 2 of 8 (Playlist Analysis & Consolidation)
-Plan: 9 of 11 in current phase
+Plan: 10 of 11 in current phase
 Status: In progress
-Last activity: 2026-02-06 — Completed 02-09-PLAN.md
+Last activity: 2026-02-06 — Completed 02-10-PLAN.md
 
-Progress: [████████████░░░░] 12/16 plans (~75%)
+Progress: [█████████████░░░] 13/16 plans (~81%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 4.1 min
-- Total execution time: 0.82 hours
+- Total plans completed: 13
+- Average duration: 4.2 min
+- Total execution time: 0.91 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 - Foundation & API Integration | 5/5 | 23.5 min | 4.7 min |
-| 2 - Playlist Analysis & Consolidation | 7/11 | 27 min | 3.9 min |
+| 2 - Playlist Analysis & Consolidation | 8/11 | 33 min | 4.1 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4min), 02-06 (3min), 02-07 (4min), 02-11 (3min), 02-09 (4min)
-- Trend: Stable at ~3.6 min per plan
+- Last 5 plans: 02-06 (3min), 02-07 (4min), 02-11 (3min), 02-09 (4min), 02-10 (6min)
+- Trend: Stable at ~4.0 min per plan
 
 *Updated after each plan completion*
 
@@ -134,6 +134,13 @@ Recent decisions affecting current work:
 - Relative date formatting for publishedAt ("2 months ago") instead of absolute dates
 - Deduplication in getCategoryDetail: keep first occurrence of each video across source playlists
 
+**From 02-10 execution (2026-02-06):**
+- Native HTML inputs with Tailwind styling instead of adding shadcn Input component (reduces dependency churn)
+- Radio-button assignment in split wizard: each playlist assigned to exactly one category via Map<playlistId, categoryIndex>
+- ManualAdjustments only visible for pending proposals (approved/rejected not editable)
+- CreateCategoryDialog in dashboard toolbar (accessible without selecting a category)
+- updateProposalPlaylists recalculates confidence using calculateConfidence with updated playlist names
+
 ### Pending Todos
 
 None yet.
@@ -157,12 +164,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-06T11:59:00Z
-Stopped at: Completed 02-08-PLAN.md (Category Detail Panel)
+Last session: 2026-02-06T12:06:48Z
+Stopped at: Completed 02-10-PLAN.md (Split Wizard & Manual Adjustments)
 Resume file: None
 
 ---
 
 **Phase 1 Complete!** All 5 Phase 1 Success Criteria validated.
 
-**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, 08, 09, and 11 complete. Full backend API with 15 server actions (including getCategoryDetail), resizable split-panel analysis dashboard with CategoryDetail right panel, DuplicateResolver with smart defaults and preview dialog, BatchOperations toolbar with useBatchSelection hook, and 5 standalone supporting UI components. Ready for remaining UI plans (02-10, 02-12).
+**Phase 2 In Progress:** Plans 01, 05, 02, 06, 07, 08, 09, 10, and 11 complete. Full backend API with 17 server actions (including updateProposalPlaylists, getAllPlaylistsForSelector), resizable split-panel analysis dashboard with CategoryDetail right panel including SplitWizard and ManualAdjustments controls, DuplicateResolver with smart defaults and preview dialog, BatchOperations toolbar with useBatchSelection hook, CreateCategoryDialog in dashboard toolbar, and 5 standalone supporting UI components. Ready for final plan (02-12).
