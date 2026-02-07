@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 8 of 8 (Batch Sync Operations)
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In progress
-Last activity: 2026-02-07 — Completed 08-02-PLAN.md
+Last activity: 2026-02-07 — Completed 08-03-PLAN.md
 
-Progress: [██████████████████████████████████████████] 42/44 plans (95%)
+Progress: [███████████████████████████████████████████] 43/44 plans (98%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 42
+- Total plans completed: 43
 - Average duration: 3.6 min
-- Total execution time: 3.53 hours
+- Total execution time: 3.60 hours
 
 **By Phase:**
 
@@ -35,11 +35,11 @@ Progress: [███████████████████████
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
 | 6 - Review & Approval Interface | 5/5 | 59.3 min | 11.86 min |
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
-| 8 - Batch Sync Operations | 2/4 | 9.5 min | 4.75 min |
+| 8 - Batch Sync Operations | 3/4 | 13.6 min | 4.53 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-03 (3.5min), 07-04 (2.1min), 08-01 (5.3min), 08-02 (4.2min)
-- Trend: Phase 8 engine core slightly faster than foundation
+- Last 5 plans: 07-04 (2.1min), 08-01 (5.3min), 08-02 (4.2min), 08-03 (4.1min)
+- Trend: Phase 8 consistent ~4-5min per plan
 
 *Updated after each plan completion*
 
@@ -330,6 +330,13 @@ Recent decisions affecting current work:
 - syncVideoOperations bulk-populated at stage transition (chunked at 500 rows), not lazily per-batch
 - Pause stores real stage in stageResults._pausedAtStage (cleaned on resume)
 
+**From 08-03 execution (2026-02-07):**
+- Server actions return structured {success, data, error} responses (never throw) for consistent client-side error handling
+- SyncPageClient uses router.refresh() after startSync to transition from preview to progress view
+- Per-category video breakdown in add_videos card sorted by count descending, top 10 visible
+- Quota summary uses amber warning styling when estimatedDays > 7 for honest multi-week expectations
+- Progress placeholder for active jobs (full progress UI deferred to 08-04)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -356,8 +363,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07T22:27:48Z
-Stopped at: Completed 08-02-PLAN.md (sync engine core: preview, engine, stages)
+Last session: 2026-02-07T22:35:03Z
+Stopped at: Completed 08-03-PLAN.md (sync server actions and preview UI)
 Resume file: None
 
 ---
@@ -399,3 +406,5 @@ Resume file: None
 **Phase 8 Plan 01 Complete!** Sync foundation: syncJobs table (stage-based state machine with pause/resume, quota tracking, preview data, backup snapshot link) and syncVideoOperations table (per-video tracking for idempotent resume). Extended categories with youtubePlaylistId and playlists with deletedFromYoutubeAt. TypeScript types for full sync workflow (SyncStage, SyncPreview, SyncJobRecord, SyncVideoOperationRecord, STAGE_LABELS). Three YouTube write wrappers (createYouTubePlaylist, addVideoToPlaylist, deleteYouTubePlaylist) using existing callYouTubeAPI + trackQuotaUsage. OAuth scope upgraded to youtube.force-ssl. 2 files created, 2 modified (284 lines total). Ready for Phase 8 Plan 02 (Sync Preview Engine).
 
 **Phase 8 Plan 02 Complete!** Sync engine core: computeSyncPreview queries categories/categoryVideos/playlists for accurate quota cost estimates and multi-day timeline. Engine state machine (createSyncJob, processSyncBatch, pauseSyncJob, resumeSyncJob, getCurrentSyncJob) manages full job lifecycle with stage transitions (pending -> backup -> create_playlists -> add_videos -> delete_playlists -> completed). Three stage executors with idempotent resume: executeCreatePlaylists stores YouTube IDs on categories, executeAddVideos processes syncVideoOperations with 409 conflict handling, executeDeletePlaylists treats 404 as success. All stages pause on 403 quotaExceeded and collect other errors. Bulk syncVideoOperations population at stage transition. 3 files created, 1 modified (921 lines total). Ready for Phase 8 Plan 03 (Server Actions and Sync UI).
+
+**Phase 8 Plan 03 Complete!** Sync server actions and preview UI: 6 server actions for complete sync lifecycle (getSyncPreview, startSync, resumeSync, pauseSync, getSyncProgress, runSyncBatch) with auth checks and structured responses. /sync page at dedicated route with auth-gated server component, client wrapper managing preview-to-progress transitions via useTransition, and SyncPreview component showing 3 stage cards (Create Playlists, Add Videos, Delete Old Playlists) with quota costs, per-category video breakdown, collapsible playlist lists, quota summary with amber warning for multi-week syncs, Watch Later deprecation notice, and Start Sync button. Sync link added to navigation bar with RefreshCw icon. 4 files created, 1 modified (663 lines total). Ready for Phase 8 Plan 04 (Progress UI and Completion Report).
