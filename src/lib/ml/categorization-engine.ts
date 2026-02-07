@@ -61,13 +61,14 @@ export class MLCategorizationEngine {
     });
 
     this.worker.addEventListener('message', (event: MessageEvent) => {
-      const { type, id, embeddings, progress } = event.data;
+      const { type, id, embeddings, progress, error } = event.data;
 
       if (type === 'EMBEDDINGS_RESULT') {
         const pending = this.pendingRequests.get(id);
         if (pending) {
           // Validate embeddings structure
-          if (!Array.isArray(embeddings) || embeddings.length === 0) {
+          if (!embeddings || !Array.isArray(embeddings) || embeddings.length === 0) {
+            console.error('[Engine] Invalid embeddings received:', embeddings);
             pending.reject(new Error('Invalid embeddings received from worker'));
             this.pendingRequests.delete(id);
             return;
@@ -87,6 +88,13 @@ export class MLCategorizationEngine {
           });
 
           pending.resolve(typedEmbeddings);
+          this.pendingRequests.delete(id);
+        }
+      } else if (type === 'ERROR') {
+        console.error('[Engine] Worker error:', error);
+        const pending = this.pendingRequests.get(id);
+        if (pending) {
+          pending.reject(new Error(error || 'Unknown worker error'));
           this.pendingRequests.delete(id);
         }
       } else if (type === 'LOAD_PROGRESS') {
