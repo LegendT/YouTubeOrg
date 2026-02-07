@@ -2,21 +2,22 @@
 
 import { db } from '@/lib/db';
 import { videos, categories, mlCategorizations } from '@/lib/db/schema';
-import { MLCategorizationEngine } from '@/lib/ml/categorization-engine';
-import type { RunMLCategorizationResult, MLCategorizationResult } from '@/types/ml';
+import type { RunMLCategorizationResult, MLCategorizationResult, CategorizationResult } from '@/types/ml';
 import { eq, inArray } from 'drizzle-orm';
+import type { Category } from '@/types/categories';
+import type { VideoCardData } from '@/types/videos';
 
 /**
- * Run ML categorization on all uncategorized videos.
- * Note: Progress updates happen client-side (server actions don't stream).
- *
- * @returns Result with success status and categorization counts
+ * Fetch videos and categories for client-side categorization.
+ * Returns data needed for MLCategorizationEngine.
  */
-export async function runMLCategorization(): Promise<RunMLCategorizationResult> {
+export async function getDataForCategorization(): Promise<{
+  success: boolean;
+  error?: string;
+  videos?: VideoCardData[];
+  categories?: Category[];
+}> {
   try {
-    // Step 1: Fetch all videos that need categorization
-    // For Phase 5: categorize all videos (no filter)
-    // For Phase 6: filter to Watch Later or uncategorized videos
     const videosToProcess = await db
       .select({
         id: videos.id,
@@ -29,17 +30,6 @@ export async function runMLCategorization(): Promise<RunMLCategorizationResult> 
       })
       .from(videos);
 
-    if (videosToProcess.length === 0) {
-      return {
-        success: true,
-        categorizedCount: 0,
-        highConfidenceCount: 0,
-        mediumConfidenceCount: 0,
-        lowConfidenceCount: 0,
-      };
-    }
-
-    // Step 2: Fetch all categories (exclude protected "Uncategorized")
     const allCategories = await db
       .select()
       .from(categories)
@@ -52,24 +42,43 @@ export async function runMLCategorization(): Promise<RunMLCategorizationResult> 
       };
     }
 
-    // Step 3: Run ML categorization engine
-    // Note: Progress callbacks don't work in server actions (no streaming)
-    // Progress will be tracked client-side in Plan 04
-    const engine = new MLCategorizationEngine();
-
-    const results = await engine.categorizeVideos(
-      videosToProcess.map((v) => ({
+    return {
+      success: true,
+      videos: videosToProcess.map((v) => ({
         ...v,
         categoryNames: [], // Not needed for categorization
       })),
-      allCategories
-    );
+      categories: allCategories,
+    };
+  } catch (error) {
+    console.error('[getDataForCategorization] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
 
-    engine.terminate();
+/**
+ * Persist ML categorization results to database.
+ * Called from client after ML engine completes.
+ */
+export async function saveCategorizationResults(
+  results: CategorizationResult[]
+): Promise<RunMLCategorizationResult> {
+  try {
+    if (results.length === 0) {
+      return {
+        success: true,
+        categorizedCount: 0,
+        highConfidenceCount: 0,
+        mediumConfidenceCount: 0,
+        lowConfidenceCount: 0,
+      };
+    }
 
-    // Step 4: Persist results to database
     // Delete existing ML categorizations for these videos (re-run scenario)
-    const videoIds = videosToProcess.map((v) => v.id);
+    const videoIds = results.map((r) => r.videoId);
     await db
       .delete(mlCategorizations)
       .where(inArray(mlCategorizations.videoId, videoIds));
@@ -85,7 +94,7 @@ export async function runMLCategorization(): Promise<RunMLCategorizationResult> 
 
     await db.insert(mlCategorizations).values(categorizationRecords);
 
-    // Step 5: Calculate statistics
+    // Calculate statistics
     const highCount = results.filter((r) => r.confidence === 'HIGH').length;
     const mediumCount = results.filter((r) => r.confidence === 'MEDIUM').length;
     const lowCount = results.filter((r) => r.confidence === 'LOW').length;
@@ -98,7 +107,7 @@ export async function runMLCategorization(): Promise<RunMLCategorizationResult> 
       lowConfidenceCount: lowCount,
     };
   } catch (error) {
-    console.error('[runMLCategorization] Error:', error);
+    console.error('[saveCategorizationResults] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
