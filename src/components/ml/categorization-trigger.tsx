@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { runMLCategorization } from '@/app/actions/ml-categorization';
+import { getDataForCategorization, saveCategorizationResults } from '@/app/actions/ml-categorization';
+import { MLCategorizationEngine } from '@/lib/ml/categorization-engine';
 import type { RunMLCategorizationResult } from '@/types/ml';
 
 interface CategorizationTriggerProps {
@@ -17,24 +18,50 @@ export function CategorizationTrigger({ onProgressUpdate, onComplete }: Categori
     setIsRunning(true);
     setError(null);
 
+    let engine: MLCategorizationEngine | null = null;
+
     try {
-      // Note: Server actions don't support progress streaming
-      // Progress will be simulated/estimated client-side or moved to client-side engine in future
-      onProgressUpdate?.(0, 100, 0, 'Starting categorization...');
+      // Step 1: Fetch data from server
+      onProgressUpdate?.(0, 100, 0, 'Loading data...');
+      const data = await getDataForCategorization();
 
-      const result = await runMLCategorization();
+      if (!data.success || !data.videos || !data.categories) {
+        setError(data.error || 'Failed to load data');
+        onComplete?.({ success: false, error: data.error });
+        return;
+      }
 
-      if (!result.success) {
-        setError(result.error || 'Categorization failed');
+      // Step 2: Run ML categorization client-side
+      engine = new MLCategorizationEngine();
+
+      const results = await engine.categorizeVideos(
+        data.videos,
+        data.categories,
+        (current, total, percentage, status) => {
+          onProgressUpdate?.(current, total, percentage, status);
+        }
+      );
+
+      // Step 3: Save results to database
+      onProgressUpdate?.(100, 100, 95, 'Saving results...');
+      const saveResult = await saveCategorizationResults(results);
+
+      if (!saveResult.success) {
+        setError(saveResult.error || 'Failed to save results');
       } else {
         onProgressUpdate?.(100, 100, 100, 'Complete');
       }
 
-      onComplete?.(result);
+      onComplete?.(saveResult);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
+      onComplete?.({ success: false, error: errorMessage });
     } finally {
+      // Cleanup: terminate worker
+      if (engine) {
+        engine.terminate();
+      }
       setIsRunning(false);
     }
   };

@@ -1,6 +1,6 @@
 import type { ConfidenceLevel } from '@/lib/ml/confidence';
 
-/** Result of ML categorization for a single video */
+/** Result of ML categorization for a single video (database record) */
 export interface MLCategorizationResult {
   id: number;
   videoId: number;
@@ -12,6 +12,14 @@ export interface MLCategorizationResult {
   acceptedAt: Date | null;
   rejectedAt: Date | null;
   manualCategoryId: number | null;
+}
+
+/** Categorization result from ML engine (before database persistence) */
+export interface CategorizationResult {
+  videoId: number;
+  suggestedCategoryId: number;
+  confidence: ConfidenceLevel;
+  similarityScore: number; // 0-100
 }
 
 /** Progress update during batch categorization */
