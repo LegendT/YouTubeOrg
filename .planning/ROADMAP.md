@@ -195,10 +195,13 @@ Plans:
   4. System maintains immutable log showing all destructive operations (timestamp, playlist ID, action)
   5. User can undo pending changes before syncing to YouTube
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 07-01-PLAN.md — Database schema (operationLog + backupSnapshots), types, and core backup/restore logic
+- [ ] 07-02-PLAN.md — Server actions (backup CRUD, operation log, pending changes) and download route handler
+- [ ] 07-03-PLAN.md — Safety dashboard UI page with backup list, operation log, pending changes, and navbar link
+- [ ] 07-04-PLAN.md — Wire pre-operation backups into destructive actions and end-to-end verification
 
 ---
 
@@ -238,7 +241,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
 | 5. ML Categorization Engine | 4/4 | Complete | 2026-02-07 |
 | 6. Review & Approval Interface | 5/5 | Complete | 2026-02-07 |
-| 7. Safety & Archive System | 0/TBD | Not started | - |
+| 7. Safety & Archive System | 0/4 | Planned | - |
 | 8. Batch Sync Operations | 0/TBD | Not started | - |
 
 ---
