@@ -221,10 +221,13 @@ Plans:
   6. System handles API errors gracefully with retry logic (exponential backoff)
   7. User sees completion confirmation showing success/failure counts
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 08-01-PLAN.md — Database schema (syncJobs, syncVideoOperations), types, YouTube write operations, OAuth scope upgrade
+- [ ] 08-02-PLAN.md — Sync engine state machine, stage executors, and preview computation
+- [ ] 08-03-PLAN.md — Server actions for sync control and /sync preview page
+- [ ] 08-04-PLAN.md — Sync progress display, completion report, navigation link, and end-to-end verification
 
 ---
 
@@ -242,7 +245,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. ML Categorization Engine | 4/4 | Complete | 2026-02-07 |
 | 6. Review & Approval Interface | 5/5 | Complete | 2026-02-07 |
 | 7. Safety & Archive System | 4/4 | Complete | 2026-02-07 |
-| 8. Batch Sync Operations | 0/TBD | Not started | - |
+| 8. Batch Sync Operations | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
