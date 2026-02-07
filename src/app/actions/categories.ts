@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { requireAuth } from '@/lib/auth/guard';
 import { db } from '@/lib/db';
 import {
   categories,
@@ -199,6 +200,9 @@ export async function renameCategory(
  * Returns undo data to allow reversal.
  */
 export async function deleteCategory(categoryId: number): Promise<DeleteCategoryResult> {
+  const auth = await requireAuth()
+  if (!auth.authenticated) return { success: false, error: auth.error }
+
   try {
     // Check category exists
     const [category] = await db
@@ -410,6 +414,9 @@ export async function mergeCategories(
   sourceCategoryIds: number[],
   targetName: string
 ): Promise<MergeCategoriesResult> {
+  const auth = await requireAuth()
+  if (!auth.authenticated) return { success: false, error: auth.error }
+
   try {
     if (sourceCategoryIds.length < 2) {
       return { success: false, error: 'At least 2 categories are required for merge' };

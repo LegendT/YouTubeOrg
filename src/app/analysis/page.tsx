@@ -1,5 +1,3 @@
-import { getServerSession } from '@/lib/auth/session'
-import { redirect } from 'next/navigation'
 import { AnalysisDashboard } from '@/components/analysis/analysis-dashboard'
 import { AnalysisRunner } from '@/components/analysis/analysis-loading'
 import { RunAnalysisButton } from '@/components/analysis/run-analysis-button'
@@ -13,13 +11,6 @@ import {
 import { getCategories } from '@/app/actions/categories'
 
 export default async function AnalysisPage() {
-  // Check authentication
-  const authSession = await getServerSession()
-
-  if (!authSession?.access_token || authSession?.error === 'RefreshAccessTokenError') {
-    redirect('/api/auth/signin')
-  }
-
   const [proposalsResult, summary, staleness, allPlaylists, session] =
     await Promise.all([
       getProposals(),

@@ -3,6 +3,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
+import { requireAuth } from '@/lib/auth/guard';
 import { db } from '@/lib/db';
 import { backupSnapshots } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -88,6 +89,9 @@ export async function restoreBackup(
     }
   | { success: false; error: string }
 > {
+  const auth = await requireAuth()
+  if (!auth.authenticated) return { success: false, error: auth.error }
+
   try {
     const result = await restoreFromSnapshot(snapshotId);
 
@@ -136,6 +140,9 @@ export async function restoreBackup(
 export async function deleteBackup(
   snapshotId: number
 ): Promise<{ success: true } | { success: false; error: string }> {
+  const auth = await requireAuth()
+  if (!auth.authenticated) return { success: false, error: auth.error }
+
   try {
     // Look up snapshot
     const [snapshot] = await db
