@@ -12,6 +12,7 @@ export const playlists = pgTable('playlists', {
   lastFetched: timestamp('last_fetched').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedFromYoutubeAt: timestamp('deleted_from_youtube_at'), // Phase 8: tracks when old playlists were deleted during sync for idempotent resume
 });
 
 // Videos table - stores YouTube video metadata with ETag support
