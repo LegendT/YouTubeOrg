@@ -232,9 +232,20 @@ export class MLCategorizationEngine {
       }
 
       // Step 2c: Categorize each video in batch
+      console.log(`[Engine] Starting categorization for ${batch.length} videos`);
       for (const video of batch) {
-        const videoEmbedding = cachedEmbeddings.get(video.id)!;
+        console.log(`[Engine] Categorizing video ${video.id}`);
+        const videoEmbedding = cachedEmbeddings.get(video.id);
+        console.log(`[Engine] Retrieved embedding for video ${video.id}:`, videoEmbedding ? `${videoEmbedding.length} dims` : 'undefined');
+
+        if (!videoEmbedding) {
+          console.error(`[Engine] No embedding found for video ${video.id}!`);
+          continue;
+        }
+
+        console.log(`[Engine] Calling categorizeWithConfidence for video ${video.id}`);
         const match = categorizeWithConfidence(videoEmbedding, categoryEmbeddings);
+        console.log(`[Engine] Categorization result for video ${video.id}:`, match);
 
         // Skip if no match (shouldn't happen since we pre-computed categories)
         if (!match) {
