@@ -123,18 +123,33 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         // Always treat output as a tensor with shape [batch_size, embedding_dim]
         // Extract the raw data array
         let data: number[];
+
+        console.log('[Worker] Output type:', Array.isArray(output) ? 'array' : 'tensor', 'length:', Array.isArray(output) ? output.length : 'N/A');
+
         if (Array.isArray(output)) {
           // If output is an array of tensors, flatten them
-          data = output.flatMap((tensor) => Array.from(tensor.data as number[]));
+          console.log('[Worker] Processing array of', output.length, 'tensors');
+          data = output.flatMap((tensor, i) => {
+            if (!tensor || !tensor.data) {
+              console.error('[Worker] Tensor', i, 'is invalid:', tensor);
+              throw new Error(`Invalid tensor at index ${i}`);
+            }
+            return Array.from(tensor.data as number[]);
+          });
         } else {
           // Single tensor - extract data
+          if (!output || !output.data) {
+            console.error('[Worker] Output tensor is invalid:', output);
+            throw new Error('Invalid output tensor from model');
+          }
+          console.log('[Worker] Processing single tensor with data length:', (output.data as any).length);
           data = Array.from(output.data as number[]);
         }
 
         const batchSize = texts.length;
         const expectedLength = batchSize * EMBEDDING_DIM;
 
-        console.log('[Worker] Data length:', data.length, 'Expected:', expectedLength, 'Batch size:', batchSize);
+        console.log('[Worker] Extracted data length:', data.length, 'Expected:', expectedLength, 'Batch size:', batchSize);
 
         // Validate data length
         if (data.length !== expectedLength) {
