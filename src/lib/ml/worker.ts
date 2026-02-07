@@ -16,15 +16,20 @@
 import { pipeline, env, type FeatureExtractionPipeline } from '@huggingface/transformers';
 
 // Configure Transformers.js for browser environment
-// Models are loaded from Hugging Face CDN and cached via Cache API
+// Use JSDelivr CDN as fallback for better reliability
+env.backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/@xenova/transformers@latest/dist/';
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
+env.useFS = false;
+env.useFSCache = false;
 
 console.log('[Worker] Transformers.js environment configured:', {
   allowLocalModels: env.allowLocalModels,
   allowRemoteModels: env.allowRemoteModels,
-  useBrowserCache: env.useBrowserCache
+  useBrowserCache: env.useBrowserCache,
+  useFS: env.useFS,
+  wasmPaths: env.backends.onnx.wasm.wasmPaths
 });
 
 /**
