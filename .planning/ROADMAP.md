@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Video Display & Organization** - Virtualized UI for browsing/searching videos
 - [x] **Phase 5: ML Categorization Engine** - Auto-categorize Watch Later with Transformers.js
 - [x] **Phase 6: Review & Approval Interface** - Batch review ML suggestions with keyboard shortcuts
-- [ ] **Phase 7: Safety & Archive System** - Backup mechanism before destructive operations
+- [x] **Phase 7: Safety & Archive System** - Backup mechanism before destructive operations
 - [ ] **Phase 8: Batch Sync Operations** - Quota-aware sync to YouTube with checkpoint/resume
 
 ## Phase Details
@@ -198,10 +198,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Database schema (operationLog + backupSnapshots), types, and core backup/restore logic
-- [ ] 07-02-PLAN.md — Server actions (backup CRUD, operation log, pending changes) and download route handler
-- [ ] 07-03-PLAN.md — Safety dashboard UI page with backup list, operation log, pending changes, and navbar link
-- [ ] 07-04-PLAN.md — Wire pre-operation backups into destructive actions and end-to-end verification
+- [x] 07-01-PLAN.md — Database schema (operationLog + backupSnapshots), types, and core backup/restore logic
+- [x] 07-02-PLAN.md — Server actions (backup CRUD, operation log, pending changes) and download route handler
+- [x] 07-03-PLAN.md — Safety dashboard UI page with backup list, operation log, pending changes, and navbar link
+- [x] 07-04-PLAN.md — Wire pre-operation backups into destructive actions and end-to-end verification
 
 ---
 
@@ -241,9 +241,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
 | 5. ML Categorization Engine | 4/4 | Complete | 2026-02-07 |
 | 6. Review & Approval Interface | 5/5 | Complete | 2026-02-07 |
-| 7. Safety & Archive System | 0/4 | Planned | - |
+| 7. Safety & Archive System | 4/4 | Complete | 2026-02-07 |
 | 8. Batch Sync Operations | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-07 (Phase 6 complete: 5/5 plans executed, verified)*
+*Last updated: 2026-02-07 (Phase 7 complete: 4/4 plans executed, verified)*

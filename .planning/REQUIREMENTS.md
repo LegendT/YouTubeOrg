@@ -59,12 +59,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Safety & Archives
 
-- [ ] **SAFE-01**: System exports playlist metadata to JSON backup
-- [ ] **SAFE-02**: System automatically archives playlists before any delete operation
-- [ ] **SAFE-03**: User can restore playlists from archive
+- [x] **SAFE-01**: System exports playlist metadata to JSON backup
+- [x] **SAFE-02**: System automatically archives playlists before any delete operation
+- [x] **SAFE-03**: User can restore playlists from archive
 - [ ] **SAFE-04**: System detects duplicate videos across playlists
-- [ ] **SAFE-05**: System maintains immutable operation log (timestamps, playlist IDs, actions)
-- [ ] **SAFE-06**: User can undo changes before syncing to YouTube
+- [x] **SAFE-05**: System maintains immutable operation log (timestamps, playlist IDs, actions)
+- [x] **SAFE-06**: User can undo changes before syncing to YouTube
 
 ### YouTube Sync
 
@@ -191,11 +191,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-07 | Phase 6 | Complete |
 | UI-08 | Phase 6 | Complete |
 | UI-09 | Phase 6 | Complete |
-| SAFE-01 | Phase 7 | Pending |
-| SAFE-02 | Phase 7 | Pending |
-| SAFE-03 | Phase 7 | Pending |
-| SAFE-05 | Phase 7 | Pending |
-| SAFE-06 | Phase 7 | Pending |
+| SAFE-01 | Phase 7 | Complete |
+| SAFE-02 | Phase 7 | Complete |
+| SAFE-03 | Phase 7 | Complete |
+| SAFE-05 | Phase 7 | Complete |
+| SAFE-06 | Phase 7 | Complete |
 | SYNC-01 | Phase 8 | Pending |
 | SYNC-02 | Phase 8 | Pending |
 | SYNC-03 | Phase 8 | Pending |
@@ -217,4 +217,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-07 after Phase 6 completion*
+*Last updated: 2026-02-07 after Phase 7 completion*
