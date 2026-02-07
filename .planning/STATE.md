@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 6 - Review & Approval Interface
+**Current focus:** Phase 7 - Safety & Archive System
 
 ## Current Position
 
-Phase: 6 of 8 (Review & Approval Interface)
-Plan: 4 of 5
-Status: In progress
-Last activity: 2026-02-07 — Completed 06-04-PLAN.md
+Phase: 7 of 8 (Safety & Archive System)
+Plan: 0 of TBD
+Status: Not started
+Last activity: 2026-02-07 — Phase 6 complete (verified)
 
-Progress: [████████████████████████████████████] 35/36 plans (97%)
+Progress: [████████████████████████████████████████] 36/36 plans (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 35
+- Total plans completed: 36
 - Average duration: 3.7 min
-- Total execution time: 2.24 hours
+- Total execution time: 2.99 hours
 
 **By Phase:**
 
@@ -33,11 +33,11 @@ Progress: [███████████████████████
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
-| 6 - Review & Approval Interface | 4/5 | 14.3 min | 3.58 min |
+| 6 - Review & Approval Interface | 5/5 | 59.3 min | 11.86 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (4min), 06-01 (3.8min), 06-02 (4min), 06-03 (3min), 06-04 (3.5min)
-- Trend: Phase 6 wave 3 orchestrator plan completing in 3.5 min, consistent with component plans
+- Last 5 plans: 06-01 (3.8min), 06-02 (4min), 06-03 (3min), 06-04 (3.5min), 06-05 (45min)
+- Trend: Phase 6 plan 05 was extended checkpoint plan with iterative bug fixes and ML calibration
 
 *Updated after each plan completion*
 
@@ -278,6 +278,18 @@ Recent decisions affecting current work:
 - Grid-to-modal orchestration: Tab cycles focusedIndex, Enter opens modal, modal navigation syncs both states
 - Empty state in Server Component redirects to prerequisite page (/ml-categorisation) when no data
 
+**From 06-05 execution (2026-02-07):**
+- useOptimistic base state must be updated inside startTransition (setResults) to prevent silent revert
+- advanceToNext must be called BEFORE startTransition for instant navigation feel
+- Optimistic reducer must clear opposite state (accept clears rejectedAt, reject clears acceptedAt)
+- Removed server action fetch from modal; uses ReviewResult from props to avoid Next.js action serialization blocking
+- DB connection pool increased from max 1 to max 3 to handle concurrent server actions
+- getReviewStats consolidated from 6 queries to 1 using PostgreSQL FILTER(WHERE) syntax
+- Confidence thresholds calibrated to actual data distribution: HIGH ≥50%, MEDIUM ≥35% (was 75%/60%)
+- Hybrid scoring: channel-name Jaccard boost (max 0.35) added alongside cosine similarity for Topic/VEVO channels
+- Fixed height h-48 thumbnails prevent grid card overlap on wide screens (ROW_HEIGHT 380→340)
+- Prefer mqdefault (320x180) thumbnails over DB-stored default (120x90)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -304,8 +316,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07T19:24:46Z
-Stopped at: Completed 06-04-PLAN.md (Review Page Orchestrator)
+Last session: 2026-02-07
+Stopped at: Phase 6 complete — all 5 plans executed, verified 6/6 must-haves
 Resume file: None
 
 ---
@@ -333,3 +345,5 @@ Resume file: None
 **Phase 6 Plan 03 Complete!** Review modal and keyboard shortcuts: ReviewModal with Radix Dialog (max-w-4xl, controlled open state), 4 keyboard shortcuts via react-hotkeys-hook (A accept, R reject, Left/Right navigate), YouTube embed iframe for video preview, lazy-loaded video details via getVideoReviewDetail, ML suggestion card with confidence badge, accept/reject action buttons. KeyboardHints floating overlay with 6 shortcut entries using kbd styling. 2 files created (281 lines total). Ready for Phase 6 Plan 04.
 
 **Phase 6 Plan 04 Complete!** Review page orchestrator: Server Component page at /ml-review loading initial data via Promise.all (getReviewData + getReviewStats), client orchestrator wiring ReviewGrid/ReviewModal/ReviewProgress/KeyboardHints with shared state, Tab/Shift+Tab keyboard grid navigation with wrap-around (disabled when modal open), Enter opens modal for focused card, modal navigation syncs selectedVideoId and gridFocusIndex, placeholder accept/reject handlers for Plan 06-05, empty state with link to ML categorisation. 2 files created (188 lines total). Ready for Phase 6 Plan 05 (Advanced Review Features).
+
+**Phase 6 Complete!** All 5 plans executed and verified (6/6 must-haves). Full keyboard-driven review workflow at /ml-review: virtualized 3-column grid with confidence badges, review modal with A/R/arrow shortcuts, Tab/Enter grid navigation, useOptimistic + useTransition for instant feedback, auto-advance after accept/reject, confidence filtering (All/High/Medium/Low), review status filtering (pending/rejected), CategoryPickerDialog for manual recategorisation, navbar link, consolidated getReviewStats (6→1 query), DB pool max 3, and calibrated ML confidence thresholds (HIGH ≥50%, MEDIUM ≥35%) with hybrid channel-name Jaccard boost scoring. All 7 Phase 6 requirements satisfied (ML-05..08, UI-07..09). Ready for Phase 7 (Safety & Archive System).

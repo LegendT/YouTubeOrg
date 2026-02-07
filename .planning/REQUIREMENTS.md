@@ -52,10 +52,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ML-02**: System assigns confidence scores to ML categorizations (HIGH/MEDIUM/LOW)
 - [x] **ML-03**: System processes videos in batches for performance (32 videos at a time)
 - [x] **ML-04**: System caches video embeddings to avoid recomputation
-- [ ] **ML-05**: User can review ML-suggested categories before accepting
-- [ ] **ML-06**: System highlights low-confidence categorizations for manual review
-- [ ] **ML-07**: User can accept ML suggestion with single click
-- [ ] **ML-08**: User can reject ML suggestion and manually categorize
+- [x] **ML-05**: User can review ML-suggested categories before accepting
+- [x] **ML-06**: System highlights low-confidence categorizations for manual review
+- [x] **ML-07**: User can accept ML suggestion with single click
+- [x] **ML-08**: User can reject ML suggestion and manually categorize
 
 ### Safety & Archives
 
@@ -89,9 +89,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UI-04**: User can navigate sync progress view
 - [ ] **UI-05**: System renders 4,000+ video list without UI freeze (react-window virtualization)
 - [ ] **UI-06**: System lazy-loads thumbnails as user scrolls
-- [ ] **UI-07**: User can navigate review interface with keyboard shortcuts (arrow keys, enter)
-- [ ] **UI-08**: User can accept/reject suggestions with keyboard (a/r keys)
-- [ ] **UI-09**: System provides visual feedback for all actions (loading states, success/error)
+- [x] **UI-07**: User can navigate review interface with keyboard shortcuts (arrow keys, enter)
+- [x] **UI-08**: User can accept/reject suggestions with keyboard (a/r keys)
+- [x] **UI-09**: System provides visual feedback for all actions (loading states, success/error)
 
 ## v2 Requirements
 
@@ -184,13 +184,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ML-02 | Phase 5 | Complete |
 | ML-03 | Phase 5 | Complete |
 | ML-04 | Phase 5 | Complete |
-| ML-05 | Phase 6 | Pending |
-| ML-06 | Phase 6 | Pending |
-| ML-07 | Phase 6 | Pending |
-| ML-08 | Phase 6 | Pending |
-| UI-07 | Phase 6 | Pending |
-| UI-08 | Phase 6 | Pending |
-| UI-09 | Phase 6 | Pending |
+| ML-05 | Phase 6 | Complete |
+| ML-06 | Phase 6 | Complete |
+| ML-07 | Phase 6 | Complete |
+| ML-08 | Phase 6 | Complete |
+| UI-07 | Phase 6 | Complete |
+| UI-08 | Phase 6 | Complete |
+| UI-09 | Phase 6 | Complete |
 | SAFE-01 | Phase 7 | Pending |
 | SAFE-02 | Phase 7 | Pending |
 | SAFE-03 | Phase 7 | Pending |
@@ -217,4 +217,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 after roadmap creation*
+*Last updated: 2026-02-07 after Phase 6 completion*
