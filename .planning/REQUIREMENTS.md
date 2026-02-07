@@ -9,19 +9,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & API Integration
 
-- [ ] **AUTH-01**: User can authenticate with YouTube via OAuth 2.0
-- [ ] **AUTH-02**: System maintains valid OAuth tokens throughout long operations
-- [ ] **AUTH-03**: System refreshes access tokens proactively before expiration
-- [ ] **AUTH-04**: User can re-authenticate if tokens are revoked
+- [x] **AUTH-01**: User can authenticate with YouTube via OAuth 2.0
+- [x] **AUTH-02**: System maintains valid OAuth tokens throughout long operations
+- [x] **AUTH-03**: System refreshes access tokens proactively before expiration
+- [x] **AUTH-04**: User can re-authenticate if tokens are revoked
 
 ### Data Management & Caching
 
-- [ ] **DATA-01**: System fetches all existing playlists from YouTube (87 playlists)
-- [ ] **DATA-02**: System fetches Watch Later playlist contents (4,000 videos)
-- [ ] **DATA-03**: System retrieves video metadata (title, thumbnail, description, channel, duration)
-- [ ] **DATA-04**: System caches YouTube data locally with ETag-based conditional requests
-- [ ] **DATA-05**: System tracks API quota usage (displays remaining daily quota)
-- [ ] **DATA-06**: System handles YouTube API rate limits gracefully (exponential backoff)
+- [x] **DATA-01**: System fetches all existing playlists from YouTube (87 playlists)
+- [x] **DATA-02**: System fetches Watch Later playlist contents (4,000 videos)
+- [x] **DATA-03**: System retrieves video metadata (title, thumbnail, description, channel, duration)
+- [x] **DATA-04**: System caches YouTube data locally with ETag-based conditional requests
+- [x] **DATA-05**: System tracks API quota usage (displays remaining daily quota)
+- [x] **DATA-06**: System handles YouTube API rate limits gracefully (exponential backoff)
 
 ### Category Management
 
@@ -29,22 +29,22 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CAT-02**: User can create new categories
 - [x] **CAT-03**: User can rename existing categories
 - [x] **CAT-04**: User can delete categories
-- [ ] **CAT-05**: System analyzes 87 playlists and proposes consolidation to ~25-35 categories
-- [ ] **CAT-06**: System shows overlap analysis (duplicate videos across playlists)
-- [ ] **CAT-07**: User can approve proposed category consolidations
-- [ ] **CAT-08**: User can reject proposed consolidations
-- [ ] **CAT-09**: User can manually adjust proposed consolidations (merge different playlists)
+- [x] **CAT-05**: System analyzes 87 playlists and proposes consolidation to ~25-35 categories
+- [x] **CAT-06**: System shows overlap analysis (duplicate videos across playlists)
+- [x] **CAT-07**: User can approve proposed category consolidations
+- [x] **CAT-08**: User can reject proposed consolidations
+- [x] **CAT-09**: User can manually adjust proposed consolidations (merge different playlists)
 - [x] **CAT-10**: User can manually merge two categories
 
 ### Video Organization
 
-- [ ] **VID-01**: User can view videos with thumbnails, titles, and metadata
-- [ ] **VID-02**: User can manually move videos between categories
-- [ ] **VID-03**: User can select multiple videos for batch operations
-- [ ] **VID-04**: User can search videos by title or channel name
-- [ ] **VID-05**: User can filter videos by category
-- [ ] **VID-06**: User can preview video by clicking through to YouTube
-- [ ] **VID-07**: User can view video description and additional metadata
+- [x] **VID-01**: User can view videos with thumbnails, titles, and metadata
+- [x] **VID-02**: User can manually move videos between categories
+- [x] **VID-03**: User can select multiple videos for batch operations
+- [x] **VID-04**: User can search videos by title or channel name
+- [x] **VID-05**: User can filter videos by category
+- [x] **VID-06**: User can preview video by clicking through to YouTube
+- [x] **VID-07**: User can view video description and additional metadata
 
 ### ML Categorization
 
@@ -62,33 +62,33 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SAFE-01**: System exports playlist metadata to JSON backup
 - [x] **SAFE-02**: System automatically archives playlists before any delete operation
 - [x] **SAFE-03**: User can restore playlists from archive
-- [ ] **SAFE-04**: System detects duplicate videos across playlists
+- [x] **SAFE-04**: System detects duplicate videos across playlists
 - [x] **SAFE-05**: System maintains immutable operation log (timestamps, playlist IDs, actions)
 - [x] **SAFE-06**: User can undo changes before syncing to YouTube
 
 ### YouTube Sync
 
-- [ ] **SYNC-01**: User can preview changes before syncing to YouTube
-- [ ] **SYNC-02**: System creates new playlists on YouTube with approved structure
-- [ ] **SYNC-03**: System adds videos to playlists in batches
-- [ ] **SYNC-04**: System removes videos from old playlists
-- [ ] **SYNC-05**: System deletes old playlists after archiving
-- [ ] **SYNC-06**: System implements multi-day sync strategy (quota-aware scheduling)
-- [ ] **SYNC-07**: System tracks sync progress with checkpoint/resume capability
-- [ ] **SYNC-08**: System journals all operations before execution (pending/complete/failed states)
-- [ ] **SYNC-09**: System resumes sync from last checkpoint after failure
-- [ ] **SYNC-10**: System displays real-time progress (videos processed, percentage complete)
-- [ ] **SYNC-11**: System handles quota exhaustion gracefully (pauses until next day)
-- [ ] **SYNC-12**: System retries failed operations with exponential backoff
+- [x] **SYNC-01**: User can preview changes before syncing to YouTube
+- [x] **SYNC-02**: System creates new playlists on YouTube with approved structure
+- [x] **SYNC-03**: System adds videos to playlists in batches
+- [~] **SYNC-04**: System removes videos from old playlists *(partial — YouTube deprecated Watch Later write access in 2020; old non-WL playlists are deleted, not emptied)*
+- [x] **SYNC-05**: System deletes old playlists after archiving
+- [x] **SYNC-06**: System implements multi-day sync strategy (quota-aware scheduling)
+- [x] **SYNC-07**: System tracks sync progress with checkpoint/resume capability
+- [x] **SYNC-08**: System journals all operations before execution (pending/complete/failed states)
+- [x] **SYNC-09**: System resumes sync from last checkpoint after failure
+- [x] **SYNC-10**: System displays real-time progress (videos processed, percentage complete)
+- [x] **SYNC-11**: System handles quota exhaustion gracefully (pauses until next day)
+- [x] **SYNC-12**: System retries failed operations with exponential backoff
 
 ### User Interface & Performance
 
-- [ ] **UI-01**: User sees dashboard with Watch Later count and categorization progress
-- [ ] **UI-02**: User can navigate category management interface
-- [ ] **UI-03**: User can navigate review interface (category-by-category view)
-- [ ] **UI-04**: User can navigate sync progress view
-- [ ] **UI-05**: System renders 4,000+ video list without UI freeze (react-window virtualization)
-- [ ] **UI-06**: System lazy-loads thumbnails as user scrolls
+- [x] **UI-01**: User sees dashboard with Watch Later count and categorization progress
+- [x] **UI-02**: User can navigate category management interface
+- [x] **UI-03**: User can navigate review interface (category-by-category view)
+- [x] **UI-04**: User can navigate sync progress view
+- [x] **UI-05**: System renders 4,000+ video list without UI freeze (react-window virtualization)
+- [x] **UI-06**: System lazy-loads thumbnails as user scrolls
 - [x] **UI-07**: User can navigate review interface with keyboard shortcuts (arrow keys, enter)
 - [x] **UI-08**: User can accept/reject suggestions with keyboard (a/r keys)
 - [x] **UI-09**: System provides visual feedback for all actions (loading states, success/error)
@@ -147,39 +147,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| DATA-06 | Phase 1 | Pending |
-| UI-01 | Phase 1 | Pending |
-| CAT-05 | Phase 2 | Pending |
-| CAT-06 | Phase 2 | Pending |
-| CAT-07 | Phase 2 | Pending |
-| CAT-08 | Phase 2 | Pending |
-| CAT-09 | Phase 2 | Pending |
-| SAFE-04 | Phase 2 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
+| DATA-06 | Phase 1 | Complete |
+| UI-01 | Phase 1 | Complete |
+| CAT-05 | Phase 2 | Complete |
+| CAT-06 | Phase 2 | Complete |
+| CAT-07 | Phase 2 | Complete |
+| CAT-08 | Phase 2 | Complete |
+| CAT-09 | Phase 2 | Complete |
+| SAFE-04 | Phase 2 | Complete |
 | CAT-01 | Phase 3 | Complete |
 | CAT-02 | Phase 3 | Complete |
 | CAT-03 | Phase 3 | Complete |
 | CAT-04 | Phase 3 | Complete |
 | CAT-10 | Phase 3 | Complete |
-| VID-01 | Phase 4 | Pending |
-| VID-02 | Phase 4 | Pending |
-| VID-03 | Phase 4 | Pending |
-| VID-04 | Phase 4 | Pending |
-| VID-05 | Phase 4 | Pending |
-| VID-06 | Phase 4 | Pending |
-| VID-07 | Phase 4 | Pending |
-| UI-02 | Phase 4 | Pending |
-| UI-03 | Phase 4 | Pending |
-| UI-05 | Phase 4 | Pending |
-| UI-06 | Phase 4 | Pending |
+| VID-01 | Phase 4 | Complete |
+| VID-02 | Phase 4 | Complete |
+| VID-03 | Phase 4 | Complete |
+| VID-04 | Phase 4 | Complete |
+| VID-05 | Phase 4 | Complete |
+| VID-06 | Phase 4 | Complete |
+| VID-07 | Phase 4 | Complete |
+| UI-02 | Phase 4 | Complete |
+| UI-03 | Phase 4 | Complete |
+| UI-05 | Phase 4 | Complete |
+| UI-06 | Phase 4 | Complete |
 | ML-01 | Phase 5 | Complete |
 | ML-02 | Phase 5 | Complete |
 | ML-03 | Phase 5 | Complete |
@@ -196,19 +196,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 7 | Complete |
 | SAFE-05 | Phase 7 | Complete |
 | SAFE-06 | Phase 7 | Complete |
-| SYNC-01 | Phase 8 | Pending |
-| SYNC-02 | Phase 8 | Pending |
-| SYNC-03 | Phase 8 | Pending |
-| SYNC-04 | Phase 8 | Pending |
-| SYNC-05 | Phase 8 | Pending |
-| SYNC-06 | Phase 8 | Pending |
-| SYNC-07 | Phase 8 | Pending |
-| SYNC-08 | Phase 8 | Pending |
-| SYNC-09 | Phase 8 | Pending |
-| SYNC-10 | Phase 8 | Pending |
-| SYNC-11 | Phase 8 | Pending |
-| SYNC-12 | Phase 8 | Pending |
-| UI-04 | Phase 8 | Pending |
+| SYNC-01 | Phase 8 | Complete |
+| SYNC-02 | Phase 8 | Complete |
+| SYNC-03 | Phase 8 | Complete |
+| SYNC-04 | Phase 8 | Partial |
+| SYNC-05 | Phase 8 | Complete |
+| SYNC-06 | Phase 8 | Complete |
+| SYNC-07 | Phase 8 | Complete |
+| SYNC-08 | Phase 8 | Complete |
+| SYNC-09 | Phase 8 | Complete |
+| SYNC-10 | Phase 8 | Complete |
+| SYNC-11 | Phase 8 | Complete |
+| SYNC-12 | Phase 8 | Complete |
+| UI-04 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 62 total
@@ -217,4 +217,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-07 after Phase 7 completion*
+*Last updated: 2026-02-07 after Phase 8 completion — all v1 requirements complete (61/62 full, 1 partial)*
