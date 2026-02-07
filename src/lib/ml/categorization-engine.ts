@@ -68,9 +68,12 @@ export class MLCategorizationEngine {
         if (pending) {
           // Embeddings are already Float32Arrays after postMessage deserialization
           // Just ensure they're properly typed
-          pending.resolve(embeddings.map((e: any) =>
+          console.log('[Engine] Received embeddings:', embeddings.length, 'first type:', typeof embeddings[0], 'first length:', embeddings[0]?.length);
+          const typedEmbeddings = embeddings.map((e: any) =>
             e instanceof Float32Array ? e : new Float32Array(e)
-          ));
+          );
+          console.log('[Engine] After conversion:', typedEmbeddings.length, 'first length:', typedEmbeddings[0]?.length);
+          pending.resolve(typedEmbeddings);
           this.pendingRequests.delete(id);
         }
       } else if (type === 'LOAD_PROGRESS') {

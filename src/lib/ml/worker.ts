@@ -139,12 +139,18 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
           const data = Array.from(output.data as number[]);
           const batchSize = texts.length;
 
+          console.log('[Worker] Batch output - data length:', data.length, 'batch size:', batchSize, 'expected per embedding:', EMBEDDING_DIM);
+
           for (let i = 0; i < batchSize; i++) {
             const start = i * EMBEDDING_DIM;
             const end = start + EMBEDDING_DIM;
-            embeddings.push(new Float32Array(data.slice(start, end)));
+            const embedding = new Float32Array(data.slice(start, end));
+            console.log(`[Worker] Embedding ${i}: length =`, embedding.length);
+            embeddings.push(embedding);
           }
         }
+
+        console.log('[Worker] Generated', embeddings.length, 'embeddings, first embedding length:', embeddings[0]?.length);
 
         // Send result back to main thread
         const resultMessage: EmbeddingsResultMessage = {
