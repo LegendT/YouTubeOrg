@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Serve WASM files with correct MIME type
+        source: '/:path*.wasm',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/wasm',
+          },
+        ],
+      },
     ];
   },
 
