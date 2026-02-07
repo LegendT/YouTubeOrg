@@ -258,6 +258,13 @@ Recent decisions affecting current work:
 - getVideoReviewDetail returns all non-protected categories for manual recategorisation picker
 - getReviewStats uses 6 separate count queries with Number() wrapping for PostgreSQL bigint safety
 
+**From 06-02 execution (2026-02-07):**
+- Fixed 3-column review grid (not responsive) per RESEARCH.md review interface recommendation
+- Confidence badge colour coding: green (HIGH), amber (MEDIUM), red (LOW) with title-case labels
+- Reviewed cards get opacity-75 to visually distinguish accepted/rejected from pending
+- ReviewCard uses role=button with tabIndex=0 for accessibility beyond click events
+- Thumbnail URL fallback: DB-stored thumbnailUrl then getThumbnailUrl() constructor
+
 **From 06-03 execution (2026-02-07):**
 - YouTube embed iframe for video preview in review modal (enables watching videos for categorisation decisions)
 - Keyboard shortcuts scoped with enabled: open && !isLoading for modal-context activation
@@ -314,5 +321,7 @@ Resume file: None
 **Phase 5 Complete!** All 4 plans executed. Client-side ML categorization with browser-native APIs: IndexedDB embeddings cache (EmbeddingsCache), Web Worker with Transformers.js (Xenova/all-MiniLM-L6-v2), cosine similarity scoring, confidence levels (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60), mlCategorizations database table, batch processing (32 videos), cache-first strategy, MLCategorizationEngine orchestrator, split server actions (getDataForCategorization/saveCategorizationResults), full-page UI at /ml-categorization with navigation link, real-time progress callbacks, and end-to-end verified workflow. Blocker resolved: moved ML engine from server-side to client-side to access Worker/IndexedDB APIs. All 4 Phase 5 success criteria verified. Ready for Phase 6 (Watch Later Processing).
 
 **Phase 6 Plan 01 Complete!** Review workflow server actions: 6 new actions (acceptSuggestion, rejectSuggestion, recategorizeVideo, getReviewData, getVideoReviewDetail, getReviewStats) and 3 new types (ReviewResult, ReviewStats, VideoReviewDetail). Three-way join query for enriched review data with confidence and status filtering. Accept/reject mutual exclusion pattern. Dashboard statistics with 6 count aggregations. Ready for Phase 6 Plan 02 (Review Grid UI).
+
+**Phase 6 Plan 02 Complete!** Review grid UI components: ReviewGrid (virtualized 3-column grid with @tanstack/react-virtual, ROW_HEIGHT 380px, focusedIndex support, auto-scroll), ReviewCard (thumbnail with confidence badge overlay green/amber/red, CheckCircle/XCircle review state icons, suggested category, similarity score), ReviewProgress (reviewed count with percentage, filter buttons for All/High/Medium/Low confidence). 3 files created (284 lines total). Ready for Phase 6 Plan 04 (Review Page Orchestrator).
 
 **Phase 6 Plan 03 Complete!** Review modal and keyboard shortcuts: ReviewModal with Radix Dialog (max-w-4xl, controlled open state), 4 keyboard shortcuts via react-hotkeys-hook (A accept, R reject, Left/Right navigate), YouTube embed iframe for video preview, lazy-loaded video details via getVideoReviewDetail, ML suggestion card with confidence badge, accept/reject action buttons. KeyboardHints floating overlay with 6 shortcut entries using kbd styling. 2 files created (281 lines total). Ready for Phase 6 Plan 04.
