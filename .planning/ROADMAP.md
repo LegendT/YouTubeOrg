@@ -20,6 +20,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Review & Approval Interface** - Batch review ML suggestions with keyboard shortcuts
 - [x] **Phase 7: Safety & Archive System** - Backup mechanism before destructive operations
 - [x] **Phase 8: Batch Sync Operations** - Quota-aware sync to YouTube with checkpoint/resume
+- [ ] **Phase 9: Auth Hardening** - Page-level and server-action auth checks (gap closure)
+- [ ] **Phase 10: UI Polish & Code Quality** - Toast notifications, TS fixes, British English sweep (gap closure)
+- [ ] **Phase 11: UX Refinements** - Approval toggle, checkbox separation, cancel button (gap closure)
 
 ## Phase Details
 
@@ -231,10 +234,64 @@ Plans:
 
 ---
 
+### Phase 9: Auth Hardening
+**Goal**: All pages and server actions validate authentication, redirecting to login on expired/missing tokens instead of showing errors.
+
+**Depends on**: Phase 1 (auth infrastructure)
+
+**Requirements**: Closes tech debt — 4 pages missing auth checks, server actions lack auth validation
+
+**Gap Closure**: Audit items #1, #2 (HIGH priority security)
+
+**Success Criteria** (what must be TRUE):
+  1. Visiting /analysis, /ml-review, /safety, /videos without a session redirects to login
+  2. Server actions return auth error (not crash) when called without valid session
+  3. Expired tokens trigger re-authentication flow, not raw error display
+
+**Plans**: TBD (created by /gsd:plan-phase)
+
+---
+
+### Phase 10: UI Polish & Code Quality
+**Goal**: Replace alert() with toast notifications, fix TypeScript errors in ML worker, and sweep all user-facing strings for British English consistency.
+
+**Depends on**: Phase 4 (alert usage), Phase 5 (TS errors)
+
+**Requirements**: Closes tech debt #3, #5; Closes pending todo (i18n British English)
+
+**Gap Closure**: Audit items #3, #5; STATE.md pending todo #4
+
+**Success Criteria** (what must be TRUE):
+  1. No alert() calls remain in production code — errors shown via toast/notification component
+  2. ml/worker.ts compiles with zero TypeScript errors
+  3. All user-facing strings use British English spelling (Categorise, Organise, Uncategorised, etc.)
+
+**Plans**: TBD (created by /gsd:plan-phase)
+
+---
+
+### Phase 11: UX Refinements
+**Goal**: Improve analysis workflow UX — approval toggle behaviour, checkbox semantics, and cancel affordance in Final Review dialog.
+
+**Depends on**: Phase 2 (analysis UI)
+
+**Requirements**: Closes STATE.md pending todos #1, #2, #3
+
+**Gap Closure**: UX issues identified during v1 development
+
+**Success Criteria** (what must be TRUE):
+  1. Approval is a toggle: clicking an approved proposal returns it to pending (not one-way)
+  2. Checkboxes are used only for batch selection (merge, bulk approve/reject), not conflated with approval state
+  3. Final Review & Execute dialog has an explicit Cancel button alongside the Execute action
+
+**Plans**: TBD (created by /gsd:plan-phase)
+
+---
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -246,7 +303,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 6. Review & Approval Interface | 5/5 | Complete | 2026-02-07 |
 | 7. Safety & Archive System | 4/4 | Complete | 2026-02-07 |
 | 8. Batch Sync Operations | 4/4 | Complete | 2026-02-07 |
+| 9. Auth Hardening | 0/? | Not started | — |
+| 10. UI Polish & Code Quality | 0/? | Not started | — |
+| 11. UX Refinements | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-07 (Phase 8 complete: 4/4 plans executed, verified — all phases complete)*
+*Last updated: 2026-02-07 (Gap closure phases 9-11 added from v1 milestone audit)*
