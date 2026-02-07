@@ -26,6 +26,7 @@ import { EmbeddingsCache } from './embeddings-cache';
 import { categorizeWithConfidence, type ConfidenceLevel } from './confidence';
 
 const MODEL_VERSION = 'all-MiniLM-L6-v2';
+const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 embedding dimension
 const BATCH_SIZE = 32; // Per RESEARCH.md recommendation for browser performance
 
 export interface CategorizationResult {
@@ -199,14 +200,42 @@ export class MLCategorizationEngine {
 
       // Step 2a: Check cache for existing embeddings
       console.log(`[Engine] Checking cache for ${batch.length} videos`);
-      const cachedEmbeddings = await this.embeddingsCache.getBatch(
+      const rawCachedEmbeddings = await this.embeddingsCache.getBatch(
         batch.map((v) => v.id),
         MODEL_VERSION
       );
-      console.log(`[Engine] Cache check complete: ${cachedEmbeddings.size} cached, ${batch.length - cachedEmbeddings.size} uncached`);
+      console.log(`[Engine] Cache check complete: ${rawCachedEmbeddings.size} cached, ${batch.length - rawCachedEmbeddings.size} uncached`);
 
-      // Step 2b: Generate embeddings for uncached videos
-      const uncachedVideos = batch.filter((v) => !cachedEmbeddings.has(v.id));
+      // Validate cached embeddings (defensive: check dimensions to avoid corrupted cache)
+      const validCachedEmbeddings = new Map<number, Float32Array>();
+      const invalidVideoIds: number[] = [];
+
+      for (const [videoId, embedding] of rawCachedEmbeddings) {
+        if (
+          embedding &&
+          embedding instanceof Float32Array &&
+          embedding.length === EMBEDDING_DIM
+        ) {
+          validCachedEmbeddings.set(videoId, embedding);
+        } else {
+          console.warn(
+            `[Engine] Invalid cached embedding for video ${videoId}: ` +
+            `${embedding ? `${embedding.length} dims (expected ${EMBEDDING_DIM})` : 'undefined'}`
+          );
+          invalidVideoIds.push(videoId);
+        }
+      }
+
+      if (invalidVideoIds.length > 0) {
+        console.warn(
+          `[Engine] Found ${invalidVideoIds.length} corrupted cache entries, will regenerate`
+        );
+      }
+
+      // Step 2b: Generate embeddings for uncached or invalid videos
+      const uncachedVideos = batch.filter(
+        (v) => !validCachedEmbeddings.has(v.id)
+      );
       console.log(`[Engine] Need to generate embeddings for ${uncachedVideos.length} videos`);
       if (uncachedVideos.length > 0) {
         console.log(`[Engine] Building text array for ${uncachedVideos.length} uncached videos`);
@@ -225,9 +254,9 @@ export class MLCategorizationEngine {
           MODEL_VERSION
         );
 
-        // Merge with cached
+        // Merge with validated cached embeddings
         uncachedVideos.forEach((v, idx) => {
-          cachedEmbeddings.set(v.id, newEmbeddings[idx]);
+          validCachedEmbeddings.set(v.id, newEmbeddings[idx]);
         });
       }
 
@@ -235,7 +264,7 @@ export class MLCategorizationEngine {
       console.log(`[Engine] Starting categorization for ${batch.length} videos`);
       for (const video of batch) {
         console.log(`[Engine] Categorizing video ${video.id}`);
-        const videoEmbedding = cachedEmbeddings.get(video.id);
+        const videoEmbedding = validCachedEmbeddings.get(video.id);
         console.log(`[Engine] Retrieved embedding for video ${video.id}:`, videoEmbedding ? `${videoEmbedding.length} dims` : 'undefined');
 
         if (!videoEmbedding) {
