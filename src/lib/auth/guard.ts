@@ -31,6 +31,29 @@ export type AuthResult =
  * }
  * ```
  */
+/**
+ * Higher-order wrapper for critical mutating server actions.
+ * Checks auth before executing and returns `{ success: false, error }` on failure.
+ *
+ * Usage:
+ * ```typescript
+ * async function _deleteCategory(id: number) { ... }
+ * export const deleteCategory = withAuth(_deleteCategory)
+ * ```
+ */
+export function withAuth<
+  Args extends unknown[],
+  R extends { success: boolean; error?: string },
+>(fn: (...args: Args) => Promise<R>): (...args: Args) => Promise<R> {
+  return async (...args: Args): Promise<R> => {
+    const result = await requireAuth()
+    if (!result.authenticated) {
+      return { success: false, error: result.error } as R
+    }
+    return fn(...args)
+  }
+}
+
 export async function requireAuth(): Promise<AuthResult> {
   const session = await auth()
 

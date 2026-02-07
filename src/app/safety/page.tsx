@@ -1,5 +1,3 @@
-import { getServerSession } from '@/lib/auth/session';
-import { redirect } from 'next/navigation';
 import { listBackups } from '@/app/actions/backup';
 import { getOperationLog, getPendingChanges } from '@/app/actions/operation-log';
 import { SafetyDashboard } from '@/components/safety/safety-dashboard';
@@ -15,13 +13,6 @@ export const metadata = {
  * then delegates to SafetyDashboard client component for tabbed display.
  */
 export default async function SafetyPage() {
-  // Check authentication
-  const session = await getServerSession();
-
-  if (!session?.access_token || session?.error === 'RefreshAccessTokenError') {
-    redirect('/api/auth/signin');
-  }
-
   const [backups, operationLog, pendingChanges] = await Promise.all([
     listBackups(),
     getOperationLog(20, 0),
