@@ -75,17 +75,13 @@ export class MLCategorizationEngine {
             return;
           }
 
-          console.log('[Engine] Received', embeddings.length, 'embeddings, first length:', embeddings[0]?.length);
-
           // Ensure all embeddings are Float32Arrays with correct dimensions
-          const typedEmbeddings: Float32Array[] = embeddings.map((e: any, i: number) => {
+          const typedEmbeddings: Float32Array[] = embeddings.map((e: any) => {
             if (e instanceof Float32Array) {
               return e;
             }
             // Convert to Float32Array if needed (handles structured clone edge cases)
-            const arr = new Float32Array(e);
-            console.log(`[Engine] Converted embedding ${i}: length ${arr.length}`);
-            return arr;
+            return new Float32Array(e);
           });
 
           pending.resolve(typedEmbeddings);
@@ -118,17 +114,15 @@ export class MLCategorizationEngine {
    * Returns cached embeddings when available.
    */
   private async generateEmbeddings(texts: string[]): Promise<Float32Array[]> {
-    console.log(`[Engine] generateEmbeddings called for ${texts.length} texts`);
     this.initWorker();
 
     if (!this.worker) {
-      console.error('[Engine] Worker is null after initWorker()!');
+      console.error('[Engine] Worker failed to initialize');
       throw new Error('Worker failed to initialize');
     }
 
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36).substring(2);
-      console.log(`[Engine] Creating request ${id} for ${texts.length} texts`);
       this.pendingRequests.set(id, { resolve, reject });
 
       this.worker!.postMessage({
@@ -136,13 +130,12 @@ export class MLCategorizationEngine {
         texts,
         id,
       });
-      console.log(`[Engine] Posted message to worker for request ${id}`);
 
       // 60 second timeout for batch processing
       setTimeout(() => {
         const pending = this.pendingRequests.get(id);
         if (pending) {
-          console.error(`[Engine] Request ${id} timed out after 60s`);
+          console.error(`[Engine] Embedding generation timed out after 60s`);
           pending.reject(new Error('Embedding generation timeout'));
           this.pendingRequests.delete(id);
         }
@@ -184,12 +177,10 @@ export class MLCategorizationEngine {
     const categoryEmbeddings = await this.generateCategoryEmbeddings(categories);
 
     // Step 2: Process videos in batches
-    console.log(`[Engine] Starting video processing: ${videos.length} videos, ${Math.ceil(videos.length / BATCH_SIZE)} batches`);
     for (let i = 0; i < videos.length; i += BATCH_SIZE) {
       const batch = videos.slice(i, i + BATCH_SIZE);
       const batchNum = Math.floor(i / BATCH_SIZE) + 1;
       const totalBatches = Math.ceil(videos.length / BATCH_SIZE);
-      console.log(`[Engine] Processing batch ${batchNum}/${totalBatches}, ${batch.length} videos`);
 
       onProgress?.(
         i,
@@ -199,12 +190,10 @@ export class MLCategorizationEngine {
       );
 
       // Step 2a: Check cache for existing embeddings
-      console.log(`[Engine] Checking cache for ${batch.length} videos`);
       const rawCachedEmbeddings = await this.embeddingsCache.getBatch(
         batch.map((v) => v.id),
         MODEL_VERSION
       );
-      console.log(`[Engine] Cache check complete: ${rawCachedEmbeddings.size} cached, ${batch.length - rawCachedEmbeddings.size} uncached`);
 
       // Validate cached embeddings (defensive: check dimensions to avoid corrupted cache)
       const validCachedEmbeddings = new Map<number, Float32Array>();
@@ -236,13 +225,10 @@ export class MLCategorizationEngine {
       const uncachedVideos = batch.filter(
         (v) => !validCachedEmbeddings.has(v.id)
       );
-      console.log(`[Engine] Need to generate embeddings for ${uncachedVideos.length} videos`);
       if (uncachedVideos.length > 0) {
-        console.log(`[Engine] Building text array for ${uncachedVideos.length} uncached videos`);
         const texts = uncachedVideos.map(
           (v) => `${v.title} ${v.channelTitle || ''}`
         );
-        console.log(`[Engine] Calling generateEmbeddings for ${texts.length} texts`);
         const newEmbeddings = await this.generateEmbeddings(texts);
 
         // Cache new embeddings
@@ -261,24 +247,19 @@ export class MLCategorizationEngine {
       }
 
       // Step 2c: Categorize each video in batch
-      console.log(`[Engine] Starting categorization for ${batch.length} videos`);
       for (const video of batch) {
-        console.log(`[Engine] Categorizing video ${video.id}`);
         const videoEmbedding = validCachedEmbeddings.get(video.id);
-        console.log(`[Engine] Retrieved embedding for video ${video.id}:`, videoEmbedding ? `${videoEmbedding.length} dims` : 'undefined');
 
         if (!videoEmbedding) {
-          console.error(`[Engine] No embedding found for video ${video.id}!`);
+          console.error(`[Engine] No embedding found for video ${video.id}`);
           continue;
         }
 
-        console.log(`[Engine] Calling categorizeWithConfidence for video ${video.id}`);
         const match = categorizeWithConfidence(videoEmbedding, categoryEmbeddings);
-        console.log(`[Engine] Categorization result for video ${video.id}:`, match);
 
         // Skip if no match (shouldn't happen since we pre-computed categories)
         if (!match) {
-          console.warn(`[ML] No category match for video ${video.id}. Skipping.`);
+          console.warn(`[Engine] No category match for video ${video.id}`);
           continue;
         }
 
