@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Playlist Analysis & Consolidation** - Analyze 87 playlists, propose ~25-35 categories
 - [x] **Phase 3: Category Management** - CRUD operations for category structure
 - [x] **Phase 4: Video Display & Organization** - Virtualized UI for browsing/searching videos
-- [ ] **Phase 5: ML Categorization Engine** - Auto-categorize Watch Later with Transformers.js
+- [x] **Phase 5: ML Categorization Engine** - Auto-categorize Watch Later with Transformers.js
 - [ ] **Phase 6: Review & Approval Interface** - Batch review ML suggestions with keyboard shortcuts
 - [ ] **Phase 7: Safety & Archive System** - Backup mechanism before destructive operations
 - [ ] **Phase 8: Batch Sync Operations** - Quota-aware sync to YouTube with checkpoint/resume
@@ -65,17 +65,17 @@ Plans:
 **Plans**: 11 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Analysis backend (duplicate detection, clustering, validation)
-- [ ] 02-02-PLAN.md — Server actions for proposal workflow
-- [ ] 02-03-PLAN.md — Basic consolidation UI with approve/reject
-- [ ] 02-05-PLAN.md — Backend fixes: fast-dice-coefficient, group(k), confidence scores, algorithm modes, sessions
-- [ ] 02-06-PLAN.md — Enhanced server actions: split, create, resolve duplicates, batch, staleness
-- [ ] 02-07-PLAN.md — Resizable split-panel layout, summary card, sortable category list
-- [ ] 02-08-PLAN.md — Category detail panel with paginated video list, confidence/validation badges
-- [ ] 02-09-PLAN.md — Duplicate resolver with bulk actions, batch approve/reject toolbar
-- [ ] 02-10-PLAN.md — Split wizard, manual adjustment buttons, create custom category
-- [ ] 02-11-PLAN.md — Progress tracking, keyboard navigation, loading states, staleness detection
-- [ ] 02-12-PLAN.md — Final review screen, full integration, end-to-end verification
+- [x] 02-01-PLAN.md — Analysis backend (duplicate detection, clustering, validation)
+- [x] 02-02-PLAN.md — Server actions for proposal workflow
+- [x] 02-03-PLAN.md — Basic consolidation UI with approve/reject
+- [x] 02-05-PLAN.md — Backend fixes: fast-dice-coefficient, group(k), confidence scores, algorithm modes, sessions
+- [x] 02-06-PLAN.md — Enhanced server actions: split, create, resolve duplicates, batch, staleness
+- [x] 02-07-PLAN.md — Resizable split-panel layout, summary card, sortable category list
+- [x] 02-08-PLAN.md — Category detail panel with paginated video list, confidence/validation badges
+- [x] 02-09-PLAN.md — Duplicate resolver with bulk actions, batch approve/reject toolbar
+- [x] 02-10-PLAN.md — Split wizard, manual adjustment buttons, create custom category
+- [x] 02-11-PLAN.md — Progress tracking, keyboard navigation, loading states, staleness detection
+- [x] 02-12-PLAN.md — Final review screen, full integration, end-to-end verification
 
 ---
 
@@ -148,10 +148,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — ML foundation (IndexedDB cache, Web Worker, cosine similarity)
-- [ ] 05-02-PLAN.md — Database schema and batch categorization engine
-- [ ] 05-03-PLAN.md — Server actions and UI components (trigger + progress)
-- [ ] 05-04-PLAN.md — Integration, navigation, and end-to-end verification
+- [x] 05-01-PLAN.md — ML foundation (IndexedDB cache, Web Worker, cosine similarity)
+- [x] 05-02-PLAN.md — Database schema and batch categorization engine
+- [x] 05-03-PLAN.md — Server actions and UI components (trigger + progress)
+- [x] 05-04-PLAN.md — Integration, navigation, and end-to-end verification
 
 ---
 
@@ -170,10 +170,13 @@ Plans:
   5. User can navigate review interface with keyboard (arrow keys, enter) without mouse
   6. User sees visual feedback for all actions (loading states, success confirmations)
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD (pending phase planning)
+- [ ] 06-01-PLAN.md — Server actions for review workflow (accept/reject/recategorize)
+- [ ] 06-02-PLAN.md — Review grid with confidence badges and progress display
+- [ ] 06-03-PLAN.md — Review modal with keyboard shortcuts and auto-advance
+- [ ] 06-04-PLAN.md — Page orchestrator, category picker, and end-to-end verification
 
 ---
 
@@ -233,10 +236,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Category Management | 6/6 | Complete | 2026-02-06 |
 | 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
 | 5. ML Categorization Engine | 4/4 | Complete | 2026-02-07 |
-| 6. Review & Approval Interface | 0/TBD | Not started | - |
+| 6. Review & Approval Interface | 0/4 | Not started | - |
 | 7. Safety & Archive System | 0/TBD | Not started | - |
 | 8. Batch Sync Operations | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-07 (Phase 5 complete: ML categorization engine with client-side execution)*
+*Last updated: 2026-02-07 (Phase 6 planned: Review & Approval Interface with keyboard-driven workflow)*
