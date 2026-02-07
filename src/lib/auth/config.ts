@@ -24,8 +24,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Force consent screen to guarantee refresh_token on every login
           // Without this, Google only provides refresh_token on first login
           prompt: "consent",
-          // Request YouTube read-only scope plus profile/email
-          scope: "openid email profile https://www.googleapis.com/auth/youtube.readonly",
+          // youtube.force-ssl grants read AND write access (required for Phase 8 sync operations).
+          // User must re-authenticate to grant the new scope.
+          scope: "openid email profile https://www.googleapis.com/auth/youtube.force-ssl",
         },
       },
     }),
