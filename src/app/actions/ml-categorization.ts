@@ -418,59 +418,26 @@ export async function getVideoReviewDetail(
  */
 export async function getReviewStats(): Promise<ReviewStats> {
   try {
-    // Total count
-    const totalResult = await db
-      .select({ value: count() })
+    // Single query with conditional counts instead of 6 separate queries
+    const result = await db
+      .select({
+        total: count(),
+        reviewed: sql<string>`count(*) filter (where ${mlCategorizations.acceptedAt} is not null or ${mlCategorizations.rejectedAt} is not null)`,
+        pending: sql<string>`count(*) filter (where ${mlCategorizations.acceptedAt} is null and ${mlCategorizations.rejectedAt} is null)`,
+        highConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'HIGH')`,
+        mediumConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'MEDIUM')`,
+        lowConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'LOW')`,
+      })
       .from(mlCategorizations);
-    const total = Number(totalResult[0].value);
 
-    // Reviewed count (accepted OR rejected)
-    const reviewedResult = await db
-      .select({ value: count() })
-      .from(mlCategorizations)
-      .where(
-        sql`${mlCategorizations.acceptedAt} IS NOT NULL OR ${mlCategorizations.rejectedAt} IS NOT NULL`
-      );
-    const reviewed = Number(reviewedResult[0].value);
-
-    // Pending count (neither accepted nor rejected)
-    const pendingResult = await db
-      .select({ value: count() })
-      .from(mlCategorizations)
-      .where(
-        and(
-          isNull(mlCategorizations.acceptedAt),
-          isNull(mlCategorizations.rejectedAt)
-        )
-      );
-    const pending = Number(pendingResult[0].value);
-
-    // Confidence level counts
-    const highResult = await db
-      .select({ value: count() })
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.confidence, 'HIGH'));
-    const highConfidence = Number(highResult[0].value);
-
-    const mediumResult = await db
-      .select({ value: count() })
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.confidence, 'MEDIUM'));
-    const mediumConfidence = Number(mediumResult[0].value);
-
-    const lowResult = await db
-      .select({ value: count() })
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.confidence, 'LOW'));
-    const lowConfidence = Number(lowResult[0].value);
-
+    const row = result[0];
     return {
-      total,
-      reviewed,
-      pending,
-      highConfidence,
-      mediumConfidence,
-      lowConfidence,
+      total: Number(row.total),
+      reviewed: Number(row.reviewed),
+      pending: Number(row.pending),
+      highConfidence: Number(row.highConfidence),
+      mediumConfidence: Number(row.mediumConfidence),
+      lowConfidence: Number(row.lowConfidence),
     };
   } catch (error) {
     console.error('[getReviewStats] Error:', error);
