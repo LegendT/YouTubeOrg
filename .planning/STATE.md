@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 5 - ML Categorization Engine
+**Current focus:** Phase 6 - Review & Approval Interface
 
 ## Current Position
 
-Phase: 5 of 8 (ML Categorization Engine)
-Plan: 4 of 4
-Status: Phase complete
-Last activity: 2026-02-07 — Completed 05-04-PLAN.md
+Phase: 6 of 8 (Review & Approval Interface)
+Plan: 1 of 5
+Status: In progress
+Last activity: 2026-02-07 — Completed 06-01-PLAN.md
 
-Progress: [█████████████████████████████████] 31/31 plans (100%)
+Progress: [██████████████████████████████████] 32/36 plans (89%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 3.7 min
-- Total execution time: 2.04 hours
+- Total execution time: 2.10 hours
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: [███████████████████████
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
+| 6 - Review & Approval Interface | 1/5 | 3.8 min | 3.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-05 (2min), 05-01 (5min), 05-02 (4.5min), 05-03 (4.8min), 05-04 (4min)
-- Trend: Phase 5 complete with consistent 4-5 min velocity per plan
+- Last 5 plans: 05-01 (5min), 05-02 (4.5min), 05-03 (4.8min), 05-04 (4min), 06-01 (3.8min)
+- Trend: Phase 6 started, server action plan completed efficiently
 
 *Updated after each plan completion*
 
@@ -250,6 +251,13 @@ Recent decisions affecting current work:
 - CategorizationResult type bridges ML engine output with database persistence layer (pre-DB format)
 - Blocker fix pattern: moved browser-only APIs from server context to client context to avoid "Worker is not defined" error
 
+**From 06-01 execution (2026-02-07):**
+- Accept clears rejection (and vice versa) for clean toggle semantics
+- recategorizeVideo auto-sets rejectedAt if not already rejected (implicit rejection on manual recategorisation)
+- getReviewData uses innerJoin three-way join (videos/mlCategorizations/categories) with conditional WHERE for status/confidence filtering
+- getVideoReviewDetail returns all non-protected categories for manual recategorisation picker
+- getReviewStats uses 6 separate count queries with Number() wrapping for PostgreSQL bigint safety
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -276,8 +284,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07T09:48:23Z
-Stopped at: Completed 05-04-PLAN.md (ML Categorization Integration)
+Last session: 2026-02-07T19:11:51Z
+Stopped at: Completed 06-01-PLAN.md (Review Workflow Server Actions)
 Resume file: None
 
 ---
@@ -297,3 +305,5 @@ Resume file: None
 **Phase 5 Plan 03 Complete!** Server actions bridge ML engine to database: runMLCategorization (full pipeline: fetch videos → fetch categories → run engine → delete+insert persistence → stats), getMLCategorizationForVideo (single video query), getMLCategorizationResults (filtered query with confidence level). React components ready for Plan 04: CategorizationTrigger (button with loading state, error display, callbacks), ProgressDisplay (status text, animated progress bar). 4 files created (277 lines total). Ready for Phase 5 Plan 04 (ML Review Interface).
 
 **Phase 5 Complete!** All 4 plans executed. Client-side ML categorization with browser-native APIs: IndexedDB embeddings cache (EmbeddingsCache), Web Worker with Transformers.js (Xenova/all-MiniLM-L6-v2), cosine similarity scoring, confidence levels (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60), mlCategorizations database table, batch processing (32 videos), cache-first strategy, MLCategorizationEngine orchestrator, split server actions (getDataForCategorization/saveCategorizationResults), full-page UI at /ml-categorization with navigation link, real-time progress callbacks, and end-to-end verified workflow. Blocker resolved: moved ML engine from server-side to client-side to access Worker/IndexedDB APIs. All 4 Phase 5 success criteria verified. Ready for Phase 6 (Watch Later Processing).
+
+**Phase 6 Plan 01 Complete!** Review workflow server actions: 6 new actions (acceptSuggestion, rejectSuggestion, recategorizeVideo, getReviewData, getVideoReviewDetail, getReviewStats) and 3 new types (ReviewResult, ReviewStats, VideoReviewDetail). Three-way join query for enriched review data with confidence and status filtering. Accept/reject mutual exclusion pattern. Dashboard statistics with 6 count aggregations. Ready for Phase 6 Plan 02 (Review Grid UI).
