@@ -66,13 +66,26 @@ export class MLCategorizationEngine {
       if (type === 'EMBEDDINGS_RESULT') {
         const pending = this.pendingRequests.get(id);
         if (pending) {
-          // Embeddings are already Float32Arrays after postMessage deserialization
-          // Just ensure they're properly typed
-          console.log('[Engine] Received embeddings:', embeddings.length, 'first type:', typeof embeddings[0], 'first length:', embeddings[0]?.length);
-          const typedEmbeddings = embeddings.map((e: any) =>
-            e instanceof Float32Array ? e : new Float32Array(e)
-          );
-          console.log('[Engine] After conversion:', typedEmbeddings.length, 'first length:', typedEmbeddings[0]?.length);
+          // Validate embeddings structure
+          if (!Array.isArray(embeddings) || embeddings.length === 0) {
+            pending.reject(new Error('Invalid embeddings received from worker'));
+            this.pendingRequests.delete(id);
+            return;
+          }
+
+          console.log('[Engine] Received', embeddings.length, 'embeddings, first length:', embeddings[0]?.length);
+
+          // Ensure all embeddings are Float32Arrays with correct dimensions
+          const typedEmbeddings: Float32Array[] = embeddings.map((e: any, i: number) => {
+            if (e instanceof Float32Array) {
+              return e;
+            }
+            // Convert to Float32Array if needed (handles structured clone edge cases)
+            const arr = new Float32Array(e);
+            console.log(`[Engine] Converted embedding ${i}: length ${arr.length}`);
+            return arr;
+          });
+
           pending.resolve(typedEmbeddings);
           this.pendingRequests.delete(id);
         }

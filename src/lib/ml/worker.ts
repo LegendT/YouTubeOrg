@@ -120,37 +120,38 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         const embeddings: Float32Array[] = [];
         const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 output dimension
 
+        // Always treat output as a tensor with shape [batch_size, embedding_dim]
+        // Extract the raw data array
+        let data: number[];
         if (Array.isArray(output)) {
-          // Batch processing: multiple texts
-          // Each output is a separate tensor (one per text)
-          for (const tensor of output) {
-            const data = Array.from(tensor.data as number[]);
-            // Handle case where tensor might have batch dimension
-            if (data.length === EMBEDDING_DIM) {
-              embeddings.push(new Float32Array(data));
-            } else {
-              // If data is larger, extract the first EMBEDDING_DIM elements
-              embeddings.push(new Float32Array(data.slice(0, EMBEDDING_DIM)));
-            }
-          }
+          // If output is an array of tensors, flatten them
+          data = output.flatMap((tensor) => Array.from(tensor.data as number[]));
         } else {
-          // Single tensor containing all batch embeddings
-          // Shape is [batch_size, embedding_dim], data is flattened
-          const data = Array.from(output.data as number[]);
-          const batchSize = texts.length;
-
-          console.log('[Worker] Batch output - data length:', data.length, 'batch size:', batchSize, 'expected per embedding:', EMBEDDING_DIM);
-
-          for (let i = 0; i < batchSize; i++) {
-            const start = i * EMBEDDING_DIM;
-            const end = start + EMBEDDING_DIM;
-            const embedding = new Float32Array(data.slice(start, end));
-            console.log(`[Worker] Embedding ${i}: length =`, embedding.length);
-            embeddings.push(embedding);
-          }
+          // Single tensor - extract data
+          data = Array.from(output.data as number[]);
         }
 
-        console.log('[Worker] Generated', embeddings.length, 'embeddings, first embedding length:', embeddings[0]?.length);
+        const batchSize = texts.length;
+        const expectedLength = batchSize * EMBEDDING_DIM;
+
+        console.log('[Worker] Data length:', data.length, 'Expected:', expectedLength, 'Batch size:', batchSize);
+
+        // Validate data length
+        if (data.length !== expectedLength) {
+          throw new Error(
+            `Unexpected embedding data length: ${data.length}, expected ${expectedLength} (${batchSize} × ${EMBEDDING_DIM})`
+          );
+        }
+
+        // Slice data into individual embeddings
+        for (let i = 0; i < batchSize; i++) {
+          const start = i * EMBEDDING_DIM;
+          const end = start + EMBEDDING_DIM;
+          const embedding = new Float32Array(data.slice(start, end));
+          embeddings.push(embedding);
+        }
+
+        console.log('[Worker] Generated', embeddings.length, 'embeddings, each', embeddings[0]?.length, 'dims');
 
         // Send result back to main thread
         const resultMessage: EmbeddingsResultMessage = {
