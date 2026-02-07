@@ -161,3 +161,28 @@ export const mlCategorizations = pgTable('ml_categorizations', {
 
 // Index for filtering by confidence level (low-confidence review workflow)
 // CREATE INDEX idx_ml_cat_confidence ON ml_categorizations(confidence, created_at);
+
+// --- Phase 7: Safety & Archive System ---
+
+// Backup snapshots table - metadata for JSON backup files stored on the filesystem
+export const backupSnapshots = pgTable('backup_snapshots', {
+  id: serial('id').primaryKey(),
+  filename: text('filename').notNull().unique(),
+  trigger: text('trigger').notNull(),
+  scope: text('scope').notNull(),
+  entityCount: integer('entity_count').notNull(),
+  fileSizeBytes: integer('file_size_bytes').notNull(),
+  checksum: text('checksum').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Operation log table - append-only audit trail for all destructive/important operations
+export const operationLog = pgTable('operation_log', {
+  id: serial('id').primaryKey(),
+  action: text('action').notNull(),
+  entityType: text('entity_type').notNull(),
+  entityIds: jsonb('entity_ids').$type<number[]>().notNull(),
+  metadata: jsonb('metadata'),
+  backupSnapshotId: integer('backup_snapshot_id').references(() => backupSnapshots.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
