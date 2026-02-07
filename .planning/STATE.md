@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 6 of 8 (Review & Approval Interface)
-Plan: 1 of 5
+Plan: 3 of 5
 Status: In progress
-Last activity: 2026-02-07 — Completed 06-01-PLAN.md
+Last activity: 2026-02-07 — Completed 06-03-PLAN.md
 
-Progress: [██████████████████████████████████] 32/36 plans (89%)
+Progress: [███████████████████████████████████] 34/36 plans (94%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32
+- Total plans completed: 34
 - Average duration: 3.7 min
-- Total execution time: 2.10 hours
+- Total execution time: 2.18 hours
 
 **By Phase:**
 
@@ -33,11 +33,11 @@ Progress: [███████████████████████
 | 3 - Category Management | 6/6 | 24 min | 4.0 min |
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
-| 6 - Review & Approval Interface | 1/5 | 3.8 min | 3.8 min |
+| 6 - Review & Approval Interface | 3/5 | 10.8 min | 3.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (5min), 05-02 (4.5min), 05-03 (4.8min), 05-04 (4min), 06-01 (3.8min)
-- Trend: Phase 6 started, server action plan completed efficiently
+- Last 5 plans: 05-03 (4.8min), 05-04 (4min), 06-01 (3.8min), 06-02 (4min), 06-03 (3min)
+- Trend: Phase 6 wave 2 progressing rapidly, UI component plans completing in 3-4 min
 
 *Updated after each plan completion*
 
@@ -258,6 +258,13 @@ Recent decisions affecting current work:
 - getVideoReviewDetail returns all non-protected categories for manual recategorisation picker
 - getReviewStats uses 6 separate count queries with Number() wrapping for PostgreSQL bigint safety
 
+**From 06-03 execution (2026-02-07):**
+- YouTube embed iframe for video preview in review modal (enables watching videos for categorisation decisions)
+- Keyboard shortcuts scoped with enabled: open && !isLoading for modal-context activation
+- Auto-advance via onAccept/onReject callbacks (parent controls navigation, modal stays open)
+- Navigation indicator showing prev/next titles and position counter for context during review
+- Escape handling delegated to Radix Dialog built-in onOpenChange (avoids overriding focus management)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -284,8 +291,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07T19:11:51Z
-Stopped at: Completed 06-01-PLAN.md (Review Workflow Server Actions)
+Last session: 2026-02-07T19:18:20Z
+Stopped at: Completed 06-03-PLAN.md (Review Modal & Keyboard Shortcuts)
 Resume file: None
 
 ---
@@ -307,3 +314,5 @@ Resume file: None
 **Phase 5 Complete!** All 4 plans executed. Client-side ML categorization with browser-native APIs: IndexedDB embeddings cache (EmbeddingsCache), Web Worker with Transformers.js (Xenova/all-MiniLM-L6-v2), cosine similarity scoring, confidence levels (HIGH≥0.75, MEDIUM≥0.60, LOW<0.60), mlCategorizations database table, batch processing (32 videos), cache-first strategy, MLCategorizationEngine orchestrator, split server actions (getDataForCategorization/saveCategorizationResults), full-page UI at /ml-categorization with navigation link, real-time progress callbacks, and end-to-end verified workflow. Blocker resolved: moved ML engine from server-side to client-side to access Worker/IndexedDB APIs. All 4 Phase 5 success criteria verified. Ready for Phase 6 (Watch Later Processing).
 
 **Phase 6 Plan 01 Complete!** Review workflow server actions: 6 new actions (acceptSuggestion, rejectSuggestion, recategorizeVideo, getReviewData, getVideoReviewDetail, getReviewStats) and 3 new types (ReviewResult, ReviewStats, VideoReviewDetail). Three-way join query for enriched review data with confidence and status filtering. Accept/reject mutual exclusion pattern. Dashboard statistics with 6 count aggregations. Ready for Phase 6 Plan 02 (Review Grid UI).
+
+**Phase 6 Plan 03 Complete!** Review modal and keyboard shortcuts: ReviewModal with Radix Dialog (max-w-4xl, controlled open state), 4 keyboard shortcuts via react-hotkeys-hook (A accept, R reject, Left/Right navigate), YouTube embed iframe for video preview, lazy-loaded video details via getVideoReviewDetail, ML suggestion card with confidence badge, accept/reject action buttons. KeyboardHints floating overlay with 6 shortcut entries using kbd styling. 2 files created (281 lines total). Ready for Phase 6 Plan 04.
