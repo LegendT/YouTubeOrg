@@ -1,3 +1,5 @@
+import { getServerSession } from '@/lib/auth/session';
+import { redirect } from 'next/navigation';
 import { getReviewData, getReviewStats } from '@/app/actions/ml-categorization';
 import { ReviewPage } from '@/components/ml-review/review-page';
 
@@ -12,6 +14,13 @@ export const metadata = {
  * ReviewPage client component for interactive review workflow.
  */
 export default async function MLReviewPage() {
+  // Check authentication
+  const session = await getServerSession();
+
+  if (!session?.access_token || session?.error === 'RefreshAccessTokenError') {
+    redirect('/api/auth/signin');
+  }
+
   const [results, stats] = await Promise.all([
     getReviewData(),
     getReviewStats(),
