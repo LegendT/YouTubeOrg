@@ -19,6 +19,8 @@ import type {
   MergeUndoData,
   VideoSearchResult,
 } from '@/types/categories';
+import { createSnapshot } from '@/lib/backup/snapshot';
+import { logOperation } from '@/app/actions/operation-log';
 
 // ============================================================================
 // Core CRUD: List, Create, Rename, Delete, Undo Delete
@@ -213,6 +215,14 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
       return { success: false, error: 'Protected categories cannot be deleted' };
     }
 
+    // Create pre-operation backup (SAFE-02: automatic archive before delete)
+    let backup: { snapshotId: number } | null = null;
+    try {
+      backup = await createSnapshot('pre_delete', `category:${category.name}`);
+    } catch (backupError) {
+      console.warn('Pre-delete backup failed (proceeding with delete):', backupError);
+    }
+
     const result = await db.transaction(async (tx) => {
       // a. Get all videoIds in this category
       const categoryVideoRows = await tx
@@ -276,6 +286,24 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
     });
 
     revalidatePath('/analysis');
+    revalidatePath('/safety');
+
+    // Log to immutable operation log (SAFE-05)
+    try {
+      await logOperation({
+        action: 'delete_category',
+        entityType: 'category',
+        entityIds: [categoryId],
+        metadata: {
+          categoryName: category.name,
+          videoCount: Number(category.videoCount),
+          orphanedCount: result.orphanedCount,
+        },
+        ...(backup ? { backupSnapshotId: backup.snapshotId } : {}),
+      });
+    } catch (logError) {
+      console.warn('Operation log entry failed (delete completed):', logError);
+    }
 
     return {
       success: true,
@@ -410,6 +438,15 @@ export async function mergeCategories(
       return { success: false, error: 'One or more source categories not found' };
     }
 
+    // Create pre-operation backup (SAFE-02: automatic archive before merge)
+    let backup: { snapshotId: number } | null = null;
+    try {
+      const categoryNames = sourceCategories.map(c => c.name).join(', ');
+      backup = await createSnapshot('pre_merge', `merge:${categoryNames}`);
+    } catch (backupError) {
+      console.warn('Pre-merge backup failed (proceeding with merge):', backupError);
+    }
+
     const result = await db.transaction(async (tx) => {
       // a. Collect all videoIds from source categories
       const allCategoryVideoRows = await tx
@@ -461,6 +498,24 @@ export async function mergeCategories(
     });
 
     revalidatePath('/analysis');
+    revalidatePath('/safety');
+
+    // Log to immutable operation log (SAFE-05)
+    try {
+      await logOperation({
+        action: 'merge_categories',
+        entityType: 'category',
+        entityIds: sourceCategoryIds,
+        metadata: {
+          sourceCategoryNames: sourceCategories.map(c => c.name),
+          targetName: trimmed,
+          totalVideos: result.totalVideos,
+        },
+        ...(backup ? { backupSnapshotId: backup.snapshotId } : {}),
+      });
+    } catch (logError) {
+      console.warn('Operation log entry failed (merge completed):', logError);
+    }
 
     return {
       success: true,
