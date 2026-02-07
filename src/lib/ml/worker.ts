@@ -16,8 +16,7 @@
 import { pipeline, env, type FeatureExtractionPipeline } from '@huggingface/transformers';
 
 // Configure Transformers.js for browser environment
-// Use JSDelivr CDN for WASM files to avoid bundling issues
-env.backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/';
+// Let Transformers.js use its default WASM paths (it knows the correct version)
 env.backends.onnx.wasm.numThreads = 1; // Disable multithreading to avoid SharedArrayBuffer requirements
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
@@ -30,7 +29,7 @@ console.log('[Worker] Transformers.js environment configured:', {
   allowRemoteModels: env.allowRemoteModels,
   useBrowserCache: env.useBrowserCache,
   useFS: env.useFS,
-  wasmPaths: env.backends.onnx.wasm.wasmPaths
+  numThreads: env.backends.onnx.wasm.numThreads
 });
 
 /**
