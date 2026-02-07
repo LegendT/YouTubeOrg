@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 8 of 8 (Batch Sync Operations)
-Plan: 0 of TBD
-Status: Not started
-Last activity: 2026-02-07 — Phase 7 complete (verified)
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-02-07 — Completed 08-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 40/40 plans (100%)
+Progress: [██████████████████████████████████████████] 41/44 plans (93%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 40
+- Total plans completed: 41
 - Average duration: 3.6 min
-- Total execution time: 3.37 hours
+- Total execution time: 3.46 hours
 
 **By Phase:**
 
@@ -35,10 +35,11 @@ Progress: [███████████████████████
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
 | 6 - Review & Approval Interface | 5/5 | 59.3 min | 11.86 min |
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
+| 8 - Batch Sync Operations | 1/4 | 5.3 min | 5.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (3.5min), 07-02 (3min), 07-03 (3.5min), 07-04 (2.1min)
-- Trend: Consistent fast execution for Phase 7 plans
+- Last 5 plans: 07-02 (3min), 07-03 (3.5min), 07-04 (2.1min), 08-01 (5.3min)
+- Trend: Phase 8 start slightly slower (schema + types foundation)
 
 *Updated after each plan completion*
 
@@ -316,6 +317,12 @@ Recent decisions affecting current work:
 - Existing undo functionality (undoDeleteCategory, undoMergeCategories) left untouched — Phase 7 provides persistent undo via backup restore
 - revalidatePath('/safety') added to both deleteCategory and mergeCategories for dashboard cache invalidation
 
+**From 08-01 execution (2026-02-07):**
+- New playlists created as private by default to prevent exposing incomplete sync state
+- youtube.force-ssl scope replaces youtube.readonly (superset with read + write access)
+- Per-video operation tracking in syncVideoOperations enables idempotent resume at video granularity
+- drizzle-kit push may silently skip column additions on existing tables — manual ALTER TABLE needed as fallback
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -342,8 +349,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: Phase 7 complete — all 4 plans executed, verified 5/5 must-haves
+Last session: 2026-02-07T22:20:10Z
+Stopped at: Completed 08-01-PLAN.md (sync foundation: schema, types, write wrappers, OAuth)
 Resume file: None
 
 ---
@@ -381,3 +388,5 @@ Resume file: None
 **Phase 7 Plan 03 Complete!** Safety dashboard at /safety with Radix Tabs (Backups, Operation Log, Pending Changes). BackupList with create/download/restore/delete actions using useTransition for loading states and window.confirm for confirmations. OperationLogTable with colour-coded action badges (red=delete, amber=merge, blue=restore, green=create), metadata display, and "Load more" pagination. PendingChanges with grouped change counts and amber warning card. SafetyDashboard wrapper component bridges Server Component data fetching with client-side tab interactivity. Safety navbar link with Shield icon. 6 files created/modified (624 lines total). Ready for Phase 7 Plan 04 (Integration Testing).
 
 **Phase 7 Complete!** All 4 plans executed and verified (5/5 must-haves). Complete safety & archive system: backupSnapshots + operationLog DB tables, JSON backup with stable YouTube IDs and SHA-256 checksums, transactional restore with pre-restore safety backup, 7 server actions (4 backup CRUD + 3 operation log), GET /api/backup/[id] download route, Safety dashboard at /safety with Radix Tabs (backups/log/pending changes), Shield icon navbar link, and automatic pre-operation backups wired into deleteCategory and mergeCategories. All 5 Phase 7 requirements satisfied (SAFE-01, SAFE-02, SAFE-03, SAFE-05, SAFE-06). Ready for Phase 8 (Batch Sync Operations).
+
+**Phase 8 Plan 01 Complete!** Sync foundation: syncJobs table (stage-based state machine with pause/resume, quota tracking, preview data, backup snapshot link) and syncVideoOperations table (per-video tracking for idempotent resume). Extended categories with youtubePlaylistId and playlists with deletedFromYoutubeAt. TypeScript types for full sync workflow (SyncStage, SyncPreview, SyncJobRecord, SyncVideoOperationRecord, STAGE_LABELS). Three YouTube write wrappers (createYouTubePlaylist, addVideoToPlaylist, deleteYouTubePlaylist) using existing callYouTubeAPI + trackQuotaUsage. OAuth scope upgraded to youtube.force-ssl. 2 files created, 2 modified (284 lines total). Ready for Phase 8 Plan 02 (Sync Preview Engine).
