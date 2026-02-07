@@ -37,12 +37,23 @@ class PipelineSingleton {
     progress_callback?: (progress: any) => void
   ): Promise<FeatureExtractionPipeline> {
     if (this.instance === null) {
-      // Type assertion needed due to complex Transformers.js overload types
-      const pipelinePromise = progress_callback
-        ? pipeline(this.task, this.model, { progress_callback } as any)
-        : pipeline(this.task, this.model);
+      try {
+        console.log('[Worker] Loading model:', this.model);
 
-      this.instance = (await pipelinePromise) as FeatureExtractionPipeline;
+        // Type assertion needed due to complex Transformers.js overload types
+        const pipelinePromise = progress_callback
+          ? pipeline(this.task, this.model, {
+              progress_callback,
+              dtype: 'q8' // Explicitly set quantization to avoid warnings
+            } as any)
+          : pipeline(this.task, this.model, { dtype: 'q8' } as any);
+
+        this.instance = (await pipelinePromise) as FeatureExtractionPipeline;
+        console.log('[Worker] Model loaded successfully');
+      } catch (error) {
+        console.error('[Worker] Failed to load model:', error);
+        throw new Error(`Failed to load ML model: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     }
     return this.instance;
   }
