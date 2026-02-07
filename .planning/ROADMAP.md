@@ -248,7 +248,12 @@ Plans:
   2. Server actions return auth error (not crash) when called without valid session
   3. Expired tokens trigger re-authentication flow, not raw error display
 
-**Plans**: TBD (created by /gsd:plan-phase)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Create requireAuth() guard utility and add auth checks to 4 unprotected pages
+- [ ] 09-02-PLAN.md — Add auth guards to analysis.ts, categories.ts, and ml-categorization.ts (38 actions)
+- [ ] 09-03-PLAN.md — Add auth guards to videos.ts, backup.ts, operation-log.ts (9 actions) and full audit
 
 ---
 
@@ -303,10 +308,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Review & Approval Interface | 5/5 | Complete | 2026-02-07 |
 | 7. Safety & Archive System | 4/4 | Complete | 2026-02-07 |
 | 8. Batch Sync Operations | 4/4 | Complete | 2026-02-07 |
-| 9. Auth Hardening | 0/? | Not started | — |
+| 9. Auth Hardening | 0/3 | Not started | — |
 | 10. UI Polish & Code Quality | 0/? | Not started | — |
 | 11. UX Refinements | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-07 (Gap closure phases 9-11 added from v1 milestone audit)*
+*Last updated: 2026-02-07 (Phase 9 planned: 3 plans in 2 waves)*
