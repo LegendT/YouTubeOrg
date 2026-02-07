@@ -28,11 +28,11 @@ export default async function SyncPage() {
   ]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Synchronise to YouTube</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Sync to YouTube</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Push your approved category structure to YouTube as playlists.
+          Synchronise your approved category structure with YouTube
         </p>
       </div>
 

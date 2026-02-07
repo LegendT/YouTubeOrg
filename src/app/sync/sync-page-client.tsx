@@ -1,10 +1,16 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SyncPreview as SyncPreviewComponent } from '@/components/sync/sync-preview';
-import { startSync } from '@/app/actions/sync';
-import { STAGE_LABELS } from '@/types/sync';
+import { SyncProgress } from '@/components/sync/sync-progress';
+import { SyncReport } from '@/components/sync/sync-report';
+import {
+  startSync,
+  pauseSync,
+  resumeSync,
+  getSyncPreview,
+} from '@/app/actions/sync';
 import type { SyncPreview, SyncJobRecord } from '@/types/sync';
 
 interface SyncPageClientProps {
@@ -14,11 +20,12 @@ interface SyncPageClientProps {
 }
 
 /**
- * Client wrapper for the sync page.
+ * Client orchestrator for the /sync page.
  *
- * Manages local state transitions:
- * - Preview view: shows SyncPreview component with "Start Sync" button
- * - Progress view: placeholder for active sync (built in 08-04)
+ * Manages the full sync lifecycle:
+ * - Preview view: shows SyncPreview with "Start Sync" button
+ * - Progress view: shows SyncProgress with real-time polling and pause/resume
+ * - Report view: shows SyncReport after completion with per-stage results
  * - Error view: when preview data cannot be loaded
  */
 export function SyncPageClient({
@@ -26,30 +33,119 @@ export function SyncPageClient({
   initialJob,
   previewError,
 }: SyncPageClientProps) {
+  const [currentJob, setCurrentJob] = useState<SyncJobRecord | null>(initialJob);
+  const [preview, setPreview] = useState<SyncPreview | null>(initialPreview);
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | undefined>(previewError);
   const router = useRouter();
 
+  /**
+   * Determine the current view based on job state.
+   */
+  function getView(): 'preview' | 'progress' | 'report' | 'error' {
+    if (error) return 'error';
+
+    if (currentJob) {
+      const { stage } = currentJob;
+
+      // Completed or failed with results -> show report
+      if (stage === 'completed' || stage === 'failed') {
+        return 'report';
+      }
+
+      // Active or paused -> show progress
+      if (
+        stage === 'pending' ||
+        stage === 'backup' ||
+        stage === 'create_playlists' ||
+        stage === 'add_videos' ||
+        stage === 'delete_playlists' ||
+        stage === 'paused'
+      ) {
+        return 'progress';
+      }
+    }
+
+    // No active job -> show preview
+    return 'preview';
+  }
+
+  /**
+   * Start a new sync.
+   */
   function handleStartSync() {
     startTransition(async () => {
+      setError(undefined);
       const result = await startSync();
-      if (result.success) {
-        // Refresh the page to transition to the progress view
-        router.refresh();
+      if (result.success && result.job) {
+        setCurrentJob(result.job);
       } else {
-        // Show error -- for now alert, will be refined in 08-04
-        alert(result.error ?? 'Failed to start sync');
+        setError(result.error ?? 'Failed to start sync');
       }
     });
   }
 
-  // Error state: preview could not be loaded
-  if (previewError) {
+  /**
+   * Pause the running sync.
+   */
+  function handlePause() {
+    startTransition(async () => {
+      const result = await pauseSync();
+      if (result.success && result.job) {
+        setCurrentJob(result.job);
+      }
+    });
+  }
+
+  /**
+   * Resume a paused sync.
+   */
+  function handleResume() {
+    startTransition(async () => {
+      const result = await resumeSync();
+      if (result.success && result.job) {
+        setCurrentJob(result.job);
+      }
+    });
+  }
+
+  /**
+   * Receive updated job state from SyncProgress polling.
+   */
+  const handleJobUpdate = useCallback((updatedJob: SyncJobRecord) => {
+    setCurrentJob(updatedJob);
+  }, []);
+
+  /**
+   * Reset to preview state to start a new sync.
+   */
+  function handleStartNewSync() {
+    startTransition(async () => {
+      setCurrentJob(null);
+      setError(undefined);
+      // Re-fetch preview data
+      const result = await getSyncPreview();
+      if (result.success && result.preview) {
+        setPreview(result.preview);
+      } else {
+        setError(result.error ?? 'Failed to load preview');
+      }
+    });
+  }
+
+  const view = getView();
+
+  // Error state
+  if (view === 'error') {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6">
         <h2 className="text-lg font-medium text-red-800">Unable to Load Preview</h2>
-        <p className="text-sm text-red-700 mt-1">{previewError}</p>
+        <p className="text-sm text-red-700 mt-1">{error}</p>
         <button
-          onClick={() => router.refresh()}
+          onClick={() => {
+            setError(undefined);
+            router.refresh();
+          }}
           className="mt-3 text-sm text-red-600 hover:text-red-800 underline"
         >
           Try again
@@ -58,67 +154,30 @@ export function SyncPageClient({
     );
   }
 
-  // Active job: show progress placeholder (full progress UI in 08-04)
-  if (initialJob) {
-    const stageLabel = STAGE_LABELS[initialJob.stage] ?? initialJob.stage;
-    const isPaused = initialJob.stage === 'paused';
-    const pauseLabel = initialJob.pauseReason === 'quota_exhausted'
-      ? 'Quota exhausted -- resume when daily quota resets'
-      : initialJob.pauseReason === 'user_paused'
-        ? 'Paused by you'
-        : initialJob.pauseReason === 'errors_collected'
-          ? 'Paused -- errors collected for review'
-          : '';
-
+  // Report view: completed or failed job
+  if (view === 'report' && currentJob) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-medium text-gray-900">Sync In Progress</h2>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className={`inline-block h-2.5 w-2.5 rounded-full ${
-              isPaused ? 'bg-amber-400' : 'bg-green-400 animate-pulse'
-            }`} />
-            <span className="text-sm font-medium text-gray-700">{stageLabel}</span>
-          </div>
+      <SyncReport
+        job={currentJob}
+        onStartNewSync={handleStartNewSync}
+      />
+    );
+  }
 
-          {initialJob.currentStageTotal > 0 && (
-            <div>
-              <div className="flex justify-between text-sm text-gray-500 mb-1">
-                <span>Progress</span>
-                <span>
-                  {initialJob.currentStageProgress} / {initialJob.currentStageTotal}
-                </span>
-              </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all"
-                  style={{
-                    width: `${Math.round(
-                      (initialJob.currentStageProgress / initialJob.currentStageTotal) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {isPaused && pauseLabel && (
-            <p className="text-sm text-amber-700">{pauseLabel}</p>
-          )}
-
-          <p className="text-xs text-gray-400">
-            Quota used this sync: {initialJob.quotaUsedThisSync.toLocaleString()} units
-          </p>
-        </div>
-        <p className="mt-4 text-sm text-gray-500">
-          Full progress controls will be available in the next update.
-        </p>
-      </div>
+  // Progress view: active or paused job
+  if (view === 'progress' && currentJob) {
+    return (
+      <SyncProgress
+        job={currentJob}
+        onPause={handlePause}
+        onResume={handleResume}
+        onJobUpdate={handleJobUpdate}
+      />
     );
   }
 
   // No active job, no preview: empty state
-  if (!initialPreview) {
+  if (!preview) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm text-center">
         <h2 className="text-lg font-medium text-gray-900">No Preview Available</h2>
@@ -133,7 +192,7 @@ export function SyncPageClient({
   // Default: show preview
   return (
     <SyncPreviewComponent
-      preview={initialPreview}
+      preview={preview}
       onStartSync={handleStartSync}
       isStarting={isPending}
     />
