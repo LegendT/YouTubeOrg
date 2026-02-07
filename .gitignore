@@ -41,3 +41,6 @@ next-env.d.ts
 
 # Temporary files
 test-db.ts
+
+# Backup snapshots (Phase 7)
+/backups
