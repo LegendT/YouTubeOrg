@@ -2,8 +2,8 @@
 
 import { db } from '@/lib/db';
 import { videos, categories, mlCategorizations } from '@/lib/db/schema';
-import type { RunMLCategorizationResult, MLCategorizationResult, CategorizationResult } from '@/types/ml';
-import { eq, inArray } from 'drizzle-orm';
+import type { RunMLCategorizationResult, MLCategorizationResult, CategorizationResult, ReviewResult, VideoReviewDetail } from '@/types/ml';
+import { eq, inArray, and, isNull, isNotNull, count, sql } from 'drizzle-orm';
 import type { Category } from '@/types/categories';
 import type { VideoCardData } from '@/types/videos';
 
@@ -161,5 +161,251 @@ export async function getMLCategorizationResults(
   } catch (error) {
     console.error('[getMLCategorizationResults] Error:', error);
     return [];
+  }
+}
+
+// --- Phase 6: Review & Approval Interface ---
+
+/**
+ * Accept an ML categorization suggestion for a video.
+ * Sets acceptedAt timestamp and clears any previous rejection.
+ *
+ * @param videoId - Video database ID
+ * @returns Success status
+ */
+export async function acceptSuggestion(
+  videoId: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await db
+      .update(mlCategorizations)
+      .set({
+        acceptedAt: new Date(),
+        rejectedAt: null,
+        manualCategoryId: null,
+      })
+      .where(eq(mlCategorizations.videoId, videoId));
+
+    return { success: true };
+  } catch (error) {
+    console.error('[acceptSuggestion] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Reject an ML categorization suggestion for a video.
+ * Sets rejectedAt timestamp and clears any previous acceptance.
+ *
+ * @param videoId - Video database ID
+ * @returns Success status
+ */
+export async function rejectSuggestion(
+  videoId: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await db
+      .update(mlCategorizations)
+      .set({
+        rejectedAt: new Date(),
+        acceptedAt: null,
+      })
+      .where(eq(mlCategorizations.videoId, videoId));
+
+    return { success: true };
+  } catch (error) {
+    console.error('[rejectSuggestion] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Recategorise a video with a manual category choice.
+ * Sets manualCategoryId and marks as rejected if not already.
+ *
+ * @param videoId - Video database ID
+ * @param newCategoryId - User-chosen category ID
+ * @returns Success status
+ */
+export async function recategorizeVideo(
+  videoId: number,
+  newCategoryId: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Fetch current state to check if already rejected
+    const existing = await db
+      .select({ rejectedAt: mlCategorizations.rejectedAt })
+      .from(mlCategorizations)
+      .where(eq(mlCategorizations.videoId, videoId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      return { success: false, error: 'No ML categorization found for this video' };
+    }
+
+    const updateData: {
+      manualCategoryId: number;
+      rejectedAt?: Date;
+      acceptedAt: null;
+    } = {
+      manualCategoryId: newCategoryId,
+      acceptedAt: null,
+    };
+
+    // Set rejectedAt if not already rejected
+    if (!existing[0].rejectedAt) {
+      updateData.rejectedAt = new Date();
+    }
+
+    await db
+      .update(mlCategorizations)
+      .set(updateData)
+      .where(eq(mlCategorizations.videoId, videoId));
+
+    return { success: true };
+  } catch (error) {
+    console.error('[recategorizeVideo] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Fetch enriched review data with three-way join (videos -> mlCategorizations -> categories).
+ * Supports filtering by confidence level and review status.
+ *
+ * @param confidenceFilter - Optional: filter by confidence level
+ * @param reviewStatus - Optional: 'all' | 'pending' | 'accepted' | 'rejected'
+ * @returns Array of enriched review results
+ */
+export async function getReviewData(
+  confidenceFilter?: 'HIGH' | 'MEDIUM' | 'LOW',
+  reviewStatus?: 'all' | 'pending' | 'accepted' | 'rejected'
+): Promise<ReviewResult[]> {
+  try {
+    // Build WHERE conditions
+    const conditions = [];
+
+    if (confidenceFilter) {
+      conditions.push(eq(mlCategorizations.confidence, confidenceFilter));
+    }
+
+    if (reviewStatus === 'pending') {
+      conditions.push(isNull(mlCategorizations.acceptedAt));
+      conditions.push(isNull(mlCategorizations.rejectedAt));
+    } else if (reviewStatus === 'accepted') {
+      conditions.push(isNotNull(mlCategorizations.acceptedAt));
+    } else if (reviewStatus === 'rejected') {
+      conditions.push(isNotNull(mlCategorizations.rejectedAt));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Three-way join: videos -> mlCategorizations -> categories
+    const results = await db
+      .select({
+        videoId: videos.id,
+        youtubeId: videos.youtubeId,
+        title: videos.title,
+        thumbnailUrl: videos.thumbnailUrl,
+        channelTitle: videos.channelTitle,
+        duration: videos.duration,
+        publishedAt: videos.publishedAt,
+        suggestedCategoryId: mlCategorizations.suggestedCategoryId,
+        suggestedCategoryName: categories.name,
+        confidence: mlCategorizations.confidence,
+        similarityScore: mlCategorizations.similarityScore,
+        acceptedAt: mlCategorizations.acceptedAt,
+        rejectedAt: mlCategorizations.rejectedAt,
+        manualCategoryId: mlCategorizations.manualCategoryId,
+      })
+      .from(mlCategorizations)
+      .innerJoin(videos, eq(mlCategorizations.videoId, videos.id))
+      .innerJoin(categories, eq(mlCategorizations.suggestedCategoryId, categories.id))
+      .where(whereClause);
+
+    return results as ReviewResult[];
+  } catch (error) {
+    console.error('[getReviewData] Error:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch full video details with ML categorization context for review modal.
+ * Includes suggested category details and all non-protected categories for manual picker.
+ *
+ * @param videoId - Video database ID
+ * @returns Full review detail or null if not found
+ */
+export async function getVideoReviewDetail(
+  videoId: number
+): Promise<VideoReviewDetail | null> {
+  try {
+    // Fetch video data
+    const videoResult = await db
+      .select({
+        id: videos.id,
+        youtubeId: videos.youtubeId,
+        title: videos.title,
+        thumbnailUrl: videos.thumbnailUrl,
+        duration: videos.duration,
+        channelTitle: videos.channelTitle,
+        publishedAt: videos.publishedAt,
+      })
+      .from(videos)
+      .where(eq(videos.id, videoId))
+      .limit(1);
+
+    if (videoResult.length === 0) return null;
+
+    // Fetch ML categorization for this video
+    const categorizationResult = await db
+      .select()
+      .from(mlCategorizations)
+      .where(eq(mlCategorizations.videoId, videoId))
+      .limit(1);
+
+    if (categorizationResult.length === 0) return null;
+
+    const categorization = categorizationResult[0] as MLCategorizationResult;
+
+    // Fetch suggested category
+    const suggestedCategoryResult = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, categorization.suggestedCategoryId))
+      .limit(1);
+
+    if (suggestedCategoryResult.length === 0) return null;
+
+    // Fetch all non-protected categories for manual recategorisation picker
+    const allCategories = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.isProtected, false));
+
+    const video = videoResult[0];
+
+    return {
+      video: {
+        ...video,
+        categoryNames: [], // Not needed in review context
+      },
+      categorization,
+      suggestedCategory: suggestedCategoryResult[0] as Category,
+      allCategories: allCategories as Category[],
+    };
+  } catch (error) {
+    console.error('[getVideoReviewDetail] Error:', error);
+    return null;
   }
 }
