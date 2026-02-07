@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { Loader2 } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { getVideoReviewDetail } from '@/app/actions/ml-categorization';
-import type { ReviewResult, VideoReviewDetail } from '@/types/ml';
+import type { ReviewResult } from '@/types/ml';
 import type { ConfidenceLevel } from '@/lib/ml/confidence';
 import { formatDuration, formatRelativeDate } from '@/lib/videos/format';
 
@@ -46,30 +45,11 @@ export function ReviewModal({
   onAccept,
   onReject,
 }: ReviewModalProps) {
-  const [modalData, setModalData] = useState<VideoReviewDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Fetch video review detail when modal opens or videoId changes
-  useEffect(() => {
-    if (open && videoId) {
-      setIsLoading(true);
-      setModalData(null);
-      getVideoReviewDetail(videoId)
-        .then((data) => {
-          setModalData(data);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else if (!open) {
-      setModalData(null);
-    }
-  }, [open, videoId]);
-
-  // Find current index in results list for navigation
+  // Use data directly from resultsList — no server action needed
   const currentIndex = videoId
     ? resultsList.findIndex((r) => r.videoId === videoId)
     : -1;
+  const currentResult = currentIndex >= 0 ? resultsList[currentIndex] : null;
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex >= 0 && currentIndex < resultsList.length - 1;
 
@@ -77,22 +57,18 @@ export function ReviewModal({
   useHotkeys(
     'a',
     () => {
-      if (videoId) {
-        onAccept(videoId);
-      }
+      if (videoId) onAccept(videoId);
     },
-    { enabled: open && !isLoading && videoId !== null, preventDefault: true }
+    { enabled: open && videoId !== null, preventDefault: true }
   );
 
   // R key: Reject suggestion
   useHotkeys(
     'r',
     () => {
-      if (videoId) {
-        onReject(videoId);
-      }
+      if (videoId) onReject(videoId);
     },
-    { enabled: open && !isLoading && videoId !== null, preventDefault: true }
+    { enabled: open && videoId !== null, preventDefault: true }
   );
 
   // Left arrow: Navigate to previous video
@@ -103,7 +79,7 @@ export function ReviewModal({
         onNavigate(resultsList[currentIndex - 1].videoId);
       }
     },
-    { enabled: open && !isLoading && hasPrevious, preventDefault: true }
+    { enabled: open && hasPrevious, preventDefault: true }
   );
 
   // Right arrow: Navigate to next video
@@ -114,7 +90,7 @@ export function ReviewModal({
         onNavigate(resultsList[currentIndex + 1].videoId);
       }
     },
-    { enabled: open && !isLoading && hasNext, preventDefault: true }
+    { enabled: open && hasNext, preventDefault: true }
   );
 
   return (
@@ -127,57 +103,56 @@ export function ReviewModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <span className="ml-3 text-muted-foreground">
-              Loading video details...
-            </span>
-          </div>
-        )}
-
-        {/* Error state: video not found */}
-        {!isLoading && !modalData && videoId && (
+        {/* No video found */}
+        {!currentResult && videoId && (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
             <p>Could not load video details</p>
           </div>
         )}
 
-        {/* Modal content */}
-        {!isLoading && modalData && (
+        {/* Modal content — uses ReviewResult data directly, no server fetch */}
+        {currentResult && (
           <div className="flex flex-col gap-6">
-            {/* Video player embed */}
-            <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-              <iframe
-                src={`https://www.youtube.com/embed/${modalData.video.youtubeId}`}
-                title={modalData.video.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
+            {/* Video thumbnail with YouTube link */}
+            <a
+              href={`https://www.youtube.com/watch?v=${currentResult.youtubeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative block aspect-video rounded-lg overflow-hidden bg-muted group/thumb"
+            >
+              <img
+                src={getThumbnailUrl(currentResult.youtubeId) ?? ''}
+                alt={currentResult.title}
+                className="w-full h-full object-cover"
               />
-            </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover/thumb:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2 bg-white/90 text-black px-4 py-2 rounded-lg text-sm font-medium">
+                  <ExternalLink className="h-4 w-4" />
+                  Watch on YouTube
+                </div>
+              </div>
+            </a>
 
             {/* Video metadata */}
             <div className="flex flex-col gap-1">
               <h3 className="text-lg font-semibold leading-tight">
-                {modalData.video.title}
+                {currentResult.title}
               </h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                {modalData.video.channelTitle && (
-                  <span>{modalData.video.channelTitle}</span>
+                {currentResult.channelTitle && (
+                  <span>{currentResult.channelTitle}</span>
                 )}
-                {modalData.video.channelTitle && modalData.video.duration && (
+                {currentResult.channelTitle && currentResult.duration && (
                   <span>&bull;</span>
                 )}
-                {modalData.video.duration && (
-                  <span>{formatDuration(modalData.video.duration)}</span>
+                {currentResult.duration && (
+                  <span>{formatDuration(currentResult.duration)}</span>
                 )}
-                {modalData.video.publishedAt && (
+                {currentResult.publishedAt && (
                   <>
                     <span>&bull;</span>
                     <span>
-                      {formatRelativeDate(modalData.video.publishedAt)}
+                      {formatRelativeDate(currentResult.publishedAt)}
                     </span>
                   </>
                 )}
@@ -189,19 +164,18 @@ export function ReviewModal({
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
                   <p className="text-lg font-medium">
-                    Suggested Category:{' '}
-                    {modalData.suggestedCategory.name}
+                    Suggested Category: {currentResult.suggestedCategoryName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {modalData.categorization.similarityScore}% match
+                    {currentResult.similarityScore}% match
                   </p>
                 </div>
                 <span
                   className={`text-xs font-semibold px-3 py-1.5 rounded ${
-                    confidenceBadgeStyles[modalData.categorization.confidence]
+                    confidenceBadgeStyles[currentResult.confidence]
                   }`}
                 >
-                  {confidenceLabels[modalData.categorization.confidence]}
+                  {confidenceLabels[currentResult.confidence]}
                 </span>
               </div>
             </div>

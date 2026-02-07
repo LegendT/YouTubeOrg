@@ -12,7 +12,7 @@ interface ReviewGridProps {
   onFocusChange: (index: number) => void;
 }
 
-const ROW_HEIGHT = 380;
+const ROW_HEIGHT = 340;
 const COLUMN_COUNT = 3;
 
 export function ReviewGrid({

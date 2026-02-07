@@ -23,7 +23,47 @@
 import type { Category } from '@/types/categories';
 import type { VideoCardData } from '@/types/videos';
 import { EmbeddingsCache } from './embeddings-cache';
-import { categorizeWithConfidence, type ConfidenceLevel } from './confidence';
+import { getConfidenceLevel, type ConfidenceLevel } from './confidence';
+import { cosineSimilarity } from './similarity';
+
+const CHANNEL_BOOST_THRESHOLD = 0.5; // Min Jaccard overlap to trigger boost
+const CHANNEL_BOOST_MAX = 0.35; // Max boost added to cosine similarity
+
+/**
+ * Compute channel-name boost via word-level Jaccard similarity.
+ * Compares channel name against the category prefix (before "::").
+ * Helps videos with short/generic titles (e.g. song names from Topic channels)
+ * where the channel name is the strongest category signal.
+ */
+function computeChannelBoost(channelTitle: string, categoryName: string): number {
+  if (!channelTitle) return 0;
+
+  // Strip common YouTube suffixes
+  const cleanChannel = channelTitle
+    .replace(/\s*-\s*Topic$/i, '')
+    .replace(/VEVO$/i, '')
+    .toLowerCase()
+    .trim();
+
+  // Use category prefix before "::" (the artist/topic part)
+  const categoryPrefix = categoryName.split('::')[0].toLowerCase().trim();
+
+  const channelWords = new Set(cleanChannel.split(/\s+/).filter((w) => w.length >= 2));
+  const categoryWords = new Set(categoryPrefix.split(/\s+/).filter((w) => w.length >= 2));
+
+  if (channelWords.size === 0 || categoryWords.size === 0) return 0;
+
+  let intersection = 0;
+  for (const word of channelWords) {
+    if (categoryWords.has(word)) intersection++;
+  }
+
+  const union = new Set([...channelWords, ...categoryWords]).size;
+  const jaccard = intersection / union;
+
+  if (jaccard < CHANNEL_BOOST_THRESHOLD) return 0;
+  return jaccard * CHANNEL_BOOST_MAX;
+}
 
 const MODEL_VERSION = 'all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 embedding dimension
@@ -172,9 +212,10 @@ export class MLCategorizationEngine {
   ): Promise<CategorizationResult[]> {
     const results: CategorizationResult[] = [];
 
-    // Step 1: Pre-compute category embeddings (reused for all videos)
+    // Step 1: Pre-compute category embeddings and lookup map
     onProgress?.(0, videos.length, 0, 'Preparing categories...');
     const categoryEmbeddings = await this.generateCategoryEmbeddings(categories);
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
     // Step 2: Process videos in batches
     for (let i = 0; i < videos.length; i += BATCH_SIZE) {
@@ -246,7 +287,8 @@ export class MLCategorizationEngine {
         });
       }
 
-      // Step 2c: Categorize each video in batch
+      // Step 2c: Categorize each video with hybrid scoring
+      // (semantic cosine similarity + channel-name keyword boost)
       for (const video of batch) {
         const videoEmbedding = validCachedEmbeddings.get(video.id);
 
@@ -255,19 +297,31 @@ export class MLCategorizationEngine {
           continue;
         }
 
-        const match = categorizeWithConfidence(videoEmbedding, categoryEmbeddings);
+        let bestMatch = { categoryId: -1, score: -Infinity };
 
-        // Skip if no match (shouldn't happen since we pre-computed categories)
-        if (!match) {
+        for (const [categoryId, catEmbedding] of categoryEmbeddings) {
+          const semantic = cosineSimilarity(videoEmbedding, catEmbedding);
+          const category = categoryMap.get(categoryId);
+          const boost = category
+            ? computeChannelBoost(video.channelTitle || '', category.name)
+            : 0;
+          const hybridScore = Math.min(semantic + boost, 1.0);
+
+          if (hybridScore > bestMatch.score) {
+            bestMatch = { categoryId, score: hybridScore };
+          }
+        }
+
+        if (bestMatch.categoryId === -1) {
           console.warn(`[Engine] No category match for video ${video.id}`);
           continue;
         }
 
         results.push({
           videoId: video.id,
-          suggestedCategoryId: match.categoryId,
-          confidence: match.confidence,
-          similarityScore: Math.round(match.score * 100), // Convert to 0-100
+          suggestedCategoryId: bestMatch.categoryId,
+          confidence: getConfidenceLevel(bestMatch.score),
+          similarityScore: Math.round(bestMatch.score * 100),
         });
       }
     }

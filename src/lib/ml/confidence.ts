@@ -1,9 +1,10 @@
 /**
  * Confidence scoring for ML categorization predictions.
  *
- * Thresholds are empirical starting points based on sentence-transformers research.
- * These may need calibration after running on actual YouTube video data.
- * See .planning/phases/05-ml-categorization-engine/05-RESEARCH.md Open Question 3.
+ * Thresholds calibrated against actual YouTube video data (1030 videos):
+ *   median score = 37%, p75 = 46%, mean = 40%
+ * Short video titles + category names produce lower cosine similarities
+ * than full-sentence benchmarks, so thresholds are adjusted accordingly.
  */
 
 import { cosineSimilarity } from './similarity';
@@ -11,21 +12,16 @@ import { cosineSimilarity } from './similarity';
 export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
 /**
- * Empirical thresholds for all-MiniLM-L6-v2 model.
- * These may need calibration based on actual categorization results.
+ * Calibrated thresholds for all-MiniLM-L6-v2 + hybrid channel-boost scoring.
  *
  * Thresholds:
- * - HIGH (≥0.75): Strong semantic match, high confidence in category assignment
- * - MEDIUM (0.60-0.74): Moderate match, reasonable confidence but may need review
- * - LOW (<0.60): Weak match, likely needs manual review or reassignment
- *
- * Note: These are starting points. Phase 05-02 will implement monitoring
- * to track actual accuracy by confidence level for threshold tuning.
+ * - HIGH (≥0.50): Top ~20% — strong match, high confidence
+ * - MEDIUM (0.35-0.49): Middle ~37% — reasonable match, worth reviewing
+ * - LOW (<0.35): Bottom ~43% — weak match, likely needs manual reassignment
  */
 export const CONFIDENCE_THRESHOLDS = {
-  HIGH: 0.75, // ≥0.75: Strong semantic match
-  MEDIUM: 0.6, // 0.60-0.74: Moderate match
-  // <0.60: Weak match (LOW)
+  HIGH: 0.5,
+  MEDIUM: 0.35,
 } as const;
 
 /**

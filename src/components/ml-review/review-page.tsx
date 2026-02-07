@@ -55,7 +55,7 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
   const [pickerVideoId, setPickerVideoId] = useState<number | null>(null);
   const [pickerCategories, setPickerCategories] = useState<Category[]>([]);
 
-  // Optimistic updates
+  // Optimistic updates — clear opposite state to match server action semantics
   const [optimisticResults, updateOptimistic] = useOptimistic(
     results,
     (
@@ -67,9 +67,9 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
           ? {
               ...r,
               acceptedAt:
-                update.action === 'accept' ? new Date() : r.acceptedAt,
+                update.action === 'accept' ? new Date() : null,
               rejectedAt:
-                update.action === 'reject' ? new Date() : r.rejectedAt,
+                update.action === 'reject' ? new Date() : null,
             }
           : r
       );
@@ -115,30 +115,46 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
 
   // --- Accept handler ---
   const handleAccept = (videoId: number) => {
+    advanceToNext(videoId);
     startTransition(async () => {
       updateOptimistic({ videoId, action: 'accept' });
       await acceptSuggestion(videoId);
+      // Persist to real state so optimistic doesn't revert
+      setResults((prev) =>
+        prev.map((r) =>
+          r.videoId === videoId
+            ? { ...r, acceptedAt: new Date(), rejectedAt: null, manualCategoryId: null }
+            : r
+        )
+      );
       setStats((prev) => ({
         ...prev,
         reviewed: prev.reviewed + 1,
         pending: prev.pending - 1,
       }));
     });
-    advanceToNext(videoId);
   };
 
   // --- Reject handler ---
   const handleReject = (videoId: number) => {
+    advanceToNext(videoId);
     startTransition(async () => {
       updateOptimistic({ videoId, action: 'reject' });
       await rejectSuggestion(videoId);
+      // Persist to real state so optimistic doesn't revert
+      setResults((prev) =>
+        prev.map((r) =>
+          r.videoId === videoId
+            ? { ...r, rejectedAt: new Date(), acceptedAt: null }
+            : r
+        )
+      );
       setStats((prev) => ({
         ...prev,
         reviewed: prev.reviewed + 1,
         pending: prev.pending - 1,
       }));
     });
-    advanceToNext(videoId);
   };
 
   // --- Confidence filter handler ---

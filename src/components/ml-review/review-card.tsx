@@ -25,14 +25,15 @@ const confidenceLabels: Record<ConfidenceLevel, string> = {
 };
 
 export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
+  // Prefer mqdefault (320x180) over DB-stored default (120x90)
   const thumbnailUrl =
-    result.thumbnailUrl ?? getThumbnailUrl(result.youtubeId);
+    getThumbnailUrl(result.youtubeId) ?? result.thumbnailUrl;
   const isAccepted = result.acceptedAt !== null;
   const isRejected = result.rejectedAt !== null;
 
   return (
     <div
-      className={`group relative flex flex-col gap-1.5 rounded-lg border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+      className={`group relative flex flex-col rounded-lg border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
         isFocused ? 'ring-2 ring-blue-500' : ''
       } ${isAccepted ? 'opacity-75' : ''} ${isRejected ? 'opacity-75' : ''}`}
       onClick={() => onClick(result.videoId)}
@@ -45,8 +46,8 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
         }
       }}
     >
-      {/* Thumbnail area */}
-      <div className="relative aspect-video bg-muted">
+      {/* Thumbnail area - fixed height prevents overlap on wide screens */}
+      <div className="relative h-48 bg-muted">
         {thumbnailUrl && (
           <img
             src={thumbnailUrl}
