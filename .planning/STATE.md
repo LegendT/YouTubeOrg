@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 7 of 8 (Safety & Archive System)
-Plan: 0 of TBD
-Status: Not started
-Last activity: 2026-02-07 — Phase 6 complete (verified)
+Plan: 1 of 4
+Status: In progress
+Last activity: 2026-02-07 — Completed 07-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 36/36 plans (100%)
+Progress: [█████████████████████████████████████████] 37/40 plans (93%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 36
+- Total plans completed: 37
 - Average duration: 3.7 min
-- Total execution time: 2.99 hours
+- Total execution time: 3.05 hours
 
 **By Phase:**
 
@@ -34,10 +34,11 @@ Progress: [███████████████████████
 | 4 - Video Display & Organization | 5/5 | 15.5 min | 3.1 min |
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
 | 6 - Review & Approval Interface | 5/5 | 59.3 min | 11.86 min |
+| 7 - Safety & Archive System | 1/4 | 3.5 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (3.8min), 06-02 (4min), 06-03 (3min), 06-04 (3.5min), 06-05 (45min)
-- Trend: Phase 6 plan 05 was extended checkpoint plan with iterative bug fixes and ML calibration
+- Last 5 plans: 06-03 (3min), 06-04 (3.5min), 06-05 (45min), 07-01 (3.5min)
+- Trend: Back to fast execution after Phase 6 Plan 05 extended checkpoint plan
 
 *Updated after each plan completion*
 
@@ -290,6 +291,13 @@ Recent decisions affecting current work:
 - Fixed height h-48 thumbnails prevent grid card overlap on wide screens (ROW_HEIGHT 380→340)
 - Prefer mqdefault (320x180) thumbnails over DB-stored default (120x90)
 
+**From 07-01 execution (2026-02-07):**
+- Stable identifiers in backup JSON: YouTube IDs and category names instead of internal serial IDs for portability
+- Pre-restore safety backup: auto-create backup before every restore for data loss prevention
+- Graceful missing video handling: skip with warning during restore instead of failing transaction
+- SHA-256 checksum verification on backup files for integrity detection
+- backupSnapshots and operationLog tables use serial() primary keys consistent with project convention
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -317,7 +325,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Phase 6 complete — all 5 plans executed, verified 6/6 must-haves
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None
 
 ---
@@ -347,3 +355,5 @@ Resume file: None
 **Phase 6 Plan 04 Complete!** Review page orchestrator: Server Component page at /ml-review loading initial data via Promise.all (getReviewData + getReviewStats), client orchestrator wiring ReviewGrid/ReviewModal/ReviewProgress/KeyboardHints with shared state, Tab/Shift+Tab keyboard grid navigation with wrap-around (disabled when modal open), Enter opens modal for focused card, modal navigation syncs selectedVideoId and gridFocusIndex, placeholder accept/reject handlers for Plan 06-05, empty state with link to ML categorisation. 2 files created (188 lines total). Ready for Phase 6 Plan 05 (Advanced Review Features).
 
 **Phase 6 Complete!** All 5 plans executed and verified (6/6 must-haves). Full keyboard-driven review workflow at /ml-review: virtualized 3-column grid with confidence badges, review modal with A/R/arrow shortcuts, Tab/Enter grid navigation, useOptimistic + useTransition for instant feedback, auto-advance after accept/reject, confidence filtering (All/High/Medium/Low), review status filtering (pending/rejected), CategoryPickerDialog for manual recategorisation, navbar link, consolidated getReviewStats (6→1 query), DB pool max 3, and calibrated ML confidence thresholds (HIGH ≥50%, MEDIUM ≥35%) with hybrid channel-name Jaccard boost scoring. All 7 Phase 6 requirements satisfied (ML-05..08, UI-07..09). Ready for Phase 7 (Safety & Archive System).
+
+**Phase 7 Plan 01 Complete!** Backup foundation: backupSnapshots table (filename, trigger, scope, entityCount, fileSizeBytes, SHA-256 checksum), operationLog table (action, entityType, entityIds JSONB, metadata, backupSnapshotId FK). 7 TypeScript interfaces (BackupData, BackupCategory, BackupCategoryVideo, BackupMLCategorization, OperationLogEntry, BackupSnapshotMeta, PendingChange, PendingChangeSummary). createSnapshot gathers categories/videos/ML data and writes JSON with stable identifiers (YouTube IDs, category names). restoreFromSnapshot verifies checksum, creates pre-restore safety backup, and rebuilds category structure in single DB transaction. 3 files created (440 lines total). Ready for Phase 7 Plan 02 (Server Actions & API Layer).
