@@ -15,9 +15,17 @@
 
 import { pipeline, env, type FeatureExtractionPipeline } from '@huggingface/transformers';
 
-// Disable local model checks in browser environment
+// Configure Transformers.js for browser environment
 // Models are loaded from Hugging Face CDN and cached via Cache API
 env.allowLocalModels = false;
+env.allowRemoteModels = true;
+env.useBrowserCache = true;
+
+console.log('[Worker] Transformers.js environment configured:', {
+  allowLocalModels: env.allowLocalModels,
+  allowRemoteModels: env.allowRemoteModels,
+  useBrowserCache: env.useBrowserCache
+});
 
 /**
  * Singleton pattern for pipeline initialization.
