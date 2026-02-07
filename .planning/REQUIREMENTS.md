@@ -48,10 +48,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### ML Categorization
 
-- [ ] **ML-01**: System auto-categorizes Watch Later videos using ML (Transformers.js)
-- [ ] **ML-02**: System assigns confidence scores to ML categorizations (HIGH/MEDIUM/LOW)
-- [ ] **ML-03**: System processes videos in batches for performance (32 videos at a time)
-- [ ] **ML-04**: System caches video embeddings to avoid recomputation
+- [x] **ML-01**: System auto-categorizes Watch Later videos using ML (Transformers.js)
+- [x] **ML-02**: System assigns confidence scores to ML categorizations (HIGH/MEDIUM/LOW)
+- [x] **ML-03**: System processes videos in batches for performance (32 videos at a time)
+- [x] **ML-04**: System caches video embeddings to avoid recomputation
 - [ ] **ML-05**: User can review ML-suggested categories before accepting
 - [ ] **ML-06**: System highlights low-confidence categorizations for manual review
 - [ ] **ML-07**: User can accept ML suggestion with single click
@@ -180,10 +180,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 4 | Pending |
 | UI-05 | Phase 4 | Pending |
 | UI-06 | Phase 4 | Pending |
-| ML-01 | Phase 5 | Pending |
-| ML-02 | Phase 5 | Pending |
-| ML-03 | Phase 5 | Pending |
-| ML-04 | Phase 5 | Pending |
+| ML-01 | Phase 5 | Complete |
+| ML-02 | Phase 5 | Complete |
+| ML-03 | Phase 5 | Complete |
+| ML-04 | Phase 5 | Complete |
 | ML-05 | Phase 6 | Pending |
 | ML-06 | Phase 6 | Pending |
 | ML-07 | Phase 6 | Pending |
