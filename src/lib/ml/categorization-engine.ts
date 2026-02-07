@@ -183,10 +183,12 @@ export class MLCategorizationEngine {
     const categoryEmbeddings = await this.generateCategoryEmbeddings(categories);
 
     // Step 2: Process videos in batches
+    console.log(`[Engine] Starting video processing: ${videos.length} videos, ${Math.ceil(videos.length / BATCH_SIZE)} batches`);
     for (let i = 0; i < videos.length; i += BATCH_SIZE) {
       const batch = videos.slice(i, i + BATCH_SIZE);
       const batchNum = Math.floor(i / BATCH_SIZE) + 1;
       const totalBatches = Math.ceil(videos.length / BATCH_SIZE);
+      console.log(`[Engine] Processing batch ${batchNum}/${totalBatches}, ${batch.length} videos`);
 
       onProgress?.(
         i,
@@ -196,17 +198,22 @@ export class MLCategorizationEngine {
       );
 
       // Step 2a: Check cache for existing embeddings
+      console.log(`[Engine] Checking cache for ${batch.length} videos`);
       const cachedEmbeddings = await this.embeddingsCache.getBatch(
         batch.map((v) => v.id),
         MODEL_VERSION
       );
+      console.log(`[Engine] Cache check complete: ${cachedEmbeddings.size} cached, ${batch.length - cachedEmbeddings.size} uncached`);
 
       // Step 2b: Generate embeddings for uncached videos
       const uncachedVideos = batch.filter((v) => !cachedEmbeddings.has(v.id));
+      console.log(`[Engine] Need to generate embeddings for ${uncachedVideos.length} videos`);
       if (uncachedVideos.length > 0) {
+        console.log(`[Engine] Building text array for ${uncachedVideos.length} uncached videos`);
         const texts = uncachedVideos.map(
           (v) => `${v.title} ${v.channelTitle || ''}`
         );
+        console.log(`[Engine] Calling generateEmbeddings for ${texts.length} texts`);
         const newEmbeddings = await this.generateEmbeddings(texts);
 
         // Cache new embeddings
