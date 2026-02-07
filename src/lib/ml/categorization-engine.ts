@@ -117,10 +117,17 @@ export class MLCategorizationEngine {
    * Returns cached embeddings when available.
    */
   private async generateEmbeddings(texts: string[]): Promise<Float32Array[]> {
+    console.log(`[Engine] generateEmbeddings called for ${texts.length} texts`);
     this.initWorker();
+
+    if (!this.worker) {
+      console.error('[Engine] Worker is null after initWorker()!');
+      throw new Error('Worker failed to initialize');
+    }
 
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36).substring(2);
+      console.log(`[Engine] Creating request ${id} for ${texts.length} texts`);
       this.pendingRequests.set(id, { resolve, reject });
 
       this.worker!.postMessage({
@@ -128,11 +135,13 @@ export class MLCategorizationEngine {
         texts,
         id,
       });
+      console.log(`[Engine] Posted message to worker for request ${id}`);
 
       // 60 second timeout for batch processing
       setTimeout(() => {
         const pending = this.pendingRequests.get(id);
         if (pending) {
+          console.error(`[Engine] Request ${id} timed out after 60s`);
           pending.reject(new Error('Embedding generation timeout'));
           this.pendingRequests.delete(id);
         }
