@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart3, Video, Brain, ClipboardCheck, Shield, LogOut } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Video, Brain, ClipboardCheck, Shield, RefreshCw, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
@@ -12,6 +12,7 @@ const navigation = [
   { name: 'ML Categorisation', href: '/ml-categorization', icon: Brain },
   { name: 'Review', href: '/ml-review', icon: ClipboardCheck },
   { name: 'Safety', href: '/safety', icon: Shield },
+  { name: 'Sync', href: '/sync', icon: RefreshCw },
 ];
 
 export function Navigation() {
