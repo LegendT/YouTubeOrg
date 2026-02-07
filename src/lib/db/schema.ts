@@ -28,6 +28,7 @@ export const videos = pgTable('videos', {
   lastFetched: timestamp('last_fetched').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedFromYoutubeAt: timestamp('deleted_from_youtube_at'), // Phase 8: tracks when old playlists were deleted during sync for idempotent resume
 });
 
 // Playlist-Video join table - many-to-many relationship with position tracking
@@ -124,6 +125,7 @@ export const categories = pgTable('categories', {
   sourceProposalId: integer('source_proposal_id').references(() => consolidationProposals.id), // Tracks origin for traceability
   videoCount: integer('video_count').notNull().default(0), // Denormalized for fast list rendering -- avoids COUNT joins
   isProtected: boolean('is_protected').notNull().default(false), // true for "Uncategorized" -- prevents rename/delete
+  youtubePlaylistId: text('youtube_playlist_id'), // Phase 8: stores the YouTube playlist ID after creation during sync
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -185,4 +187,35 @@ export const operationLog = pgTable('operation_log', {
   metadata: jsonb('metadata'),
   backupSnapshotId: integer('backup_snapshot_id').references(() => backupSnapshots.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// --- Phase 8: Batch Sync Operations ---
+
+// Sync jobs table - tracks multi-stage sync operations with pause/resume support
+export const syncJobs = pgTable('sync_jobs', {
+  id: serial('id').primaryKey(),
+  stage: text('stage').notNull().default('pending'), // SyncStage: pending, backup, create_playlists, add_videos, delete_playlists, completed, failed, paused
+  currentStageProgress: integer('current_stage_progress').notNull().default(0),
+  currentStageTotal: integer('current_stage_total').notNull().default(0),
+  stageResults: jsonb('stage_results').notNull().default('{}'), // Per-stage success/failure/skipped counts
+  errors: jsonb('errors').notNull().default('[]'), // Collected SyncError[] array
+  quotaUsedThisSync: integer('quota_used_this_sync').notNull().default(0),
+  pauseReason: text('pause_reason'), // 'quota_exhausted' | 'user_paused' | 'errors_collected' | null
+  previewData: jsonb('preview_data'), // Cached SyncPreview for display during/after sync
+  startedAt: timestamp('started_at').notNull().defaultNow(),
+  completedAt: timestamp('completed_at'),
+  lastResumedAt: timestamp('last_resumed_at'),
+  backupSnapshotId: integer('backup_snapshot_id').references(() => backupSnapshots.id), // Link to pre-sync backup
+});
+
+// Sync video operations table - per-video tracking for idempotent resume of add_videos stage
+export const syncVideoOperations = pgTable('sync_video_operations', {
+  id: serial('id').primaryKey(),
+  syncJobId: integer('sync_job_id').references(() => syncJobs.id).notNull(),
+  categoryId: integer('category_id').references(() => categories.id).notNull(),
+  videoId: integer('video_id').references(() => videos.id).notNull(),
+  youtubeVideoId: text('youtube_video_id').notNull(), // Denormalised for API calls without joins
+  status: text('status').notNull().default('pending'), // pending, completed, failed, skipped
+  errorMessage: text('error_message'),
+  completedAt: timestamp('completed_at'),
 });
