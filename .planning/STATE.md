@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 8 of 8 (Batch Sync Operations)
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-02-07 — Completed 08-01-PLAN.md
+Last activity: 2026-02-07 — Completed 08-02-PLAN.md
 
-Progress: [██████████████████████████████████████████] 41/44 plans (93%)
+Progress: [██████████████████████████████████████████] 42/44 plans (95%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 41
+- Total plans completed: 42
 - Average duration: 3.6 min
-- Total execution time: 3.46 hours
+- Total execution time: 3.53 hours
 
 **By Phase:**
 
@@ -35,11 +35,11 @@ Progress: [███████████████████████
 | 5 - ML Categorization Engine | 4/4 | 18.3 min | 4.58 min |
 | 6 - Review & Approval Interface | 5/5 | 59.3 min | 11.86 min |
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
-| 8 - Batch Sync Operations | 1/4 | 5.3 min | 5.3 min |
+| 8 - Batch Sync Operations | 2/4 | 9.5 min | 4.75 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (3min), 07-03 (3.5min), 07-04 (2.1min), 08-01 (5.3min)
-- Trend: Phase 8 start slightly slower (schema + types foundation)
+- Last 5 plans: 07-03 (3.5min), 07-04 (2.1min), 08-01 (5.3min), 08-02 (4.2min)
+- Trend: Phase 8 engine core slightly faster than foundation
 
 *Updated after each plan completion*
 
@@ -323,6 +323,13 @@ Recent decisions affecting current work:
 - Per-video operation tracking in syncVideoOperations enables idempotent resume at video granularity
 - drizzle-kit push may silently skip column additions on existing tables — manual ALTER TABLE needed as fallback
 
+**From 08-02 execution (2026-02-07):**
+- Quota pause threshold at 1000 remaining units (matching research recommendation)
+- 409 conflict on playlistItems.insert treated as success (video already in playlist)
+- 404 on playlists.delete treated as success (already deleted, idempotent)
+- syncVideoOperations bulk-populated at stage transition (chunked at 500 rows), not lazily per-batch
+- Pause stores real stage in stageResults._pausedAtStage (cleaned on resume)
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -349,8 +356,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-07T22:20:10Z
-Stopped at: Completed 08-01-PLAN.md (sync foundation: schema, types, write wrappers, OAuth)
+Last session: 2026-02-07T22:27:48Z
+Stopped at: Completed 08-02-PLAN.md (sync engine core: preview, engine, stages)
 Resume file: None
 
 ---
@@ -390,3 +397,5 @@ Resume file: None
 **Phase 7 Complete!** All 4 plans executed and verified (5/5 must-haves). Complete safety & archive system: backupSnapshots + operationLog DB tables, JSON backup with stable YouTube IDs and SHA-256 checksums, transactional restore with pre-restore safety backup, 7 server actions (4 backup CRUD + 3 operation log), GET /api/backup/[id] download route, Safety dashboard at /safety with Radix Tabs (backups/log/pending changes), Shield icon navbar link, and automatic pre-operation backups wired into deleteCategory and mergeCategories. All 5 Phase 7 requirements satisfied (SAFE-01, SAFE-02, SAFE-03, SAFE-05, SAFE-06). Ready for Phase 8 (Batch Sync Operations).
 
 **Phase 8 Plan 01 Complete!** Sync foundation: syncJobs table (stage-based state machine with pause/resume, quota tracking, preview data, backup snapshot link) and syncVideoOperations table (per-video tracking for idempotent resume). Extended categories with youtubePlaylistId and playlists with deletedFromYoutubeAt. TypeScript types for full sync workflow (SyncStage, SyncPreview, SyncJobRecord, SyncVideoOperationRecord, STAGE_LABELS). Three YouTube write wrappers (createYouTubePlaylist, addVideoToPlaylist, deleteYouTubePlaylist) using existing callYouTubeAPI + trackQuotaUsage. OAuth scope upgraded to youtube.force-ssl. 2 files created, 2 modified (284 lines total). Ready for Phase 8 Plan 02 (Sync Preview Engine).
+
+**Phase 8 Plan 02 Complete!** Sync engine core: computeSyncPreview queries categories/categoryVideos/playlists for accurate quota cost estimates and multi-day timeline. Engine state machine (createSyncJob, processSyncBatch, pauseSyncJob, resumeSyncJob, getCurrentSyncJob) manages full job lifecycle with stage transitions (pending -> backup -> create_playlists -> add_videos -> delete_playlists -> completed). Three stage executors with idempotent resume: executeCreatePlaylists stores YouTube IDs on categories, executeAddVideos processes syncVideoOperations with 409 conflict handling, executeDeletePlaylists treats 404 as success. All stages pause on 403 quotaExceeded and collect other errors. Bulk syncVideoOperations population at stage transition. 3 files created, 1 modified (921 lines total). Ready for Phase 8 Plan 03 (Server Actions and Sync UI).
