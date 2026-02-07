@@ -170,13 +170,14 @@ Plans:
   5. User can navigate review interface with keyboard (arrow keys, enter) without mouse
   6. User sees visual feedback for all actions (loading states, success confirmations)
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 - [ ] 06-01-PLAN.md — Server actions for review workflow (accept/reject/recategorize)
 - [ ] 06-02-PLAN.md — Review grid with confidence badges and progress display
 - [ ] 06-03-PLAN.md — Review modal with keyboard shortcuts and auto-advance
-- [ ] 06-04-PLAN.md — Page orchestrator, category picker, and end-to-end verification
+- [ ] 06-04-PLAN.md — Basic page orchestration with grid/modal integration and Tab/Enter navigation
+- [ ] 06-05-PLAN.md — Optimistic updates, accept/reject handlers, filters, category picker, and navbar link
 
 ---
 
@@ -236,10 +237,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Category Management | 6/6 | Complete | 2026-02-06 |
 | 4. Video Display & Organization | 5/5 | Complete | 2026-02-06 |
 | 5. ML Categorization Engine | 4/4 | Complete | 2026-02-07 |
-| 6. Review & Approval Interface | 0/4 | Not started | - |
+| 6. Review & Approval Interface | 0/5 | Not started | - |
 | 7. Safety & Archive System | 0/TBD | Not started | - |
 | 8. Batch Sync Operations | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-07 (Phase 6 planned: Review & Approval Interface with keyboard-driven workflow)*
+*Last updated: 2026-02-07 (Phase 6 revised: Split plan 04 into 04+05 for better context management)*
