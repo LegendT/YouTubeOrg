@@ -115,16 +115,35 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         });
 
         // Convert tensors to Float32Array for efficient storage and transfer
+        // Note: Transformers.js returns a single tensor with shape [batch_size, embedding_dim]
+        // We need to slice it into individual 384-dim vectors
         const embeddings: Float32Array[] = [];
+        const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 output dimension
 
         if (Array.isArray(output)) {
           // Batch processing: multiple texts
+          // Each output is a separate tensor (one per text)
           for (const tensor of output) {
-            embeddings.push(new Float32Array(Array.from(tensor.data as number[])));
+            const data = Array.from(tensor.data as number[]);
+            // Handle case where tensor might have batch dimension
+            if (data.length === EMBEDDING_DIM) {
+              embeddings.push(new Float32Array(data));
+            } else {
+              // If data is larger, extract the first EMBEDDING_DIM elements
+              embeddings.push(new Float32Array(data.slice(0, EMBEDDING_DIM)));
+            }
           }
         } else {
-          // Single text
-          embeddings.push(new Float32Array(Array.from(output.data as number[])));
+          // Single tensor containing all batch embeddings
+          // Shape is [batch_size, embedding_dim], data is flattened
+          const data = Array.from(output.data as number[]);
+          const batchSize = texts.length;
+
+          for (let i = 0; i < batchSize; i++) {
+            const start = i * EMBEDDING_DIM;
+            const end = start + EMBEDDING_DIM;
+            embeddings.push(new Float32Array(data.slice(start, end)));
+          }
         }
 
         // Send result back to main thread

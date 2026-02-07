@@ -66,7 +66,11 @@ export class MLCategorizationEngine {
       if (type === 'EMBEDDINGS_RESULT') {
         const pending = this.pendingRequests.get(id);
         if (pending) {
-          pending.resolve(embeddings.map((e: number[]) => new Float32Array(e)));
+          // Embeddings are already Float32Arrays after postMessage deserialization
+          // Just ensure they're properly typed
+          pending.resolve(embeddings.map((e: any) =>
+            e instanceof Float32Array ? e : new Float32Array(e)
+          ));
           this.pendingRequests.delete(id);
         }
       } else if (type === 'LOAD_PROGRESS') {
