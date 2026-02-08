@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, X, Circle } from 'lucide-react'
+import { Check, X, Circle } from '@phosphor-icons/react'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import type { ConsolidationProposal } from '@/types/analysis'
@@ -44,16 +44,16 @@ export function ProgressTracker({ proposals }: ProgressTrackerProps) {
       <Progress value={percentage} className="h-2" />
 
       <div className="flex items-center gap-3">
-        <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
-          <Check className="h-3 w-3 mr-1" />
+        <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/10">
+          <Check size={12} className="mr-1" weight="bold" />
           {approved} Approved
         </Badge>
-        <Badge className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
-          <X className="h-3 w-3 mr-1" />
+        <Badge className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10">
+          <X size={12} className="mr-1" weight="bold" />
           {rejected} Rejected
         </Badge>
         <Badge variant="outline">
-          <Circle className="h-3 w-3 mr-1" />
+          <Circle size={12} className="mr-1" />
           {pending} Pending
         </Badge>
       </div>

@@ -16,15 +16,15 @@ function getStatus(videoCount: number): ValidationStatus {
 }
 
 const statusStyles: Record<ValidationStatus, string> = {
-  safe: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
-  warning: 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100',
-  danger: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-100',
+  safe: 'bg-success/10 text-success border-success/20 hover:bg-success/10',
+  warning: 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/10',
+  danger: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10',
 }
 
 const progressStyles: Record<ValidationStatus, string> = {
-  safe: '[&>div]:bg-green-500',
-  warning: '[&>div]:bg-yellow-500',
-  danger: '[&>div]:bg-red-500',
+  safe: '[&>div]:bg-success',
+  warning: '[&>div]:bg-warning',
+  danger: '[&>div]:bg-destructive',
 }
 
 export function ValidationBadge({ videoCount }: ValidationBadgeProps) {
@@ -45,12 +45,12 @@ export function ValidationBadge({ videoCount }: ValidationBadgeProps) {
         </p>
       </div>
       {status === 'danger' && (
-        <p className="text-xs text-red-600 font-medium">
+        <p className="text-xs text-destructive font-medium">
           Exceeds safe limit of 4,500 videos (YouTube maximum: 5,000)
         </p>
       )}
       {status === 'warning' && (
-        <p className="text-xs text-yellow-600 font-medium">
+        <p className="text-xs text-warning font-medium">
           Approaching limit
         </p>
       )}

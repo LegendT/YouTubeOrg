@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AlertTriangle, X } from 'lucide-react'
+import { Warning, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { StalenessCheck } from '@/types/analysis'
@@ -34,15 +34,15 @@ export function StalenessBanner({ staleness, onReAnalyze }: StalenessBannerProps
   }
 
   return (
-    <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+    <Card className="border-warning/20 bg-warning/10">
       <CardContent className="flex items-start gap-3 p-4">
-        <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+        <Warning className="h-5 w-5 text-warning shrink-0 mt-0.5" weight="fill" />
         <div className="flex-1 space-y-1">
-          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+          <p className="text-sm font-medium text-warning">
             {staleness.message ?? 'Playlist data has changed since last analysis.'}
           </p>
-          <p className="text-xs text-yellow-700 dark:text-yellow-300">
-            Last analyzed: {formatDate(staleness.lastAnalysisDate)} | Last sync:{' '}
+          <p className="text-xs text-warning/80">
+            Last analysed: {formatDate(staleness.lastAnalysisDate)} | Last sync:{' '}
             {formatDate(staleness.lastSyncDate)}
           </p>
         </div>
@@ -50,19 +50,19 @@ export function StalenessBanner({ staleness, onReAnalyze }: StalenessBannerProps
           <Button
             size="sm"
             variant="outline"
-            className="border-yellow-500 text-yellow-800 hover:bg-yellow-100 dark:text-yellow-200 dark:hover:bg-yellow-900"
+            className="border-warning/30 text-warning hover:bg-warning/20"
             onClick={onReAnalyze}
           >
-            Re-analyze
+            Re-analyse
           </Button>
           <Button
             size="icon"
             variant="ghost"
-            className="h-7 w-7 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+            className="h-7 w-7 text-warning hover:text-warning hover:bg-warning/20"
             onClick={() => setDismissed(true)}
             aria-label="Dismiss staleness warning"
           >
-            <X className="h-4 w-4" />
+            <X size={16} />
           </Button>
         </div>
       </CardContent>
