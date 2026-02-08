@@ -118,7 +118,7 @@ export default async function DashboardPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" role="region" aria-label="Quota and sync status">
           <QuotaDisplay used={usedQuota} total={10000} />
 
           <div className="border border-border rounded-lg p-6 bg-card shadow-sm flex flex-col justify-center">

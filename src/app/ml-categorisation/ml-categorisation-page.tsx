@@ -18,7 +18,7 @@ export function MLCategorisationPage() {
   const [hasStarted, setHasStarted] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background" aria-label="ML video categorisation">
       {/* Header */}
       <div className="bg-card border-b border-border px-8 py-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">ML Video Categorisation</h1>
@@ -134,6 +134,6 @@ export function MLCategorisationPage() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

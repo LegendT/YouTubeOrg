@@ -21,7 +21,7 @@ export function SafetyDashboard({
   initialPendingChanges,
 }: SafetyDashboardProps) {
   return (
-    <Tabs defaultValue="backups" className="w-full">
+    <Tabs defaultValue="backups" className="w-full" aria-label="Safety management">
       <TabsList className="mb-4">
         <TabsTrigger value="backups" className="flex items-center gap-1.5">
           <HardDrive className="h-3.5 w-3.5" />

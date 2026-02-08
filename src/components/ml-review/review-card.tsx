@@ -39,6 +39,7 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
       onClick={() => onClick(result.videoId)}
       role="button"
       tabIndex={0}
+      aria-label={`Review ${result.title} - ${result.confidence} confidence`}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           e.preventDefault();

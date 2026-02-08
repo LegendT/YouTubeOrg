@@ -22,7 +22,7 @@ export function CategorySidebar({
   totalVideoCount,
 }: CategorySidebarProps) {
   return (
-    <div className="w-[280px] border-r border-border bg-card flex flex-col h-full">
+    <nav aria-label="Video categories" className="w-[280px] border-r border-border bg-card flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <h2 className="text-lg font-semibold text-foreground">Categories</h2>
@@ -65,6 +65,6 @@ export function CategorySidebar({
           ))}
         </div>
       </ScrollArea>
-    </div>
+    </nav>
   );
 }

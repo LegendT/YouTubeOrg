@@ -28,11 +28,11 @@ export default async function AnalysisPage() {
   const categories = managementMode ? await getCategories() : []
 
   return (
-    <div className="container mx-auto py-8 space-y-6 bg-background">
+    <main className="container mx-auto py-8 space-y-6 bg-background">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {managementMode
               ? 'Category Management'
               : 'Playlist Analysis & Consolidation'}
@@ -79,6 +79,6 @@ export default async function AnalysisPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }

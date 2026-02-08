@@ -86,7 +86,8 @@ export function VideoToolbar({
               placeholder="Search videos..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full h-9 pl-9 pr-9 rounded-md border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              aria-label="Search videos"
+              className="w-full h-9 pl-9 pr-9 rounded-md border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             {isSearching && (
               <button
@@ -146,6 +147,7 @@ export function VideoToolbar({
                   onClearSelection();
                 }
               }}
+              aria-label="Select all videos"
             />
             <span className="text-sm text-muted-foreground">
               {selectedCount > 0 ? `${selectedCount} selected` : `Select all (${totalInView})`}

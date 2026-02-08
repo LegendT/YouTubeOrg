@@ -28,7 +28,7 @@ export default async function SyncPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8 space-y-8">
+    <main className="mx-auto max-w-4xl px-6 py-8 space-y-8" aria-label="Sync operations">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sync to YouTube</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -41,6 +41,6 @@ export default async function SyncPage() {
         initialJob={progressResult.success ? (progressResult.job ?? null) : null}
         previewError={!previewResult.success ? previewResult.error : undefined}
       />
-    </div>
+    </main>
   );
 }
