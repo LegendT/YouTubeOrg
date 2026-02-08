@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Search,
+  MagnifyingGlass,
   GitBranch,
-  FileCheck,
+  ListChecks,
   CheckCircle,
-  AlertTriangle,
-  Loader2,
-} from 'lucide-react'
+  Warning,
+} from '@phosphor-icons/react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { Spinner } from '@/components/ui/spinner'
 import { runAnalysis } from '@/app/actions/analysis'
 import { useRouter } from 'next/navigation'
 import { AlgorithmModeToggle } from './algorithm-mode-toggle'
@@ -29,12 +29,12 @@ const STAGES: Array<{
   key: LoadingStage
   label: string
   step: string
-  icon: typeof Search
+  icon: typeof MagnifyingGlass
   progress: number
 }> = [
-  { key: 'duplicates', label: 'Detecting duplicates...', step: '1/3', icon: Search, progress: 33 },
+  { key: 'duplicates', label: 'Detecting duplicates...', step: '1/3', icon: MagnifyingGlass, progress: 33 },
   { key: 'clustering', label: 'Clustering playlists...', step: '2/3', icon: GitBranch, progress: 66 },
-  { key: 'proposals', label: 'Generating proposals...', step: '3/3', icon: FileCheck, progress: 100 },
+  { key: 'proposals', label: 'Generating proposals...', step: '3/3', icon: ListChecks, progress: 100 },
 ]
 
 /**
@@ -51,14 +51,14 @@ export function AnalysisLoading({ stage, error, onRetry }: AnalysisLoadingProps)
 
   if (stage === 'error') {
     return (
-      <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+      <Card className="border-destructive/20 bg-destructive/10">
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-          <AlertTriangle className="h-8 w-8 text-red-500" />
+          <Warning className="h-8 w-8 text-destructive" weight="fill" />
           <div>
-            <p className="text-sm font-medium text-red-800 dark:text-red-200">
+            <p className="text-sm font-medium text-destructive">
               Analysis Failed
             </p>
-            <p className="text-xs text-red-600 dark:text-red-300 mt-1">
+            <p className="text-xs text-destructive/80 mt-1">
               {error ?? 'An unexpected error occurred'}
             </p>
           </div>
@@ -74,10 +74,10 @@ export function AnalysisLoading({ stage, error, onRetry }: AnalysisLoadingProps)
 
   if (stage === 'complete') {
     return (
-      <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
+      <Card className="border-success/20 bg-success/10">
         <CardContent className="flex items-center gap-3 p-4">
-          <CheckCircle className="h-5 w-5 text-green-600" />
-          <p className="text-sm font-medium text-green-800 dark:text-green-200">
+          <CheckCircle className="h-5 w-5 text-success" weight="fill" />
+          <p className="text-sm font-medium text-success">
             Analysis complete!
           </p>
         </CardContent>
@@ -86,13 +86,12 @@ export function AnalysisLoading({ stage, error, onRetry }: AnalysisLoadingProps)
   }
 
   const currentStageInfo = STAGES.find((s) => s.key === stage) ?? STAGES[0]
-  const Icon = currentStageInfo.icon
 
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 p-6">
         <div className="flex items-center gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <Spinner size={20} className="text-primary" />
           <div>
             <p className="text-sm font-medium">{currentStageInfo.label}</p>
             <p className="text-xs text-muted-foreground">
@@ -118,14 +117,14 @@ export function AnalysisLoading({ stage, error, onRetry }: AnalysisLoadingProps)
                   isActive
                     ? 'text-primary font-medium'
                     : isDone
-                      ? 'text-green-600'
+                      ? 'text-success'
                       : ''
                 }`}
               >
                 {isDone ? (
-                  <CheckCircle className="h-3.5 w-3.5" />
+                  <CheckCircle size={14} weight="fill" />
                 ) : (
-                  <StageIcon className="h-3.5 w-3.5" />
+                  <StageIcon size={14} />
                 )}
                 <span>{s.step}</span>
               </div>
@@ -257,9 +256,9 @@ export function AnalysisRunner({
           disabled={isRunning || showComplete}
         >
           {isRunning
-            ? 'Analyzing...'
+            ? 'Analysing...'
             : hasExistingProposals
-              ? 'Re-analyze'
+              ? 'Re-analyse'
               : 'Run Analysis'}
         </Button>
       </div>

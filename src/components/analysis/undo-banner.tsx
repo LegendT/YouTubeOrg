@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Button } from '@/components/ui/button'
-import { Undo2, Loader2 } from 'lucide-react'
+import { ArrowCounterClockwise } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import type { UndoEntry } from '@/lib/categories/undo-stack'
 
 interface UndoBannerProps {
@@ -85,9 +86,9 @@ export function UndoBanner({
             disabled={isUndoing}
           >
             {isUndoing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Spinner size={16} />
             ) : (
-              <Undo2 className="h-4 w-4" />
+              <ArrowCounterClockwise size={16} />
             )}
             Undo
           </Button>

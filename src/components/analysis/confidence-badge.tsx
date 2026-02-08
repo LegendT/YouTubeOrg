@@ -10,9 +10,9 @@ interface ConfidenceBadgeProps {
 }
 
 const levelStyles: Record<ConfidenceLevel, string> = {
-  HIGH: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
-  MEDIUM: 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100',
-  LOW: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-100',
+  HIGH: 'bg-success/10 text-success border-success/20 hover:bg-success/10',
+  MEDIUM: 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/10',
+  LOW: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10',
 }
 
 export function ConfidenceBadge({ score, level, reason }: ConfidenceBadgeProps) {
