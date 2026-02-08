@@ -258,7 +258,7 @@ Plans:
 ---
 
 ### Phase 10: UI Polish & Code Quality
-**Goal**: Replace alert() with toast notifications, fix TypeScript errors in ML worker, and sweep all user-facing strings for British English consistency.
+**Goal**: Replace alert() with toast notifications, replace window.confirm() with styled modal dialogs, fix TypeScript errors in ML worker, and sweep all user-facing strings and code identifiers for British English consistency.
 
 **Depends on**: Phase 4 (alert usage), Phase 5 (TS errors)
 
@@ -271,7 +271,12 @@ Plans:
   2. ml/worker.ts compiles with zero TypeScript errors
   3. All user-facing strings use British English spelling (Categorise, Organise, Uncategorised, etc.)
 
-**Plans**: TBD (created by /gsd:plan-phase)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Sonner toast setup, alert/confirm replacements, ML worker TS verification
+- [ ] 10-02-PLAN.md — DB table rename (ml_categorisations), data migration (Uncategorised), schema updates
+- [ ] 10-03-PLAN.md — Route/file renames, British English identifier/string sweep across all files
 
 ---
 
@@ -309,9 +314,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Safety & Archive System | 4/4 | Complete | 2026-02-07 |
 | 8. Batch Sync Operations | 4/4 | Complete | 2026-02-07 |
 | 9. Auth Hardening | 3/3 | Complete | 2026-02-08 |
-| 10. UI Polish & Code Quality | 0/? | Not started | — |
+| 10. UI Polish & Code Quality | 0/3 | Not started | — |
 | 11. UX Refinements | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-08 (Phase 9 complete: middleware + selective guards)*
+*Last updated: 2026-02-08 (Phase 10 planned: 3 plans in 2 waves)*
