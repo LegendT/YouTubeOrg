@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useOptimistic, useTransition } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { GearSix } from '@phosphor-icons/react';
+import { ArrowLeft, GearSix } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import type { ReviewResult, ReviewStats } from '@/types/ml';
 import type { Category } from '@/types/categories';
 import {
@@ -303,20 +304,23 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
       {/* Recategorise rejected videos button / Back to pending */}
       <div className="px-4 py-2 border-b bg-card">
         {reviewStatusFilter === 'pending' ? (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleShowRejected}
-            className="flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm transition-colors"
           >
             <GearSix size={16} />
             Recategorise rejected videos
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleShowPending}
-            className="flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm transition-colors"
           >
+            <ArrowLeft size={16} />
             Back to pending videos
-          </button>
+          </Button>
         )}
       </div>
 

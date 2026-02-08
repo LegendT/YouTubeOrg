@@ -90,13 +90,15 @@ export function VideoToolbar({
               className="w-full h-9 pl-9 pr-9 rounded-md border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             {isSearching && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                 aria-label="Clear search"
               >
                 <X size={16} />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -180,12 +182,14 @@ export function VideoToolbar({
           <span>
             {resultCount} result{resultCount !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
           </span>
-          <button
+          <Button
+            variant="link"
+            size="sm"
             onClick={() => onSearchChange('')}
-            className="text-muted-foreground hover:text-foreground underline"
+            className="h-auto p-0 text-muted-foreground hover:text-foreground"
           >
             Clear
-          </button>
+          </Button>
         </div>
       )}
     </div>

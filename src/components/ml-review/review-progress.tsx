@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import type { ReviewStats } from '@/types/ml';
 
 type ConfidenceFilter = 'all' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -46,17 +47,15 @@ export function ReviewProgress({
         {filterButtons.map((btn) => {
           const isActive = currentFilter === btn.filter;
           return (
-            <button
+            <Button
               key={btn.filter}
+              variant={isActive ? 'default' : 'secondary'}
+              size="sm"
               onClick={() => onFilterChange(btn.filter)}
-              className={`text-xs px-3 py-1.5 rounded transition-colors ${
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className="text-xs h-7"
             >
               {btn.label}: {btn.count}
-            </button>
+            </Button>
           );
         })}
       </div>
