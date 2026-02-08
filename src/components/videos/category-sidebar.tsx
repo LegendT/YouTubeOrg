@@ -65,6 +65,13 @@ export function CategorySidebar({
           ))}
         </div>
       </ScrollArea>
+
+      {/* Keyboard shortcut hint */}
+      <div className="border-t border-border px-4 py-2">
+        <p className="text-xs text-muted-foreground">
+          Press <kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">?</kbd> for shortcuts
+        </p>
+      </div>
     </nav>
   );
 }

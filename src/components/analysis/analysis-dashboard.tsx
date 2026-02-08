@@ -405,6 +405,19 @@ export function AnalysisDashboard({
                   />
                 </div>
 
+                {/* Keyboard shortcut hint */}
+                {batchSelection.selectedIds.size === 0 && (
+                  <div className="border-t border-border px-3 py-2">
+                    <p className="text-xs text-muted-foreground">
+                      <kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">j</kbd>
+                      {' '}<kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">k</kbd>
+                      {' '}to navigate{' \u00B7 '}
+                      <kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">?</kbd>
+                      {' '}for all shortcuts
+                    </p>
+                  </div>
+                )}
+
                 {/* Batch operations toolbar with Merge button */}
                 {batchSelection.selectedIds.size > 0 && (
                   <ManagementBatchToolbar
@@ -602,6 +615,19 @@ export function AnalysisDashboard({
                   focusedIndex={keyboardNav.focusedIndex}
                 />
               </div>
+
+              {/* Keyboard shortcut hint */}
+              {batchSelection.selectedIds.size === 0 && (
+                <div className="border-t border-border px-3 py-2">
+                  <p className="text-xs text-muted-foreground">
+                    <kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">j</kbd>
+                    {' '}<kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">k</kbd>
+                    {' '}to navigate{' \u00B7 '}
+                    <kbd className="bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono text-muted-foreground">?</kbd>
+                    {' '}for all shortcuts
+                  </p>
+                </div>
+              )}
 
               {/* Batch operations floating toolbar */}
               {batchSelection.selectedIds.size > 0 && (
