@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 11 complete — Ready for Phase 12 (UX Audit)
+**Current focus:** Phase 12 in progress — UX Audit (dark mode, icons, colour migration, accessibility)
 
 ## Current Position
 
-Phase: 11 of 12 (UX Refinements)
-Plan: 3 of 3 (all complete)
-Status: Phase complete
-Last activity: 2026-02-08 — Completed 11-02-PLAN.md (Visual separation of checkbox and approval state)
+Phase: 12 of 12 (UX Audit)
+Plan: 1 of 12
+Status: In progress
+Last activity: 2026-02-08 — Completed 12-01-PLAN.md (UX Audit Foundation)
 
-Progress: [██████████████████████████████████████████████] 53/53 plans (100%)
+Progress: [████████████████████████████████████░░░░░░░░░░░] 54/65 plans (83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 53
-- Average duration: 3.4 min
-- Total execution time: 4.27 hours
+- Total plans completed: 54
+- Average duration: 3.5 min
+- Total execution time: 4.47 hours
 
 **By Phase:**
 
@@ -39,10 +39,11 @@ Progress: [███████████████████████
 | 9 - Auth Hardening | 3/3 | 7.5 min | 2.5 min |
 | 10 - UI Polish & Code Quality | 3/3 | 19.5 min | 6.5 min |
 | 11 - UX Refinements | 3/3 | 5.6 min | 1.87 min |
+| 12 - UX Audit | 1/12 | 12 min | 12 min |
 
 **Recent Trend:**
-- Last 5 plans: 10-03 (8min), 11-03 (1min), 11-01 (2.2min), 11-02 (2.4min)
-- Trend: Small targeted UI changes execute very quickly
+- Last 5 plans: 11-03 (1min), 11-01 (2.2min), 11-02 (2.4min), 12-01 (12min)
+- Trend: Phase 12 foundation plan took longer due to comprehensive audit document creation
 
 *Updated after each plan completion*
 
@@ -404,7 +405,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 11-02-PLAN.md (Visual separation of checkbox and approval state) -- Phase 11 complete
+Stopped at: Completed 12-01-PLAN.md (UX Audit Foundation)
 Resume file: None
 
 ---
@@ -448,3 +449,5 @@ Resume file: None
 **Phase 8 Plan 02 Complete!** Sync engine core: computeSyncPreview queries categories/categoryVideos/playlists for accurate quota cost estimates and multi-day timeline. Engine state machine (createSyncJob, processSyncBatch, pauseSyncJob, resumeSyncJob, getCurrentSyncJob) manages full job lifecycle with stage transitions (pending -> backup -> create_playlists -> add_videos -> delete_playlists -> completed). Three stage executors with idempotent resume: executeCreatePlaylists stores YouTube IDs on categories, executeAddVideos processes syncVideoOperations with 409 conflict handling, executeDeletePlaylists treats 404 as success. All stages pause on 403 quotaExceeded and collect other errors. Bulk syncVideoOperations population at stage transition. 3 files created, 1 modified (921 lines total). Ready for Phase 8 Plan 03 (Server Actions and Sync UI).
 
 **Phase 8 Plan 03 Complete!** Sync server actions and preview UI: 6 server actions for complete sync lifecycle (getSyncPreview, startSync, resumeSync, pauseSync, getSyncProgress, runSyncBatch) with auth checks and structured responses. /sync page at dedicated route with auth-gated server component, client wrapper managing preview-to-progress transitions via useTransition, and SyncPreview component showing 3 stage cards (Create Playlists, Add Videos, Delete Old Playlists) with quota costs, per-category video breakdown, collapsible playlist lists, quota summary with amber warning for multi-week syncs, Watch Later deprecation notice, and Start Sync button. Sync link added to navigation bar with RefreshCw icon. 4 files created, 1 modified (663 lines total). Ready for Phase 8 Plan 04 (Progress UI and Completion Report).
+
+**Phase 12 Plan 01 Complete!** UX Audit Foundation: ThemeProvider wrapping app (attribute="class", defaultTheme="system", suppressHydrationWarning), IconProvider client wrapper for Phosphor IconContext.Provider (size: 20, weight: "regular"), ThemeToggle component (Sun/Moon with CSS transitions, mounted state guard), semantic colour tokens (--success/--warning/--info with foregrounds in both light and dark), @phosphor-icons/react installed, reusable Spinner component (CircleNotch + animate-spin), reusable EmptyState component (icon 48px light + title + description + optional CTA), and comprehensive 78-issue UX audit document (8 critical, 32 major, 38 minor across 9 pages). 5 files created, 3 modified. Ready for Phase 12 Plan 02.
