@@ -4,7 +4,8 @@ import { useState, useCallback, useTransition, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Check, X, Loader2 } from 'lucide-react'
+import { Check, X } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { bulkUpdateStatus } from '@/app/actions/analysis'
 import type { ConsolidationProposal } from '@/types/analysis'
 
@@ -125,9 +126,9 @@ export function BatchOperations({
                 disabled={isPending}
               >
                 {isPending ? (
-                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  <Spinner size={16} className="mr-1.5" />
                 ) : (
-                  <X className="h-4 w-4 mr-1.5" />
+                  <X size={16} className="mr-1.5" />
                 )}
                 Reject selected
               </Button>
@@ -137,9 +138,9 @@ export function BatchOperations({
                 disabled={isPending}
               >
                 {isPending ? (
-                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  <Spinner size={16} className="mr-1.5" />
                 ) : (
-                  <Check className="h-4 w-4 mr-1.5" />
+                  <Check size={16} className="mr-1.5" />
                 )}
                 Approve selected
               </Button>
