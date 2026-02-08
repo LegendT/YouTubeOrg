@@ -693,7 +693,7 @@ export function AnalysisDashboard({
 
 import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Check, X } from 'lucide-react'
+import { Check, X, RotateCcw } from 'lucide-react'
 import { bulkUpdateStatus } from '@/app/actions/analysis'
 
 function BatchToolbar({
@@ -711,14 +711,14 @@ function BatchToolbar({
     message: string
   } | null>(null)
 
-  const handleBatchAction = (status: 'approved' | 'rejected') => {
+  const handleBatchAction = (status: 'approved' | 'rejected' | 'pending') => {
     const ids = Array.from(selectedIds)
     if (ids.length === 0) return
 
     startTransition(async () => {
       const result = await bulkUpdateStatus(ids, status)
       if (result.success) {
-        const label = status === 'approved' ? 'approved' : 'rejected'
+        const label = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'reset to pending'
         setFeedback({
           type: 'success',
           message: `${result.updatedCount} ${result.updatedCount === 1 ? 'category' : 'categories'} ${label}`,
@@ -743,6 +743,19 @@ function BatchToolbar({
           {selectedIds.size === 1 ? 'category' : 'categories'} selected
         </span>
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleBatchAction('pending')}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+            ) : (
+              <RotateCcw className="h-4 w-4 mr-1.5" />
+            )}
+            Reset
+          </Button>
           <Button
             size="sm"
             variant="outline"
