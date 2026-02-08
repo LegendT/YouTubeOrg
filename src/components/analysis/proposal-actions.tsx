@@ -3,7 +3,7 @@
 import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Check, X, RotateCcw } from 'lucide-react'
+import { Check, X, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { approveProposal, rejectProposal, resetProposal } from '@/app/actions/analysis'
 import type { ProposalStatus } from '@/types/analysis'
 
@@ -17,9 +17,9 @@ interface ProposalActionsProps {
 }
 
 const statusBadgeStyles: Record<ProposalStatus, string> = {
-  pending: 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100',
-  approved: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
-  rejected: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-100',
+  pending: 'bg-muted text-muted-foreground border-border hover:bg-muted',
+  approved: 'bg-success/10 text-success border-success/20 hover:bg-success/10',
+  rejected: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10',
 }
 
 export function ProposalActions({
@@ -58,9 +58,9 @@ export function ProposalActions({
     playlistNames.length <= 2
       ? playlistNames.map((n) => `'${n}'`).join(' and ')
       : playlistNames
-          .slice(0, -1)
-          .map((n) => `'${n}'`)
-          .join(', ') + `, and '${playlistNames[playlistNames.length - 1]}'`
+            .slice(0, -1)
+            .map((n) => `'${n}'`)
+            .join(', ') + `, and '${playlistNames[playlistNames.length - 1]}'`
 
   return (
     <div className="space-y-3">
@@ -76,7 +76,7 @@ export function ProposalActions({
           disabled={isPending || status === 'approved' || videoCount > 4500}
           className="gap-1"
         >
-          <Check className="h-4 w-4" />
+          <Check size={16} weight="bold" />
           Approve
         </Button>
         <Button
@@ -86,7 +86,7 @@ export function ProposalActions({
           disabled={isPending || status === 'rejected'}
           className="gap-1"
         >
-          <X className="h-4 w-4" />
+          <X size={16} weight="bold" />
           Reject
         </Button>
         {status !== 'pending' && (
@@ -97,7 +97,7 @@ export function ProposalActions({
             disabled={isPending}
             className="gap-1"
           >
-            <RotateCcw className="h-4 w-4" />
+            <ArrowCounterClockwise size={16} />
             Reset
           </Button>
         )}

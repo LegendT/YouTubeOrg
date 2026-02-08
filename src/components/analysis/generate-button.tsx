@@ -34,7 +34,7 @@ export function GenerateProposalButton() {
         {isLoading ? 'Analyzing playlists...' : 'Generate Consolidation Proposal'}
       </Button>
       {error && (
-        <p className="text-sm text-red-500 max-w-md text-right">{error}</p>
+        <p className="text-sm text-destructive max-w-md text-right">{error}</p>
       )}
     </div>
   )
