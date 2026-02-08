@@ -317,7 +317,21 @@ Plans:
   3. Consistent interaction patterns across all pages (loading states, error handling, empty states)
   4. Navigation flow is intuitive with no dead ends
 
-**Plans**: TBD (created by /gsd:plan-phase)
+**Plans**: 12 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Foundation: Phosphor Icons, dark mode ThemeProvider, semantic tokens, EmptyState/Spinner components, UX audit document
+- [ ] 12-02-PLAN.md — Navigation overhaul + landing page (Phosphor icons, semantic colours, theme toggle, mobile)
+- [ ] 12-03-PLAN.md — Dashboard page (standardised layout, semantic colours, empty state)
+- [ ] 12-04-PLAN.md — Analysis core structure (dashboard, category list, detail, summary, batch ops)
+- [ ] 12-05-PLAN.md — Analysis dialogs (final review, split wizard, duplicate resolver, video assignment, merge/rename/delete)
+- [ ] 12-06-PLAN.md — Analysis utility components (badges, banners, loading, buttons, tables)
+- [ ] 12-07-PLAN.md — Videos page (grid, cards, sidebar, toolbar, move-copy dialog, empty states)
+- [ ] 12-08-PLAN.md — ML Categorisation + ML Review pages (all components, standardised layouts)
+- [ ] 12-09-PLAN.md — Safety + Sync pages (all components, standardised layouts, status colours)
+- [ ] 12-10-PLAN.md — Accessibility pass (WCAG 2.2 focus, ARIA, headings) + button/form standardisation
+- [ ] 12-11-PLAN.md — Keyboard shortcuts overlay (? key) + shortcut standardisation
+- [ ] 12-12-PLAN.md — Responsive polish (mobile nav, grids, sidebar) + dark mode QA + visual verification
 
 ---
 
@@ -339,8 +353,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Auth Hardening | 3/3 | Complete | 2026-02-08 |
 | 10. UI Polish & Code Quality | 3/3 | Complete | 2026-02-08 |
 | 11. UX Refinements | 3/3 | Complete | 2026-02-08 |
-| 12. UX Audit | 0/? | Not started | — |
+| 12. UX Audit | 0/12 | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-08 (Phase 11 complete: 3 plans executed)*
+*Last updated: 2026-02-08 (Phase 12 planned: 12 plans in 4 waves)*
