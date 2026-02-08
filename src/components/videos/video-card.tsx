@@ -26,7 +26,7 @@ export function VideoCard({
   const additionalCategoryCount = video.categoryNames.length - 1;
 
   return (
-    <div className="group rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-shadow">
+    <div className={`group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}>
       {/* Thumbnail area with link and checkbox */}
       <div className="relative aspect-video bg-muted">
         <a
@@ -45,7 +45,7 @@ export function VideoCard({
           )}
           {/* Duration overlay */}
           {video.duration && (
-            <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 text-white text-xs font-medium rounded">
+            <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-foreground/80 text-background text-xs font-medium rounded">
               {formatDuration(video.duration)}
             </div>
           )}
@@ -61,14 +61,14 @@ export function VideoCard({
             onToggleSelect(video.id);
           }}
         >
-          <Checkbox checked={isSelected} className="bg-white/90 hover:bg-white" />
+          <Checkbox checked={isSelected} className="bg-card/90 hover:bg-card" />
         </div>
       </div>
 
       {/* Info area */}
       <div className="p-3 flex flex-col gap-1.5">
         {/* Title */}
-        <h3 className="text-sm font-medium line-clamp-2 leading-tight">
+        <h3 className="text-sm font-medium line-clamp-2 leading-tight text-foreground">
           {video.title}
         </h3>
 
