@@ -3,8 +3,8 @@
 import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Check, X } from 'lucide-react'
-import { approveProposal, rejectProposal } from '@/app/actions/analysis'
+import { Check, X, RotateCcw } from 'lucide-react'
+import { approveProposal, rejectProposal, resetProposal } from '@/app/actions/analysis'
 import type { ProposalStatus } from '@/types/analysis'
 
 interface ProposalActionsProps {
@@ -46,6 +46,13 @@ export function ProposalActions({
     })
   }
 
+  function handleReset() {
+    startTransition(async () => {
+      await resetProposal(proposalId)
+      onStatusChange?.()
+    })
+  }
+
   // Build natural language summary
   const playlistList =
     playlistNames.length <= 2
@@ -82,6 +89,18 @@ export function ProposalActions({
           <X className="h-4 w-4" />
           Reject
         </Button>
+        {status !== 'pending' && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleReset}
+            disabled={isPending}
+            className="gap-1"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+        )}
         <Badge className={statusBadgeStyles[status]}>
           {status}
         </Badge>
