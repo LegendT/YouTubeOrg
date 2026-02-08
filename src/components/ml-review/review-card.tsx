@@ -33,7 +33,7 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
 
   return (
     <div
-      className={`group relative flex flex-col rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+      className={`group relative flex flex-col rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer min-h-[44px] ${
         isFocused ? 'ring-2 ring-primary' : ''
       } ${isAccepted ? 'opacity-75' : ''} ${isRejected ? 'opacity-75' : ''}`}
       onClick={() => onClick(result.videoId)}
@@ -47,8 +47,8 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
         }
       }}
     >
-      {/* Thumbnail area - fixed height prevents overlap on wide screens */}
-      <div className="relative h-48 bg-muted">
+      {/* Thumbnail area - responsive height */}
+      <div className="relative aspect-video md:h-48 md:aspect-auto bg-muted">
         {thumbnailUrl && (
           <img
             src={thumbnailUrl}
@@ -60,7 +60,7 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
 
         {/* Duration overlay */}
         {result.duration && (
-          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 text-white text-xs font-medium rounded">
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-foreground/80 text-background text-xs font-medium rounded">
             {formatDuration(result.duration)}
           </div>
         )}

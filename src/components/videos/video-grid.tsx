@@ -13,7 +13,7 @@ interface VideoGridProps {
 }
 
 const ROW_HEIGHT = 380;
-const MIN_CARD_WIDTH = 300;
+const MIN_CARD_WIDTH = 280;
 const MAX_COLUMNS = 4;
 const MIN_COLUMNS = 1;
 
@@ -105,12 +105,10 @@ export function VideoGrid({
               }}
             >
               <div
-                className="grid"
+                className="grid px-4 md:px-12"
                 style={{
                   gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
-                  gap: '24px',
-                  paddingLeft: '48px',
-                  paddingRight: '48px',
+                  gap: columnCount === 1 ? '16px' : '24px',
                 }}
               >
                 {rowVideos.map((video) => (
