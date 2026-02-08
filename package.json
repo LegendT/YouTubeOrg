@@ -10,8 +10,8 @@
     "lint": "next lint"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Anthony George",
+  "license": "MIT",
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.1.36",
     "@auth/drizzle-adapter": "^1.11.1",
