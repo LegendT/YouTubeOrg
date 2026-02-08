@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 12 of 12 (UX Audit)
-Plan: 10 of 12
+Plan: 11 of 12
 Status: In progress
-Last activity: 2026-02-08 — Completed 12-04-PLAN.md (Analysis Core Structure Migration)
+Last activity: 2026-02-08 — Completed 12-11-PLAN.md (Keyboard Shortcuts Overlay)
 
-Progress: [██████████████████████████████████████████░░░░░] 62/65 plans (95%)
+Progress: [███████████████████████████████████████████░░░░] 63/65 plans (97%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 62
+- Total plans completed: 63
 - Average duration: 3.5 min
-- Total execution time: 5.1 hours
+- Total execution time: 5.2 hours
 
 **By Phase:**
 
@@ -39,11 +39,11 @@ Progress: [███████████████████████
 | 9 - Auth Hardening | 3/3 | 7.5 min | 2.5 min |
 | 10 - UI Polish & Code Quality | 3/3 | 19.5 min | 6.5 min |
 | 11 - UX Refinements | 3/3 | 5.6 min | 1.87 min |
-| 12 - UX Audit | 10/12 | 49 min | 4.9 min |
+| 12 - UX Audit | 11/12 | 55 min | 5.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 12-06 (4min), 12-08 (4min), 12-09 (6min), 12-07 (4min), 12-04 (5min)
-- Trend: Phase 12 execution plans consistent at ~5min; icon/colour migration is systematic
+- Last 5 plans: 12-08 (4min), 12-09 (6min), 12-07 (4min), 12-04 (5min), 12-11 (6min)
+- Trend: Phase 12 execution plans consistent at ~5min; keyboard shortcuts overlay standard complexity
 
 *Updated after each plan completion*
 
@@ -405,7 +405,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 12-08-PLAN.md (ML Categorisation & Review Pages Migration)
+Stopped at: Completed 12-11-PLAN.md (Keyboard Shortcuts Overlay)
 Resume file: None
 
 ---
@@ -457,3 +457,5 @@ Resume file: None
 **Phase 12 Plan 03 Complete!** Dashboard and child components migrated to semantic colours, Phosphor icons, standardised layout, and EmptyState. Dashboard page uses max-w-7xl layout, text-2xl font-semibold heading, SSR Phosphor icons (@phosphor-icons/react/ssr for server component), EmptyState for zero-playlists state. Playlist list uses bg-card/border-border/warning tokens. Quota display has 3-tier colour-coded progress bar (success >50%, warning 20-50%, destructive <20%). Sync button upgraded to shadcn Button with ArrowsClockwise icon and Spinner loading state. 4 files modified. Ready for Phase 12 Plan 04.
 
 **Phase 12 Plan 08 Complete!** ML Categorisation and Review pages migrated to semantic colours, Phosphor icons, and dark mode support across 11 components. Confidence badges use semantic status pattern (bg-success/10 text-success for HIGH, bg-warning/10 text-warning for MEDIUM, bg-destructive/10 text-destructive for LOW). EmptyState with Brain icon on ML Categorisation, ClipboardText on ML Review. Review modal uses shadcn Button with bg-success for accept and variant="destructive" for reject. Server component SSR import via @phosphor-icons/react/dist/ssr. Info card, progress bar, and error displays all use semantic tokens. 11 files modified. Ready for remaining Phase 12 plans.
+
+**Phase 12 Plan 11 Complete!** Global keyboard shortcut overlay activated by ? (Shift+/) key, displaying shortcuts grouped by page context (Global, Analysis, ML Review, Videos). KeyboardShortcutsOverlay component rendered in root layout. Consistent kbd element styling standardised across all shortcut displays (bg-muted border border-border rounded px-1.5 py-0.5 text-xs font-mono). "Press ? for shortcuts" hints added to analysis panels, ML review, and videos sidebar. enableOnFormTags: false prevents ? firing in search inputs. 5 files created/modified. Ready for Phase 12 Plan 12.
