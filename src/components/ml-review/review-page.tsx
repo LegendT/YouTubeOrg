@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useOptimistic, useTransition } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { Settings } from 'lucide-react';
+import { GearSix } from '@phosphor-icons/react';
 import type { ReviewResult, ReviewStats } from '@/types/ml';
 import type { Category } from '@/types/categories';
 import {
@@ -307,7 +307,7 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
             onClick={handleShowRejected}
             className="flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded text-sm transition-colors"
           >
-            <Settings className="h-4 w-4" />
+            <GearSix size={16} />
             Recategorise rejected videos
           </button>
         ) : (

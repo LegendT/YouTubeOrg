@@ -1,5 +1,7 @@
+import { ClipboardText } from '@phosphor-icons/react/dist/ssr';
 import { getReviewData, getReviewStats } from '@/app/actions/ml-categorisation';
 import { ReviewPage } from '@/components/ml-review/review-page';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const metadata = {
   title: 'ML Review - YouTube Playlist Organiser',
@@ -20,18 +22,13 @@ export default async function MLReviewPage() {
   // Empty state: no videos to review
   if (results.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4">
-        <h1 className="text-2xl font-bold">No Videos to Review</h1>
-        <p className="text-muted-foreground text-center max-w-md">
-          There are no ML categorisation results to review yet. Run ML
-          categorisation first to generate suggestions for your videos.
-        </p>
-        <a
-          href="/ml-categorisation"
-          className="text-primary hover:underline text-sm"
-        >
-          Go to ML Categorisation
-        </a>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <EmptyState
+          icon={ClipboardText}
+          title="No ML categorisations to review"
+          description="Run ML categorisation first to generate suggestions for your videos."
+          action={{ label: "Run Categorisation", href: "/ml-categorisation" }}
+        />
       </div>
     );
   }

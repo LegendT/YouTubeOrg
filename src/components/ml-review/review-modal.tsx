@@ -1,8 +1,9 @@
 'use client';
 
 import { useHotkeys } from 'react-hotkeys-hook';
-import { ExternalLink } from 'lucide-react';
+import { ArrowSquareOut } from '@phosphor-icons/react';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -25,9 +26,9 @@ interface ReviewModalProps {
 }
 
 const confidenceBadgeStyles: Record<ConfidenceLevel, string> = {
-  HIGH: 'bg-green-600 text-white',
-  MEDIUM: 'bg-amber-500 text-white',
-  LOW: 'bg-red-600 text-white',
+  HIGH: 'bg-success/10 text-success',
+  MEDIUM: 'bg-warning/10 text-warning',
+  LOW: 'bg-destructive/10 text-destructive',
 };
 
 const confidenceLabels: Record<ConfidenceLevel, string> = {
@@ -126,8 +127,8 @@ export function ReviewModal({
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover/thumb:opacity-100 transition-opacity">
-                <div className="flex items-center gap-2 bg-white/90 text-black px-4 py-2 rounded-lg text-sm font-medium">
-                  <ExternalLink className="h-4 w-4" />
+                <div className="flex items-center gap-2 bg-card text-foreground px-4 py-2 rounded-lg text-sm font-medium">
+                  <ArrowSquareOut size={16} />
                   Watch on YouTube
                 </div>
               </div>
@@ -135,7 +136,7 @@ export function ReviewModal({
 
             {/* Video metadata */}
             <div className="flex flex-col gap-1">
-              <h3 className="text-lg font-semibold leading-tight">
+              <h3 className="text-lg font-semibold leading-tight text-foreground">
                 {currentResult.title}
               </h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -160,10 +161,10 @@ export function ReviewModal({
             </div>
 
             {/* ML suggestion card */}
-            <div className="bg-card p-4 rounded-lg border">
+            <div className="bg-card p-4 rounded-lg border border-border">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-lg font-medium">
+                  <p className="text-lg font-medium text-foreground">
                     Suggested Category: {currentResult.suggestedCategoryName}
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -199,20 +200,21 @@ export function ReviewModal({
 
             {/* Action buttons */}
             <div className="flex items-center justify-center gap-4">
-              <button
+              <Button
                 onClick={() => videoId && onAccept(videoId)}
                 disabled={!videoId}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-success text-success-foreground hover:bg-success/90 px-6"
               >
                 Accept (A)
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => videoId && onReject(videoId)}
                 disabled={!videoId}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium transition-colors bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="destructive"
+                className="px-6"
               >
                 Reject (R)
-              </button>
+              </Button>
             </div>
           </div>
         )}

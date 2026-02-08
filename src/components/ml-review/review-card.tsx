@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from '@phosphor-icons/react';
 import type { ReviewResult } from '@/types/ml';
 import type { ConfidenceLevel } from '@/lib/ml/confidence';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
@@ -13,9 +13,9 @@ interface ReviewCardProps {
 }
 
 const confidenceBadgeStyles: Record<ConfidenceLevel, string> = {
-  HIGH: 'bg-green-600 text-white',
-  MEDIUM: 'bg-amber-500 text-white',
-  LOW: 'bg-red-600 text-white',
+  HIGH: 'bg-success/10 text-success',
+  MEDIUM: 'bg-warning/10 text-warning',
+  LOW: 'bg-destructive/10 text-destructive',
 };
 
 const confidenceLabels: Record<ConfidenceLevel, string> = {
@@ -33,8 +33,8 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
 
   return (
     <div
-      className={`group relative flex flex-col rounded-lg border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
-        isFocused ? 'ring-2 ring-blue-500' : ''
+      className={`group relative flex flex-col rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+        isFocused ? 'ring-2 ring-primary' : ''
       } ${isAccepted ? 'opacity-75' : ''} ${isRejected ? 'opacity-75' : ''}`}
       onClick={() => onClick(result.videoId)}
       role="button"
@@ -75,13 +75,13 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
 
         {/* Review state indicator */}
         {isAccepted && (
-          <div className="absolute top-1 left-1 bg-white rounded-full p-0.5">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+          <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
+            <CheckCircle size={20} weight="fill" className="text-success" />
           </div>
         )}
         {isRejected && (
-          <div className="absolute top-1 left-1 bg-white rounded-full p-0.5">
-            <XCircle className="h-5 w-5 text-red-600" />
+          <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
+            <XCircle size={20} weight="fill" className="text-destructive" />
           </div>
         )}
       </div>
@@ -89,7 +89,7 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
       {/* Info area */}
       <div className="p-3 flex flex-col gap-1.5">
         {/* Title */}
-        <h3 className="text-sm font-medium line-clamp-2 leading-tight">
+        <h3 className="text-sm font-medium text-foreground line-clamp-2 leading-tight">
           {result.title}
         </h3>
 

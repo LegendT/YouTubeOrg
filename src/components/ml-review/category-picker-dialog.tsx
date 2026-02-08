@@ -56,8 +56,8 @@ export function CategoryPickerDialog({
                 }}
                 className={`w-full text-left p-3 rounded transition-colors ${
                   isCurrent
-                    ? 'bg-secondary font-medium'
-                    : 'hover:bg-secondary/60'
+                    ? 'bg-accent font-medium'
+                    : 'hover:bg-accent'
                 }`}
               >
                 <span className="text-sm">{category.name}</span>
