@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from '@/lib/auth/session';
-import { MLCategorizationPage } from './ml-categorization-page';
+import { MLCategorisationPage } from './ml-categorisation-page';
 
 export default async function Page() {
   const session = await getServerSession();
@@ -11,8 +11,8 @@ export default async function Page() {
   }
 
   return (
-    <Suspense fallback={<div className="p-8">Loading ML categorization...</div>}>
-      <MLCategorizationPage />
+    <Suspense fallback={<div className="p-8">Loading ML categorisation...</div>}>
+      <MLCategorisationPage />
     </Suspense>
   );
 }

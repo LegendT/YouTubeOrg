@@ -2,8 +2,8 @@ import type { ConfidenceLevel } from '@/lib/ml/confidence';
 import type { Category } from '@/types/categories';
 import type { VideoCardData } from '@/types/videos';
 
-/** Result of ML categorization for a single video (database record) */
-export interface MLCategorizationResult {
+/** Result of ML categorisation for a single video (database record) */
+export interface MLCategorisationResult {
   id: number;
   videoId: number;
   suggestedCategoryId: number;
@@ -16,15 +16,15 @@ export interface MLCategorizationResult {
   manualCategoryId: number | null;
 }
 
-/** Categorization result from ML engine (before database persistence) */
-export interface CategorizationResult {
+/** Categorisation result from ML engine (before database persistence) */
+export interface CategorisationResult {
   videoId: number;
   suggestedCategoryId: number;
   confidence: ConfidenceLevel;
   similarityScore: number; // 0-100
 }
 
-/** Progress update during batch categorization */
+/** Progress update during batch categorisation */
 export interface MLProgressUpdate {
   current: number;
   total: number;
@@ -32,11 +32,11 @@ export interface MLProgressUpdate {
   status: string;
 }
 
-/** Result of runMLCategorization server action */
-export interface RunMLCategorizationResult {
+/** Result of runMLCategorisation server action */
+export interface RunMLCategorisationResult {
   success: boolean;
   error?: string;
-  categorizedCount?: number;
+  categorisedCount?: number;
   highConfidenceCount?: number;
   mediumConfidenceCount?: number;
   lowConfidenceCount?: number;
@@ -44,7 +44,7 @@ export interface RunMLCategorizationResult {
 
 // --- Phase 6: Review & Approval Interface ---
 
-/** Enriched review data combining video metadata with ML categorization details */
+/** Enriched review data combining video metadata with ML categorisation details */
 export interface ReviewResult {
   videoId: number;
   youtubeId: string;
@@ -75,7 +75,7 @@ export interface ReviewStats {
 /** Full video detail for review modal display */
 export interface VideoReviewDetail {
   video: VideoCardData;
-  categorization: MLCategorizationResult;
+  categorisation: MLCategorisationResult;
   suggestedCategory: Category;
   allCategories: Category[];
 }

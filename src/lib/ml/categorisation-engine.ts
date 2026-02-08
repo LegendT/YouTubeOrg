@@ -1,5 +1,5 @@
 /**
- * Batch categorization orchestrator for ML-powered video categorization.
+ * Batch categorisation orchestrator for ML-powered video categorisation.
  *
  * Coordinates:
  * - Web Worker for embeddings generation (Transformers.js)
@@ -7,8 +7,8 @@
  * - Confidence scoring for category assignment
  *
  * Usage:
- *   const engine = new MLCategorizationEngine();
- *   const results = await engine.categorizeVideos(videos, categories, onProgress);
+ *   const engine = new MLCategorisationEngine();
+ *   const results = await engine.categoriseVideos(videos, categories, onProgress);
  *   engine.terminate(); // Clean up worker
  *
  * Architecture:
@@ -69,7 +69,7 @@ const MODEL_VERSION = 'all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 embedding dimension
 const BATCH_SIZE = 32; // Per RESEARCH.md recommendation for browser performance
 
-export interface CategorizationResult {
+export interface CategorisationResult {
   videoId: number;
   suggestedCategoryId: number;
   confidence: ConfidenceLevel;
@@ -80,7 +80,7 @@ export interface ProgressCallback {
   (current: number, total: number, percentage: number, status: string): void;
 }
 
-export class MLCategorizationEngine {
+export class MLCategorisationEngine {
   private worker: Worker | null = null;
   private embeddingsCache: EmbeddingsCache;
   private pendingRequests = new Map<string, { resolve: Function; reject: Function }>();
@@ -90,8 +90,8 @@ export class MLCategorizationEngine {
   }
 
   /**
-   * Initialize Web Worker for embeddings generation.
-   * Lazy initialization to avoid loading model until needed.
+   * Initialise Web Worker for embeddings generation.
+   * Lazy initialisation to avoid loading model until needed.
    */
   private initWorker(): void {
     if (this.worker) return;
@@ -157,8 +157,8 @@ export class MLCategorizationEngine {
     this.initWorker();
 
     if (!this.worker) {
-      console.error('[Engine] Worker failed to initialize');
-      throw new Error('Worker failed to initialize');
+      console.error('[Engine] Worker failed to initialise');
+      throw new Error('Worker failed to initialise');
     }
 
     return new Promise((resolve, reject) => {
@@ -202,15 +202,15 @@ export class MLCategorizationEngine {
   }
 
   /**
-   * Categorize videos in batches with progress updates.
+   * Categorise videos in batches with progress updates.
    * Main orchestration method coordinating cache, worker, and similarity.
    */
-  async categorizeVideos(
+  async categoriseVideos(
     videos: VideoCardData[],
     categories: Category[],
     onProgress?: ProgressCallback
-  ): Promise<CategorizationResult[]> {
-    const results: CategorizationResult[] = [];
+  ): Promise<CategorisationResult[]> {
+    const results: CategorisationResult[] = [];
 
     // Step 1: Pre-compute category embeddings and lookup map
     onProgress?.(0, videos.length, 0, 'Preparing categories...');
@@ -287,7 +287,7 @@ export class MLCategorizationEngine {
         });
       }
 
-      // Step 2c: Categorize each video with hybrid scoring
+      // Step 2c: Categorise each video with hybrid scoring
       // (semantic cosine similarity + channel-name keyword boost)
       for (const video of batch) {
         const videoEmbedding = validCachedEmbeddings.get(video.id);
@@ -327,14 +327,14 @@ export class MLCategorizationEngine {
     }
 
     // Final progress update
-    onProgress?.(videos.length, videos.length, 100, 'Categorization complete');
+    onProgress?.(videos.length, videos.length, 100, 'Categorisation complete');
 
     return results;
   }
 
   /**
    * Terminate worker and cleanup resources.
-   * Call when categorization is complete.
+   * Call when categorisation is complete.
    */
   terminate(): void {
     if (this.worker) {

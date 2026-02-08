@@ -2,16 +2,16 @@
 
 import { db } from '@/lib/db';
 import { videos, categories, mlCategorisations } from '@/lib/db/schema';
-import type { RunMLCategorizationResult, MLCategorizationResult, CategorizationResult, ReviewResult, ReviewStats, VideoReviewDetail } from '@/types/ml';
+import type { RunMLCategorisationResult, MLCategorisationResult, CategorisationResult, ReviewResult, ReviewStats, VideoReviewDetail } from '@/types/ml';
 import { eq, inArray, and, isNull, isNotNull, count, sql } from 'drizzle-orm';
 import type { Category } from '@/types/categories';
 import type { VideoCardData } from '@/types/videos';
 
 /**
- * Fetch videos and categories for client-side categorization.
- * Returns data needed for MLCategorizationEngine.
+ * Fetch videos and categories for client-side categorisation.
+ * Returns data needed for MLCategorisationEngine.
  */
-export async function getDataForCategorization(): Promise<{
+export async function getDataForCategorisation(): Promise<{
   success: boolean;
   error?: string;
   videos?: VideoCardData[];
@@ -38,7 +38,7 @@ export async function getDataForCategorization(): Promise<{
     if (allCategories.length === 0) {
       return {
         success: false,
-        error: 'No categories available for ML categorization',
+        error: 'No categories available for ML categorisation',
       };
     }
 
@@ -46,12 +46,12 @@ export async function getDataForCategorization(): Promise<{
       success: true,
       videos: videosToProcess.map((v) => ({
         ...v,
-        categoryNames: [], // Not needed for categorization
+        categoryNames: [], // Not needed for categorisation
       })),
       categories: allCategories,
     };
   } catch (error) {
-    console.error('[getDataForCategorization] Error:', error);
+    console.error('[getDataForCategorisation] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -60,31 +60,31 @@ export async function getDataForCategorization(): Promise<{
 }
 
 /**
- * Persist ML categorization results to database.
+ * Persist ML categorisation results to database.
  * Called from client after ML engine completes.
  */
-export async function saveCategorizationResults(
-  results: CategorizationResult[]
-): Promise<RunMLCategorizationResult> {
+export async function saveCategorisationResults(
+  results: CategorisationResult[]
+): Promise<RunMLCategorisationResult> {
   try {
     if (results.length === 0) {
       return {
         success: true,
-        categorizedCount: 0,
+        categorisedCount: 0,
         highConfidenceCount: 0,
         mediumConfidenceCount: 0,
         lowConfidenceCount: 0,
       };
     }
 
-    // Delete existing ML categorizations for these videos (re-run scenario)
+    // Delete existing ML categorisations for these videos (re-run scenario)
     const videoIds = results.map((r) => r.videoId);
     await db
       .delete(mlCategorisations)
       .where(inArray(mlCategorisations.videoId, videoIds));
 
-    // Insert new categorization results
-    const categorizationRecords = results.map((result) => ({
+    // Insert new categorisation results
+    const categorisationRecords = results.map((result) => ({
       videoId: result.videoId,
       suggestedCategoryId: result.suggestedCategoryId,
       confidence: result.confidence,
@@ -92,7 +92,7 @@ export async function saveCategorizationResults(
       modelVersion: 'all-MiniLM-L6-v2',
     }));
 
-    await db.insert(mlCategorisations).values(categorizationRecords);
+    await db.insert(mlCategorisations).values(categorisationRecords);
 
     // Calculate statistics
     const highCount = results.filter((r) => r.confidence === 'HIGH').length;
@@ -101,13 +101,13 @@ export async function saveCategorizationResults(
 
     return {
       success: true,
-      categorizedCount: results.length,
+      categorisedCount: results.length,
       highConfidenceCount: highCount,
       mediumConfidenceCount: mediumCount,
       lowConfidenceCount: lowCount,
     };
   } catch (error) {
-    console.error('[saveCategorizationResults] Error:', error);
+    console.error('[saveCategorisationResults] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -116,14 +116,14 @@ export async function saveCategorizationResults(
 }
 
 /**
- * Fetch ML categorization results for a specific video.
+ * Fetch ML categorisation results for a specific video.
  *
  * @param videoId - Video database ID
- * @returns ML categorization result or null if not found
+ * @returns ML categorisation result or null if not found
  */
-export async function getMLCategorizationForVideo(
+export async function getMLCategorisationForVideo(
   videoId: number
-): Promise<MLCategorizationResult | null> {
+): Promise<MLCategorisationResult | null> {
   try {
     const result = await db
       .select()
@@ -133,22 +133,22 @@ export async function getMLCategorizationForVideo(
 
     if (result.length === 0) return null;
 
-    return result[0] as MLCategorizationResult;
+    return result[0] as MLCategorisationResult;
   } catch (error) {
-    console.error('[getMLCategorizationForVideo] Error:', error);
+    console.error('[getMLCategorisationForVideo] Error:', error);
     return null;
   }
 }
 
 /**
- * Get all ML categorization results, optionally filtered by confidence level.
+ * Get all ML categorisation results, optionally filtered by confidence level.
  *
  * @param confidenceFilter - Optional: 'HIGH', 'MEDIUM', 'LOW'
- * @returns Array of categorization results
+ * @returns Array of categorisation results
  */
-export async function getMLCategorizationResults(
+export async function getMLCategorisationResults(
   confidenceFilter?: 'HIGH' | 'MEDIUM' | 'LOW'
-): Promise<MLCategorizationResult[]> {
+): Promise<MLCategorisationResult[]> {
   try {
     const results = confidenceFilter
       ? await db
@@ -157,9 +157,9 @@ export async function getMLCategorizationResults(
           .where(eq(mlCategorisations.confidence, confidenceFilter))
       : await db.select().from(mlCategorisations);
 
-    return results as MLCategorizationResult[];
+    return results as MLCategorisationResult[];
   } catch (error) {
-    console.error('[getMLCategorizationResults] Error:', error);
+    console.error('[getMLCategorisationResults] Error:', error);
     return [];
   }
 }
@@ -167,7 +167,7 @@ export async function getMLCategorizationResults(
 // --- Phase 6: Review & Approval Interface ---
 
 /**
- * Accept an ML categorization suggestion for a video.
+ * Accept an ML categorisation suggestion for a video.
  * Sets acceptedAt timestamp and clears any previous rejection.
  *
  * @param videoId - Video database ID
@@ -197,7 +197,7 @@ export async function acceptSuggestion(
 }
 
 /**
- * Reject an ML categorization suggestion for a video.
+ * Reject an ML categorisation suggestion for a video.
  * Sets rejectedAt timestamp and clears any previous acceptance.
  *
  * @param videoId - Video database ID
@@ -233,7 +233,7 @@ export async function rejectSuggestion(
  * @param newCategoryId - User-chosen category ID
  * @returns Success status
  */
-export async function recategorizeVideo(
+export async function recategoriseVideo(
   videoId: number,
   newCategoryId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -246,7 +246,7 @@ export async function recategorizeVideo(
       .limit(1);
 
     if (existing.length === 0) {
-      return { success: false, error: 'No ML categorization found for this video' };
+      return { success: false, error: 'No ML categorisation found for this video' };
     }
 
     const updateData: {
@@ -270,7 +270,7 @@ export async function recategorizeVideo(
 
     return { success: true };
   } catch (error) {
-    console.error('[recategorizeVideo] Error:', error);
+    console.error('[recategoriseVideo] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -340,7 +340,7 @@ export async function getReviewData(
 }
 
 /**
- * Fetch full video details with ML categorization context for review modal.
+ * Fetch full video details with ML categorisation context for review modal.
  * Includes suggested category details and all non-protected categories for manual picker.
  *
  * @param videoId - Video database ID
@@ -367,22 +367,22 @@ export async function getVideoReviewDetail(
 
     if (videoResult.length === 0) return null;
 
-    // Fetch ML categorization for this video
-    const categorizationResult = await db
+    // Fetch ML categorisation for this video
+    const categorisationResult = await db
       .select()
       .from(mlCategorisations)
       .where(eq(mlCategorisations.videoId, videoId))
       .limit(1);
 
-    if (categorizationResult.length === 0) return null;
+    if (categorisationResult.length === 0) return null;
 
-    const categorization = categorizationResult[0] as MLCategorizationResult;
+    const categorisation = categorisationResult[0] as MLCategorisationResult;
 
     // Fetch suggested category
     const suggestedCategoryResult = await db
       .select()
       .from(categories)
-      .where(eq(categories.id, categorization.suggestedCategoryId))
+      .where(eq(categories.id, categorisation.suggestedCategoryId))
       .limit(1);
 
     if (suggestedCategoryResult.length === 0) return null;
@@ -400,7 +400,7 @@ export async function getVideoReviewDetail(
         ...video,
         categoryNames: [], // Not needed in review context
       },
-      categorization,
+      categorisation,
       suggestedCategory: suggestedCategoryResult[0] as Category,
       allCategories: allCategories as Category[],
     };
