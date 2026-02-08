@@ -5,7 +5,7 @@ export interface BackupData {
   trigger: string;
   data: {
     categories: BackupCategory[];
-    mlCategorizations: BackupMLCategorization[];
+    mlCategorisations: BackupMLCategorization[];
     metadata: {
       totalCategories: number;
       totalVideos: number;
