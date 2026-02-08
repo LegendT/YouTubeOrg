@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Columns, Rows, ShieldCheck, GitMerge, Plus } from '@phosphor-icons/react'
+import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { SummaryCard } from './summary-card'
 import { CategoryList } from './category-list'
@@ -93,6 +94,19 @@ export function AnalysisDashboard({
   categories: initialCategories,
 }: AnalysisDashboardProps) {
   const [orientation, setOrientation] = useState<Orientation>('horizontal')
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Auto-switch to vertical on mobile
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches)
+      if (e.matches) setOrientation('vertical')
+    }
+    handleChange(mq)
+    mq.addEventListener('change', handleChange)
+    return () => mq.removeEventListener('change', handleChange)
+  }, [])
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
   )
@@ -349,9 +363,9 @@ export function AnalysisDashboard({
     return (
       <div className="space-y-4">
         {/* Toolbar row: Summary + actions */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 md:gap-4">
           <SummaryCard summary={summary} />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -385,10 +399,10 @@ export function AnalysisDashboard({
         </div>
 
         {/* Split panel layout */}
-        <div className="h-[calc(100vh-320px)] rounded-lg border">
+        <div className={cn("rounded-lg border", isMobile ? "min-h-[60vh]" : "h-[calc(100vh-320px)]")}>
           <ResizablePanelGroup direction={orientation}>
             {/* Left panel: Category list with batch operations */}
-            <ResizablePanel defaultSize={35} minSize={25}>
+            <ResizablePanel defaultSize={isMobile ? 50 : 35} minSize={isMobile ? 30 : 25}>
               <div className="relative flex flex-col h-full">
                 <div className="flex-1 overflow-hidden">
                   <CategoryList
@@ -560,9 +574,9 @@ export function AnalysisDashboard({
       <ProgressTracker proposals={proposals} />
 
       {/* Toolbar row: Summary + actions */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 md:gap-4">
         <SummaryCard summary={summary} />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CreateCategoryDialog
             allPlaylists={allPlaylists}
             onCreated={handleStatusChange}
@@ -601,10 +615,10 @@ export function AnalysisDashboard({
       </div>
 
       {/* Split panel layout */}
-      <div className="h-[calc(100vh-380px)] rounded-lg border">
+      <div className={cn("rounded-lg border", isMobile ? "min-h-[60vh]" : "h-[calc(100vh-380px)]")}>
         <ResizablePanelGroup direction={orientation}>
           {/* Left panel: Category list with batch operations */}
-          <ResizablePanel defaultSize={35} minSize={25}>
+          <ResizablePanel defaultSize={isMobile ? 50 : 35} minSize={isMobile ? 30 : 25}>
             <div className="relative flex flex-col h-full">
               <div className="flex-1 overflow-hidden">
                 <CategoryList

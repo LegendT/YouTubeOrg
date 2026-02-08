@@ -33,9 +33,9 @@ export function ReviewProgress({
   ];
 
   return (
-    <div className="flex items-center justify-between gap-4 p-4 bg-card border-b">
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border-b">
       {/* Progress text */}
-      <div className="text-sm">
+      <div className="text-sm whitespace-nowrap">
         <span className="font-semibold">
           Reviewed {stats.reviewed} / {stats.total} videos
         </span>
@@ -43,7 +43,7 @@ export function ReviewProgress({
       </div>
 
       {/* Filter buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {filterButtons.map((btn) => {
           const isActive = currentFilter === btn.filter;
           return (
@@ -52,7 +52,7 @@ export function ReviewProgress({
               variant={isActive ? 'default' : 'secondary'}
               size="sm"
               onClick={() => onFilterChange(btn.filter)}
-              className="text-xs h-7"
+              className="text-xs h-7 px-2.5"
             >
               {btn.label}: {btn.count}
             </Button>

@@ -76,10 +76,10 @@ export function VideoToolbar({
   return (
     <div className="border-b border-border bg-card/95 backdrop-blur-sm">
       {/* Main toolbar row */}
-      <div className="flex items-center gap-4 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 md:gap-4">
         {/* Search area */}
-        <div className="flex-1 flex items-center gap-2">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex min-w-0 flex-1 items-center gap-2 basis-full md:basis-auto">
+          <div className="relative min-w-0 flex-1 max-w-md">
             <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input
               type="text"
@@ -107,6 +107,7 @@ export function VideoToolbar({
             <Button
               variant="outline"
               size="sm"
+              className="shrink-0"
               onClick={() =>
                 onSearchScopeChange(searchScope === 'category' ? 'all' : 'category')
               }
@@ -121,7 +122,7 @@ export function VideoToolbar({
         {/* Sort dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1">
+            <Button variant="outline" size="sm" className="shrink-0 gap-1">
               {currentSortLabel}
               <CaretDown size={16} />
             </Button>
@@ -151,7 +152,7 @@ export function VideoToolbar({
               }}
               aria-label="Select all videos"
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
               {selectedCount > 0 ? `${selectedCount} selected` : `Select all (${totalInView})`}
             </span>
           </div>
@@ -160,6 +161,7 @@ export function VideoToolbar({
           <Button
             variant="outline"
             size="sm"
+            className="shrink-0"
             disabled={!hasSelection}
             onClick={onMoveToClick}
           >
@@ -168,6 +170,7 @@ export function VideoToolbar({
           <Button
             variant="ghost"
             size="sm"
+            className="shrink-0"
             disabled={!hasSelection}
             onClick={onCopyToClick}
           >

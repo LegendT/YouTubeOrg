@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import {
   Dialog,
@@ -77,6 +77,26 @@ export function KeyboardShortcutsOverlay() {
       enableOnContentEditable: false,
     }
   )
+
+  // Fallback: listen for '?' via native keydown for keyboard layouts where shift+/ doesn't fire
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        const tagName = target.tagName.toLowerCase()
+        if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable) {
+          return
+        }
+        if (document.querySelector('[role="dialog"]')) {
+          return
+        }
+        e.preventDefault()
+        setOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
