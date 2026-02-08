@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 9 complete — ready for Phase 10
+**Current focus:** Phase 10 in progress — UI polish & code quality
 
 ## Current Position
 
-Phase: 9 of 11 (Auth Hardening)
-Plan: 3 of 3
-Status: Phase complete
-Last activity: 2026-02-08 — Phase 9 complete (middleware + selective guards)
+Phase: 10 of 11 (UI Polish & Code Quality)
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-02-08 — Completed 10-01-PLAN.md (replace native browser dialogs)
 
-Progress: [███████████████████████████████████████████░░] 47/47 plans (100% of phases 1-9)
+Progress: [████████████████████████████████████████████░░] 48/50 plans (96%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47
+- Total plans completed: 48
 - Average duration: 3.5 min
-- Total execution time: 3.85 hours
+- Total execution time: 3.93 hours
 
 **By Phase:**
 
@@ -37,10 +37,11 @@ Progress: [███████████████████████
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
 | 8 - Batch Sync Operations | 4/4 | 18.6 min | 4.65 min |
 | 9 - Auth Hardening | 3/3 | 7.5 min | 2.5 min |
+| 10 - UI Polish & Code Quality | 1/3 | 5 min | 5.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 08-03 (4.1min), 08-04 (5min), 09-01 (2.5min), 09-02 (2.5min), 09-03 (2.5min)
-- Trend: Auth hardening plans fast (~2.5min) — middleware approach eliminated boilerplate
+- Last 5 plans: 08-04 (5min), 09-01 (2.5min), 09-02 (2.5min), 09-03 (2.5min), 10-01 (5min)
+- Trend: UI polish plan slightly longer due to pre-existing TS spelling mismatch fix
 
 *Updated after each plan completion*
 
@@ -355,6 +356,12 @@ Recent decisions affecting current work:
 - withAuth() HOF wrapper added to guard.ts for future reuse
 - Per-page auth checks removed as redundant with middleware (pre-existing ones in dashboard/sync/ml-categorization left as-is)
 
+**From 10-01 execution (2026-02-08):**
+- Sonner toast for error feedback: toast.error() with duration: Infinity for persistent error toasts (user must dismiss)
+- Toaster provider in root layout: bottom-right, richColors, expand, closeButton, 3s default duration
+- Reusable ConfirmDialog component: parent-controlled isPending via useTransition, supports warning section
+- mlCategorisations British English standardised: backward-compat alias in schema.ts, all usages normalised
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -382,7 +389,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Phase 9 complete — all 3 plans executed, goal verified
+Stopped at: Completed 10-01-PLAN.md (replace native browser dialogs)
 Resume file: None
 
 ---
