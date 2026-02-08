@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/resizable'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Columns, Rows, Loader2, Shield, Merge, Plus } from 'lucide-react'
+import { Columns, Rows, ShieldCheck, GitMerge, Plus } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { SummaryCard } from './summary-card'
 import { CategoryList } from './category-list'
 import { CategoryDetail } from './category-detail'
@@ -358,9 +359,9 @@ export function AnalysisDashboard({
               disabled={isCreating}
             >
               {isCreating ? (
-                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                <Spinner size={16} className="mr-1.5" />
               ) : (
-                <Plus className="h-4 w-4 mr-1.5" />
+                <Plus size={16} className="mr-1.5" />
               )}
               New Category
             </Button>
@@ -375,9 +376,9 @@ export function AnalysisDashboard({
               title={`Switch to ${orientation === 'horizontal' ? 'vertical' : 'horizontal'} layout`}
             >
               {orientation === 'horizontal' ? (
-                <Rows className="h-4 w-4" />
+                <Rows size={16} />
               ) : (
-                <Columns className="h-4 w-4" />
+                <Columns size={16} />
               )}
             </Button>
           </div>
@@ -423,7 +424,7 @@ export function AnalysisDashboard({
                   isLoading ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Spinner size={20} />
                         <span>Loading category details...</span>
                       </div>
                     </div>
@@ -564,7 +565,7 @@ export function AnalysisDashboard({
                 : undefined
             }
           >
-            <Shield className="h-4 w-4 mr-1.5" />
+            <ShieldCheck size={16} className="mr-1.5" />
             Review &amp; Execute
           </Button>
           <Button
@@ -578,9 +579,9 @@ export function AnalysisDashboard({
             title={`Switch to ${orientation === 'horizontal' ? 'vertical' : 'horizontal'} layout`}
           >
             {orientation === 'horizontal' ? (
-              <Rows className="h-4 w-4" />
+              <Rows size={16} />
             ) : (
-              <Columns className="h-4 w-4" />
+              <Columns size={16} />
             )}
           </Button>
         </div>
@@ -633,7 +634,7 @@ export function AnalysisDashboard({
                   isLoading ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Spinner size={20} />
                         <span>Loading category details...</span>
                       </div>
                     </div>
@@ -666,7 +667,7 @@ export function AnalysisDashboard({
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Spinner size={20} />
                       <span>Loading duplicates...</span>
                     </div>
                   </div>
@@ -693,7 +694,7 @@ export function AnalysisDashboard({
 
 import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Check, X, RotateCcw } from 'lucide-react'
+import { Check, X, ArrowCounterClockwise } from '@phosphor-icons/react'
 import { bulkUpdateStatus } from '@/app/actions/analysis'
 
 function BatchToolbar({
@@ -750,9 +751,9 @@ function BatchToolbar({
             disabled={isPending}
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              <Spinner size={16} className="mr-1.5" />
             ) : (
-              <RotateCcw className="h-4 w-4 mr-1.5" />
+              <ArrowCounterClockwise size={16} className="mr-1.5" />
             )}
             Reset
           </Button>
@@ -763,9 +764,9 @@ function BatchToolbar({
             disabled={isPending}
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              <Spinner size={16} className="mr-1.5" />
             ) : (
-              <X className="h-4 w-4 mr-1.5" />
+              <X size={16} className="mr-1.5" />
             )}
             Reject
           </Button>
@@ -775,9 +776,9 @@ function BatchToolbar({
             disabled={isPending}
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              <Spinner size={16} className="mr-1.5" />
             ) : (
-              <Check className="h-4 w-4 mr-1.5" />
+              <Check size={16} className="mr-1.5" />
             )}
             Approve
           </Button>
@@ -821,7 +822,7 @@ function ManagementBatchToolbar({
             variant="outline"
             onClick={clearAll}
           >
-            <X className="h-4 w-4 mr-1.5" />
+            <X size={16} className="mr-1.5" />
             Clear
           </Button>
           {selectedIds.size >= 2 && (
@@ -829,7 +830,7 @@ function ManagementBatchToolbar({
               size="sm"
               onClick={onMerge}
             >
-              <Merge className="h-4 w-4 mr-1.5" />
+              <GitMerge size={16} className="mr-1.5" />
               Merge {selectedIds.size} categories
             </Button>
           )}
@@ -945,7 +946,7 @@ function CreateNewCategoryDialog({
           >
             {isCreating ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner size={16} />
                 Creating...
               </>
             ) : (

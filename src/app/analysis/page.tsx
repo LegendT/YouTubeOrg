@@ -28,7 +28,7 @@ export default async function AnalysisPage() {
   const categories = managementMode ? await getCategories() : []
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto py-8 space-y-6 bg-background">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
