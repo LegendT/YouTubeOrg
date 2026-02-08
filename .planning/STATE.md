@@ -405,7 +405,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 12-02-PLAN.md (Navigation & Landing Page)
+Stopped at: Completed 12-08-PLAN.md (ML Categorisation & Review Pages Migration)
 Resume file: None
 
 ---
@@ -455,3 +455,5 @@ Resume file: None
 **Phase 12 Plan 07 Complete!** Videos page ecosystem migrated to Phosphor icons, semantic colours, EmptyState components, and dark-mode-safe overlays across 6 components. Replaced Lucide Loader2/Search/X/ChevronDown with Phosphor Spinner/MagnifyingGlass/X/CaretDown. Added EmptyState with VideoCamera for no videos and FolderOpen for empty categories. Duration overlay uses bg-foreground/80 text-background for theme-aware inversion. Category sidebar uses bg-card border-border with hover:bg-accent/50. Move-copy dialog warning uses semantic bg-warning/10 text-warning. Video cards have ring-2 ring-primary selected state. 6 files modified. Ready for remaining Phase 12 plans.
 
 **Phase 12 Plan 03 Complete!** Dashboard and child components migrated to semantic colours, Phosphor icons, standardised layout, and EmptyState. Dashboard page uses max-w-7xl layout, text-2xl font-semibold heading, SSR Phosphor icons (@phosphor-icons/react/ssr for server component), EmptyState for zero-playlists state. Playlist list uses bg-card/border-border/warning tokens. Quota display has 3-tier colour-coded progress bar (success >50%, warning 20-50%, destructive <20%). Sync button upgraded to shadcn Button with ArrowsClockwise icon and Spinner loading state. 4 files modified. Ready for Phase 12 Plan 04.
+
+**Phase 12 Plan 08 Complete!** ML Categorisation and Review pages migrated to semantic colours, Phosphor icons, and dark mode support across 11 components. Confidence badges use semantic status pattern (bg-success/10 text-success for HIGH, bg-warning/10 text-warning for MEDIUM, bg-destructive/10 text-destructive for LOW). EmptyState with Brain icon on ML Categorisation, ClipboardText on ML Review. Review modal uses shadcn Button with bg-success for accept and variant="destructive" for reject. Server component SSR import via @phosphor-icons/react/dist/ssr. Info card, progress bar, and error displays all use semantic tokens. 11 files modified. Ready for remaining Phase 12 plans.
