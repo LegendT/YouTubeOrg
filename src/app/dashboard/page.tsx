@@ -6,15 +6,17 @@ import { getRemainingQuota } from '@/lib/youtube/quota'
 import { QuotaDisplay } from '@/components/quota-display'
 import { PlaylistList } from '@/components/playlist-list'
 import { SyncButton } from '@/components/sync-button'
+import { EmptyState } from '@/components/ui/empty-state'
 import Link from 'next/link'
 import {
-  BarChart3,
-  Video,
+  ChartBar,
+  VideoCamera,
   Brain,
-  ClipboardCheck,
+  ClipboardText,
   Shield,
-  RefreshCw,
-} from 'lucide-react'
+  ArrowsClockwise,
+  ListDashes,
+} from '@phosphor-icons/react/ssr'
 
 const workflows = [
   {
@@ -24,7 +26,7 @@ const workflows = [
       'Sync your playlists and videos from YouTube into the local database. This caches everything locally so browsing is instant and costs no API quota.',
     where: 'Use the "Sync Data" button above',
     href: null,
-    icon: RefreshCw,
+    icon: ArrowsClockwise,
   },
   {
     step: 2,
@@ -33,7 +35,7 @@ const workflows = [
       'Run clustering analysis on your 87 playlists to propose a consolidated category structure of ~25-35 categories. Review proposals, approve, reject, split, or merge them. Finalise when satisfied.',
     where: 'Analysis',
     href: '/analysis',
-    icon: BarChart3,
+    icon: ChartBar,
   },
   {
     step: 3,
@@ -42,7 +44,7 @@ const workflows = [
       'Fine-tune your category structure after consolidation. Create new categories, rename or delete existing ones, and merge categories together.',
     where: 'Analysis (Management mode)',
     href: '/analysis',
-    icon: BarChart3,
+    icon: ChartBar,
   },
   {
     step: 4,
@@ -60,7 +62,7 @@ const workflows = [
       'Review the AI\'s category suggestions video by video. Accept with "A", reject with "R", or manually recategorise. Focus on low-confidence items first. Use arrow keys and Tab to navigate.',
     where: 'Review',
     href: '/ml-review',
-    icon: ClipboardCheck,
+    icon: ClipboardText,
   },
   {
     step: 6,
@@ -69,7 +71,7 @@ const workflows = [
       'Browse all your videos with search, sort, and filter. Select multiple videos to move or copy them between categories. Every action can be undone with Ctrl+Z.',
     where: 'Videos',
     href: '/videos',
-    icon: Video,
+    icon: VideoCamera,
   },
   {
     step: 7,
@@ -87,7 +89,7 @@ const workflows = [
       'Preview all changes (playlists to create, videos to add, old playlists to delete) with honest quota estimates. Start the sync and monitor real-time progress. The sync is quota-aware and can pause/resume across multiple days.',
     where: 'Sync',
     href: '/sync',
-    icon: RefreshCw,
+    icon: ArrowsClockwise,
   },
 ]
 
@@ -107,11 +109,11 @@ export default async function DashboardPage() {
   const usedQuota = 10000 - remainingQuota
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <main className="min-h-[calc(100vh-3.5rem)] bg-background">
+      <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
         <header>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage your YouTube data sync and view quota usage
           </p>
         </header>
@@ -119,9 +121,9 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <QuotaDisplay used={usedQuota} total={10000} />
 
-          <div className="border rounded-lg p-6 bg-white shadow flex flex-col justify-center">
-            <h2 className="text-2xl font-semibold mb-4">Data Sync</h2>
-            <p className="text-gray-600 mb-4">
+          <div className="border border-border rounded-lg p-6 bg-card shadow-sm flex flex-col justify-center">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Data Sync</h2>
+            <p className="text-sm text-muted-foreground mb-4">
               {allPlaylists.length === 0
                 ? 'No playlists synced yet. Click below to fetch your YouTube data.'
                 : `Last synced: ${allPlaylists.length} playlists cached locally`}
@@ -131,8 +133,8 @@ export default async function DashboardPage() {
         </div>
 
         <section>
-          <h2 className="text-2xl font-bold mb-1">How to Use</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-lg font-semibold text-foreground mb-1">How to Use</h2>
+          <p className="text-sm text-muted-foreground mb-4">
             Follow these steps to organise your YouTube library. Each step builds on the previous one.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,28 +143,28 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={w.step}
-                  className="border rounded-lg p-5 bg-white shadow-sm flex gap-4"
+                  className="border border-border rounded-lg p-5 bg-card shadow-sm flex gap-4"
                 >
                   <div className="flex-shrink-0 flex items-start">
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-sm font-bold">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">
                       {w.step}
                     </span>
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Icon className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                      <h3 className="font-semibold text-gray-900">{w.title}</h3>
+                      <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <h3 className="font-semibold text-foreground">{w.title}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{w.description}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{w.description}</p>
                     {w.href ? (
                       <Link
                         href={w.href}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                        className="text-sm font-medium text-primary hover:text-primary/80"
                       >
                         Go to {w.where} &rarr;
                       </Link>
                     ) : (
-                      <span className="text-sm text-gray-500">{w.where}</span>
+                      <span className="text-sm text-muted-foreground">{w.where}</span>
                     )}
                   </div>
                 </div>
@@ -171,8 +173,15 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {allPlaylists.length > 0 && (
+        {allPlaylists.length > 0 ? (
           <PlaylistList playlists={allPlaylists} />
+        ) : (
+          <EmptyState
+            icon={ListDashes}
+            title="No playlists synced"
+            description="Sync your YouTube playlists to get started organising your video library."
+            action={{ label: "Sync Playlists", href: "/sync" }}
+          />
         )}
       </div>
     </main>
