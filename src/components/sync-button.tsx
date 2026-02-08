@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { syncAllData } from '@/app/actions/sync-playlists'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { ArrowsClockwise } from '@phosphor-icons/react'
 
 export function SyncButton() {
   const [syncing, setSyncing] = useState(false)
@@ -15,12 +18,12 @@ export function SyncButton() {
       const result = await syncAllData()
 
       if (result.success) {
-        setMessage(`✓ Synced ${result.playlistCount} playlists successfully!`)
+        setMessage(`Synced ${result.playlistCount} playlists successfully!`)
       } else if (result.partialSuccess) {
-        setMessage(`⚠️ ${result.error}`)
+        setMessage(result.error ?? 'Partial sync completed with warnings.')
       }
     } catch (error: any) {
-      setMessage(`✗ Error: ${error.message}`)
+      setMessage(`Error: ${error.message}`)
     } finally {
       setSyncing(false)
     }
@@ -28,15 +31,21 @@ export function SyncButton() {
 
   return (
     <div className="space-y-2">
-      <button
-        onClick={handleSync}
-        disabled={syncing}
-        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition"
-      >
-        {syncing ? 'Syncing...' : 'Sync YouTube Data'}
-      </button>
+      <Button onClick={handleSync} disabled={syncing} size="lg">
+        {syncing ? (
+          <>
+            <Spinner size={16} className="text-primary-foreground" />
+            Syncing...
+          </>
+        ) : (
+          <>
+            <ArrowsClockwise weight="bold" className="h-4 w-4" />
+            Sync YouTube Data
+          </>
+        )}
+      </Button>
       {message && (
-        <p className="text-sm">{message}</p>
+        <p className="text-sm text-muted-foreground">{message}</p>
       )}
     </div>
   )
