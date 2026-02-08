@@ -89,7 +89,7 @@ export function MoveCopyDialog({
 
         {/* Bulk move warning */}
         {showBulkWarning && currentCategoryName && (
-          <div className="rounded-md bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
+          <div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2 text-sm text-warning">
             This will remove {videoCount} videos from &quot;{currentCategoryName}
             &quot;
           </div>
@@ -110,7 +110,7 @@ export function MoveCopyDialog({
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
                     selectedTargetId === category.id
                       ? 'bg-accent text-accent-foreground'
-                      : 'hover:bg-muted'
+                      : 'text-foreground hover:bg-accent'
                   }`}
                 >
                   <span className="truncate">{category.name}</span>

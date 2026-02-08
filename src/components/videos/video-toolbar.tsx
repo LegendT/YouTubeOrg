@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, X, ChevronDown } from 'lucide-react';
+import { MagnifyingGlass, X, CaretDown } from '@phosphor-icons/react';
 import { SortOption } from '@/types/videos';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -74,19 +74,19 @@ export function VideoToolbar({
     SORT_OPTIONS.find((opt) => opt.value === currentSort)?.label || 'Date Added';
 
   return (
-    <div className="border-b bg-card">
+    <div className="border-b border-border bg-card/95 backdrop-blur-sm">
       {/* Main toolbar row */}
       <div className="flex items-center gap-4 px-4 py-3">
         {/* Search area */}
         <div className="flex-1 flex items-center gap-2">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input
               type="text"
               placeholder="Search videos..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full h-9 pl-9 pr-9 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full h-9 pl-9 pr-9 rounded-md border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
             {isSearching && (
               <button
@@ -94,7 +94,7 @@ export function VideoToolbar({
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 aria-label="Clear search"
               >
-                <X className="h-4 w-4" />
+                <X size={16} />
               </button>
             )}
           </div>
@@ -120,7 +120,7 @@ export function VideoToolbar({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1">
               {currentSortLabel}
-              <ChevronDown className="h-4 w-4" />
+              <CaretDown size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
