@@ -22,7 +22,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog'
-import { CheckCircle2, ListChecks, Loader2, AlertCircle } from 'lucide-react'
+import { CheckCircle, ListChecks } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { resolveDuplicates } from '@/app/actions/analysis'
 import type { DuplicateRecord, DuplicateResolution } from '@/types/analysis'
 
@@ -221,7 +222,7 @@ export function DuplicateResolver({ duplicates }: DuplicateResolverProps) {
   if (duplicates.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <CheckCircle2 className="h-10 w-10 mb-3" />
+        <CheckCircle className="h-10 w-10 mb-3" />
         <p className="text-sm font-medium">No duplicate videos found</p>
         <p className="text-xs mt-1">All videos are unique across playlists</p>
       </div>
@@ -267,7 +268,7 @@ export function DuplicateResolver({ duplicates }: DuplicateResolverProps) {
           <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
             <DialogTrigger asChild>
               <Button size="sm" disabled={isPending}>
-                {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isPending && <Spinner size={16} className="mr-2" />}
                 Apply default resolution to selected
               </Button>
             </DialogTrigger>
@@ -319,7 +320,7 @@ export function DuplicateResolver({ duplicates }: DuplicateResolverProps) {
                   disabled={isPending}
                 >
                   {isPending && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Spinner size={16} className="mr-2" />
                   )}
                   Apply resolution
                 </Button>
@@ -390,7 +391,7 @@ export function DuplicateResolver({ duplicates }: DuplicateResolverProps) {
                       onChange={(e) =>
                         setResolution(dup.id, Number(e.target.value))
                       }
-                      className="w-full rounded-md border bg-transparent px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full rounded-md border border-border bg-transparent px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <option value="" disabled>
                         Select playlist...
@@ -440,7 +441,7 @@ export function DuplicateResolver({ duplicates }: DuplicateResolverProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
+                        <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
                         <span className="text-xs truncate">
                           {resolvedPlaylist?.playlistTitle ?? 'Unknown'}
                         </span>

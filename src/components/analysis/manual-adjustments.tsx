@@ -15,11 +15,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Plus,
   X,
-  Loader2,
-  Search,
+  MagnifyingGlass,
   FolderPlus,
-  AlertTriangle,
-} from 'lucide-react'
+  Warning,
+} from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import {
   updateProposalPlaylists,
   createCustomCategory,
@@ -81,7 +81,7 @@ export function RemovePlaylistButton({
       className="inline-flex items-center justify-center h-5 w-5 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
     >
       {isRemoving ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
+        <Spinner size={12} />
       ) : (
         <X className="h-3 w-3" />
       )}
@@ -196,7 +196,7 @@ export function AddPlaylistSelector({
 
           {/* Search input */}
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search playlists..."
@@ -253,7 +253,7 @@ export function AddPlaylistSelector({
             >
               {isAdding ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner size={16} />
                   Adding...
                 </>
               ) : (
@@ -390,7 +390,7 @@ export function CreateCategoryDialog({
 
           {/* Search input */}
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search playlists..."
@@ -434,12 +434,12 @@ export function CreateCategoryDialog({
                 isOverLimit
                   ? 'bg-destructive/10 text-destructive'
                   : isWarning
-                    ? 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
+                    ? 'bg-warning/10 text-warning'
                     : 'bg-muted text-muted-foreground'
               }`}
             >
               {(isOverLimit || isWarning) && (
-                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <Warning className="h-4 w-4 shrink-0" />
               )}
               <span>
                 ~{estimatedVideos.toLocaleString()} estimated videos
@@ -472,7 +472,7 @@ export function CreateCategoryDialog({
             >
               {isCreating ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner size={16} />
                   Creating...
                 </>
               ) : (

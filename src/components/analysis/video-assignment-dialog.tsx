@@ -14,11 +14,11 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  Loader2,
-  Search,
+  MagnifyingGlass,
   X,
-  AlertTriangle,
-} from 'lucide-react'
+  Warning,
+} from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import {
   searchVideosForAssignment,
   assignVideosToCategory,
@@ -239,7 +239,7 @@ export function VideoAssignmentDialog({
           <div className="flex-[7] flex flex-col overflow-hidden min-w-0">
             {/* Search bar */}
             <div className="relative px-4 pb-3">
-              <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <MagnifyingGlass className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 value={query}
@@ -302,7 +302,7 @@ export function VideoAssignmentDialog({
             <ScrollArea className="flex-1 px-4">
               {isSearching && searchResults.length === 0 ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Spinner size={24} />
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="text-center py-12">
@@ -487,7 +487,7 @@ export function VideoAssignmentDialog({
                       isOverLimit
                         ? 'text-destructive font-semibold'
                         : isNearLimit
-                        ? 'text-amber-600 dark:text-amber-400 font-medium'
+                        ? 'text-warning font-medium'
                         : 'text-muted-foreground'
                     }
                   >
@@ -501,7 +501,7 @@ export function VideoAssignmentDialog({
                       isOverLimit
                         ? 'bg-destructive'
                         : isNearLimit
-                        ? 'bg-amber-500'
+                        ? 'bg-warning'
                         : 'bg-primary'
                     }`}
                     style={{
@@ -513,15 +513,15 @@ export function VideoAssignmentDialog({
 
               {/* Warnings */}
               {isNearLimit && (
-                <div className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-1.5 text-xs text-warning">
+                  <Warning className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <span>Approaching 5,000 video limit</span>
                 </div>
               )}
 
               {isOverLimit && (
                 <div className="flex items-start gap-1.5 text-xs text-destructive">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <Warning className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <span>Exceeds 5,000 video limit</span>
                 </div>
               )}
@@ -546,7 +546,7 @@ export function VideoAssignmentDialog({
           </Button>
           <Button onClick={handleAssign} disabled={!canAssign}>
             {isAssigning ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              <Spinner size={16} className="mr-1.5" />
             ) : null}
             Assign {selectedCount} video{selectedCount !== 1 ? 's' : ''}
           </Button>
