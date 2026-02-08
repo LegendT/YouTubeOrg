@@ -124,7 +124,7 @@ export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   sourceProposalId: integer('source_proposal_id').references(() => consolidationProposals.id), // Tracks origin for traceability
-  videoCount: integer('video_count').notNull().default(0), // Denormalized for fast list rendering -- avoids COUNT joins
+  videoCount: integer('video_count').notNull().default(0), // Denormalised for fast list rendering -- avoids COUNT joins
   isProtected: boolean('is_protected').notNull().default(false), // true for "Uncategorised" -- prevents rename/delete
   youtubePlaylistId: text('youtube_playlist_id'), // Phase 8: stores the YouTube playlist ID after creation during sync
   createdAt: timestamp('created_at').notNull().defaultNow(),

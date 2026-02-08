@@ -27,7 +27,7 @@ interface DeleteCategoryDialogProps {
  * Confirmation dialog for deleting a category.
  *
  * Shows a warning with video count information. Orphaned videos
- * (not in any other category) will be moved to Uncategorized.
+ * (not in any other category) will be moved to Uncategorised.
  * Returns undo data to the parent so it can push to the undo stack.
  * Protected categories should not be offered this dialog (parent controls).
  */
@@ -84,7 +84,7 @@ export function DeleteCategoryDialog({
             <span>
               {videoCount.toLocaleString()} video{videoCount !== 1 ? 's' : ''} will
               be reassigned. Videos that exist in other categories will stay there.
-              Truly orphaned videos will be moved to Uncategorized.
+              Truly orphaned videos will be moved to Uncategorised.
             </span>
           </div>
         ) : (

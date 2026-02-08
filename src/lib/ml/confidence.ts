@@ -1,5 +1,5 @@
 /**
- * Confidence scoring for ML categorization predictions.
+ * Confidence scoring for ML categorisation predictions.
  *
  * Thresholds calibrated against actual YouTube video data (1030 videos):
  *   median score = 37%, p75 = 46%, mean = 40%
@@ -36,14 +36,14 @@ export function getConfidenceLevel(score: number): ConfidenceLevel {
 }
 
 /**
- * Categorizes a video and returns full result with confidence.
+ * Categorises a video and returns full result with confidence.
  * Combines similarity search with confidence classification.
  *
  * @param videoEmbedding - Video's embedding vector
  * @param categoryEmbeddings - Map of categoryId to category embedding
  * @returns { categoryId, confidence, score } or null if no categories
  */
-export function categorizeWithConfidence(
+export function categoriseWithConfidence(
   videoEmbedding: Float32Array,
   categoryEmbeddings: Map<number, Float32Array>
 ): { categoryId: number; confidence: ConfidenceLevel; score: number } | null {

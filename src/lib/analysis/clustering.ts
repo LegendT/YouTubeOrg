@@ -129,7 +129,7 @@ export async function clusterPlaylists(
  * (most non-stopword words, then longest).
  */
 export function generateCategoryName(titles: string[]): string {
-  if (titles.length === 0) return 'Uncategorized';
+  if (titles.length === 0) return 'Uncategorised';
   if (titles.length === 1) return titles[0];
 
   // Score each title: prefer longer, more descriptive names

@@ -28,7 +28,7 @@ import { logOperation } from '@/app/actions/operation-log';
 // ============================================================================
 
 /**
- * Get all categories sorted by name, with Uncategorized at the bottom.
+ * Get all categories sorted by name, with Uncategorised at the bottom.
  *
  * Enriches each category with source playlist names derived from the
  * linked consolidation proposal. Returns CategoryListItem[] for the
@@ -130,7 +130,7 @@ export async function createCategory(name: string): Promise<CategoryActionResult
 /**
  * Rename a category.
  *
- * Protected categories (Uncategorized) cannot be renamed.
+ * Protected categories (Uncategorised) cannot be renamed.
  * Validates name constraints and case-insensitive uniqueness (excluding self).
  */
 export async function renameCategory(
@@ -196,7 +196,7 @@ export async function renameCategory(
  * Delete a category with orphan handling and undo data.
  *
  * Protected categories cannot be deleted. Videos that become orphaned
- * (not in any other category) are moved to the Uncategorized category.
+ * (not in any other category) are moved to the Uncategorised category.
  * Returns undo data to allow reversal.
  */
 export async function deleteCategory(categoryId: number): Promise<DeleteCategoryResult> {
@@ -252,31 +252,31 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
         const stillAssignedIds = new Set(stillAssigned.map((r) => r.videoId));
         const orphanedVideoIds = videoIds.filter((id) => !stillAssignedIds.has(id));
 
-        // d. Move orphans to Uncategorized
+        // d. Move orphans to Uncategorised
         if (orphanedVideoIds.length > 0) {
-          const [uncategorized] = await tx
+          const [uncategorised] = await tx
             .select({ id: categories.id, videoCount: categories.videoCount })
             .from(categories)
             .where(eq(categories.isProtected, true))
             .limit(1);
 
-          if (uncategorized) {
+          if (uncategorised) {
             for (const videoId of orphanedVideoIds) {
               await tx.insert(categoryVideos).values({
-                categoryId: uncategorized.id,
+                categoryId: uncategorised.id,
                 videoId,
                 source: 'orphan',
               });
             }
 
-            // Update Uncategorized's video count
+            // Update Uncategorised's video count
             await tx
               .update(categories)
               .set({
-                videoCount: Number(uncategorized.videoCount) + orphanedVideoIds.length,
+                videoCount: Number(uncategorised.videoCount) + orphanedVideoIds.length,
                 updatedAt: new Date(),
               })
-              .where(eq(categories.id, uncategorized.id));
+              .where(eq(categories.id, uncategorised.id));
           }
 
           orphanedCount = orphanedVideoIds.length;
@@ -329,7 +329,7 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
 /**
  * Undo a category deletion.
  *
- * Re-creates the deleted category, removes orphaned videos from Uncategorized,
+ * Re-creates the deleted category, removes orphaned videos from Uncategorised,
  * and re-assigns them to the restored category.
  */
 export async function undoDelete(undoData: DeleteUndoData): Promise<CategoryActionResult> {
@@ -345,31 +345,31 @@ export async function undoDelete(undoData: DeleteUndoData): Promise<CategoryActi
         })
         .returning({ id: categories.id });
 
-      // b. Remove orphaned videoIds from Uncategorized
+      // b. Remove orphaned videoIds from Uncategorised
       if (undoData.videoIds.length > 0) {
-        const [uncategorized] = await tx
+        const [uncategorised] = await tx
           .select({ id: categories.id, videoCount: categories.videoCount })
           .from(categories)
           .where(eq(categories.isProtected, true))
           .limit(1);
 
-        if (uncategorized) {
-          // Delete only orphan-sourced entries for these video IDs from Uncategorized
+        if (uncategorised) {
+          // Delete only orphan-sourced entries for these video IDs from Uncategorised
           await tx
             .delete(categoryVideos)
             .where(
               and(
-                eq(categoryVideos.categoryId, uncategorized.id),
+                eq(categoryVideos.categoryId, uncategorised.id),
                 eq(categoryVideos.source, 'orphan'),
                 inArray(categoryVideos.videoId, undoData.videoIds)
               )
             );
 
-          // Recalculate Uncategorized video count
+          // Recalculate Uncategorised video count
           const [uncatCount] = await tx
             .select({ cnt: count() })
             .from(categoryVideos)
-            .where(eq(categoryVideos.categoryId, uncategorized.id));
+            .where(eq(categoryVideos.categoryId, uncategorised.id));
 
           await tx
             .update(categories)
@@ -377,7 +377,7 @@ export async function undoDelete(undoData: DeleteUndoData): Promise<CategoryActi
               videoCount: Number(uncatCount.cnt),
               updatedAt: new Date(),
             })
-            .where(eq(categories.id, uncategorized.id));
+            .where(eq(categories.id, uncategorised.id));
         }
 
         // c. Insert videoIds into the restored category

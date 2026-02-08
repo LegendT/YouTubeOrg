@@ -146,9 +146,9 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
       }
     }
 
-    // Step e: Restore ML categorizations if present
+    // Step e: Restore ML categorisations if present
     if (backupData.data.mlCategorisations && backupData.data.mlCategorisations.length > 0) {
-      // Clear existing ML categorizations
+      // Clear existing ML categorisations
       await tx.delete(mlCategorisations);
 
       // Build category name -> ID lookup from the newly restored categories
@@ -160,11 +160,11 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
         const suggestedCategoryId = catNameMap.get(mlCat.suggestedCategoryName);
 
         if (!videoId) {
-          warnings.push(`ML categorization skipped — video not found: ${mlCat.videoYoutubeId}`);
+          warnings.push(`ML categorisation skipped — video not found: ${mlCat.videoYoutubeId}`);
           continue;
         }
         if (!suggestedCategoryId) {
-          warnings.push(`ML categorization skipped — category not found: ${mlCat.suggestedCategoryName}`);
+          warnings.push(`ML categorisation skipped — category not found: ${mlCat.suggestedCategoryName}`);
           continue;
         }
 

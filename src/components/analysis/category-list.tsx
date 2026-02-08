@@ -134,7 +134,7 @@ function sortCategories(
   field: ManagementSortField,
   order: SortOrder
 ): CategoryListItem[] {
-  // Always put protected (Uncategorized) at the bottom
+  // Always put protected (Uncategorised) at the bottom
   const regular = items.filter((c) => !c.isProtected)
   const protectedItems = items.filter((c) => c.isProtected)
 
