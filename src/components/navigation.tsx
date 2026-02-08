@@ -9,7 +9,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Analysis', href: '/analysis', icon: BarChart3 },
   { name: 'Videos', href: '/videos', icon: Video },
-  { name: 'ML Categorisation', href: '/ml-categorization', icon: Brain },
+  { name: 'ML Categorisation', href: '/ml-categorisation', icon: Brain },
   { name: 'Review', href: '/ml-review', icon: ClipboardCheck },
   { name: 'Safety', href: '/safety', icon: Shield },
   { name: 'Sync', href: '/sync', icon: RefreshCw },

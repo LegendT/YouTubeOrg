@@ -8,10 +8,10 @@ import type { Category } from '@/types/categories';
 import {
   acceptSuggestion,
   rejectSuggestion,
-  recategorizeVideo,
+  recategoriseVideo,
   getReviewData,
   getVideoReviewDetail,
-} from '@/app/actions/ml-categorization';
+} from '@/app/actions/ml-categorisation';
 import { ReviewGrid } from './review-grid';
 import { ReviewModal } from './review-modal';
 import { ReviewProgress } from './review-progress';
@@ -203,7 +203,7 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
     if (pickerVideoId === null) return;
 
     startTransition(async () => {
-      await recategorizeVideo(pickerVideoId, categoryId);
+      await recategoriseVideo(pickerVideoId, categoryId);
       // Refetch data to update the grid
       const updatedResults = await getReviewData(
         confidenceFilter === 'all' ? undefined : confidenceFilter,

@@ -1,4 +1,4 @@
-import { getReviewData, getReviewStats } from '@/app/actions/ml-categorization';
+import { getReviewData, getReviewStats } from '@/app/actions/ml-categorisation';
 import { ReviewPage } from '@/components/ml-review/review-page';
 
 export const metadata = {
@@ -27,7 +27,7 @@ export default async function MLReviewPage() {
           categorisation first to generate suggestions for your videos.
         </p>
         <a
-          href="/ml-categorization"
+          href="/ml-categorisation"
           className="text-primary hover:underline text-sm"
         >
           Go to ML Categorisation

@@ -22,7 +22,7 @@ export const config = {
     "/dashboard/:path*",
     "/analysis/:path*",
     "/ml-review/:path*",
-    "/ml-categorization/:path*",
+    "/ml-categorisation/:path*",
     "/safety/:path*",
     "/videos/:path*",
     "/sync/:path*",

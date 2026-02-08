@@ -50,7 +50,7 @@ const workflows = [
     description:
       'Run ML categorisation to automatically assign your Watch Later videos to categories using AI. The model runs entirely in your browser — no data leaves your machine.',
     where: 'ML Categorisation',
-    href: '/ml-categorization',
+    href: '/ml-categorisation',
     icon: Brain,
   },
   {

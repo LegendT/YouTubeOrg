@@ -13,9 +13,9 @@ export default async function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="text-center space-y-6">
-        <h1 className="text-4xl font-bold">YouTube Playlist Organizer</h1>
+        <h1 className="text-4xl font-bold">YouTube Playlist Organiser</h1>
         <p className="text-xl text-gray-600">
-          Organize your 87 playlists and 4,000+ videos with AI-powered categorization
+          Organise your 87 playlists and 4,000+ videos with AI-powered categorisation
         </p>
         <Link
           href="/api/auth/signin"

@@ -63,7 +63,7 @@ async function gatherSnapshotData(scope: string): Promise<BackupData['data']> {
     videos: videosByCategory.get(cat.id) ?? [],
   }));
 
-  // Fetch ML categorizations with video YouTube IDs and category names
+  // Fetch ML categorisations with video YouTube IDs and category names
   const mlRows = await db
     .select({
       videoYoutubeId: videos.youtubeId,
