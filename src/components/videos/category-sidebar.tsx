@@ -22,10 +22,10 @@ export function CategorySidebar({
   totalVideoCount,
 }: CategorySidebarProps) {
   return (
-    <div className="w-[280px] border-r flex flex-col h-full">
+    <div className="w-[280px] border-r border-border bg-card flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Categories</h2>
+      <div className="p-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">Categories</h2>
       </div>
 
       {/* Category List */}
@@ -37,7 +37,7 @@ export function CategorySidebar({
             className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
               selectedCategoryId === null
                 ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-muted'
+                : 'text-foreground hover:bg-accent/50'
             }`}
           >
             <span>All Videos</span>
@@ -54,7 +54,7 @@ export function CategorySidebar({
               className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
                 selectedCategoryId === category.id
                   ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-muted'
+                  : 'text-foreground hover:bg-accent/50'
               }`}
             >
               <span className="truncate">{category.name}</span>
