@@ -19,7 +19,7 @@ export function KeyboardHints() {
             key={shortcut.key}
             className="flex items-center justify-between gap-4 py-1.5"
           >
-            <kbd className="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs font-mono">
+            <kbd className="bg-muted border border-border text-muted-foreground px-2 py-1 rounded text-xs font-mono">
               {shortcut.key}
             </kbd>
             <span className="text-xs text-muted-foreground">
