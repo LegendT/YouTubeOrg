@@ -111,7 +111,6 @@ export function VideoGrid({
                   gap: '24px',
                   paddingLeft: '48px',
                   paddingRight: '48px',
-                  backgroundColor: 'transparent',
                 }}
               >
                 {rowVideos.map((video) => (

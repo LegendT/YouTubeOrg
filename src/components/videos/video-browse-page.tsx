@@ -13,7 +13,9 @@ import { MoveCopyDialog } from './move-copy-dialog';
 import { UndoBanner } from '@/components/analysis/undo-banner';
 import { useUndoStack } from '@/lib/categories/undo-stack';
 import { parseDurationToSeconds } from '@/lib/videos/format';
-import { Loader2 } from 'lucide-react';
+import { VideoCamera, FolderOpen } from '@phosphor-icons/react';
+import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from 'sonner';
 
 interface VideoBrowsePageProps {
@@ -305,8 +307,25 @@ export function VideoBrowsePage({
         {/* Video Grid */}
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Spinner size={32} />
           </div>
+        ) : sortedVideos.length === 0 && !debouncedQuery ? (
+          selectedCategoryId === null ? (
+            <EmptyState
+              icon={VideoCamera}
+              title="No videos found"
+              description="Sync your YouTube playlists to browse and organise your videos."
+              action={{ label: "Sync Playlists", href: "/sync" }}
+              className="flex-1"
+            />
+          ) : (
+            <EmptyState
+              icon={FolderOpen}
+              title="No videos in this category"
+              description="Move or copy videos from other categories to get started."
+              className="flex-1"
+            />
+          )
         ) : (
           <VideoGrid
             videos={sortedVideos}
