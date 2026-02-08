@@ -15,11 +15,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   CheckCircle,
-  AlertTriangle,
-  Loader2,
+  Warning,
   ArrowRight,
   ArrowDown,
-} from 'lucide-react'
+} from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { finalizeConsolidation } from '@/app/actions/analysis'
 import type { ConsolidationProposal, AnalysisSummary } from '@/types/analysis'
 
@@ -157,10 +157,10 @@ export function FinalReview({
                 </div>
                 <div className="rounded-lg border p-3">
                   <div className="text-sm space-y-0.5">
-                    <div className="text-green-600 font-medium">
+                    <div className="text-success font-medium">
                       {approved.length} approved
                     </div>
-                    <div className="text-red-600 font-medium">
+                    <div className="text-destructive font-medium">
                       {rejected.length} rejected
                     </div>
                     <div className="text-muted-foreground">
@@ -171,8 +171,8 @@ export function FinalReview({
               </div>
 
               {pending.length > 0 && (
-                <div className="flex items-center gap-2 mt-3 text-sm text-amber-600">
-                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                <div className="flex items-center gap-2 mt-3 text-sm text-warning">
+                  <Warning className="h-4 w-4 shrink-0" />
                   <span>
                     Note: {pending.length} categor{pending.length === 1 ? 'y is' : 'ies are'} still pending review
                   </span>
@@ -194,7 +194,7 @@ export function FinalReview({
                     className="rounded-md border p-3 space-y-1"
                   >
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-success shrink-0" />
                       <span className="font-medium text-sm">
                         {proposal.categoryName}
                       </span>
@@ -290,14 +290,14 @@ export function FinalReview({
           <div
             className={`flex items-center gap-2 text-sm rounded-md p-3 ${
               result.type === 'success'
-                ? 'bg-green-50 text-green-800 dark:bg-green-950/20 dark:text-green-200'
-                : 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-200'
+                ? 'bg-success/10 text-success'
+                : 'bg-destructive/10 text-destructive'
             }`}
           >
             {result.type === 'success' ? (
               <CheckCircle className="h-4 w-4 shrink-0" />
             ) : (
-              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <Warning className="h-4 w-4 shrink-0" />
             )}
             <span>{result.message}</span>
           </div>
@@ -318,7 +318,7 @@ export function FinalReview({
           >
             {isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Spinner size={16} className="mr-2" />
                 Executing...
               </>
             ) : result?.type === 'success' ? (

@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Loader2, ArrowLeft, ArrowRight, Scissors } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Scissors } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { splitProposal } from '@/app/actions/analysis'
 import type { ConsolidationProposal } from '@/types/analysis'
 
@@ -371,7 +372,7 @@ export function SplitWizard({
               ))}
 
               {!allAssigned && (
-                <p className="text-xs text-amber-600 dark:text-amber-400">
+                <p className="text-xs text-warning">
                   All playlists must be assigned to a category before splitting.
                 </p>
               )}
@@ -403,7 +404,7 @@ export function SplitWizard({
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner size={16} />
                   Splitting...
                 </>
               ) : (
