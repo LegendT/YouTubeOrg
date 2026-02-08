@@ -2,17 +2,29 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BarChart3, Video, Brain, ClipboardCheck, Shield, RefreshCw, LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import {
+  SquaresFour,
+  ChartBar,
+  VideoCamera,
+  Brain,
+  ClipboardText,
+  Shield,
+  ArrowsClockwise,
+  SignOut,
+} from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Analysis', href: '/analysis', icon: BarChart3 },
-  { name: 'Videos', href: '/videos', icon: Video },
+  { name: 'Dashboard', href: '/dashboard', icon: SquaresFour },
+  { name: 'Analysis', href: '/analysis', icon: ChartBar },
+  { name: 'Videos', href: '/videos', icon: VideoCamera },
   { name: 'ML Categorisation', href: '/ml-categorisation', icon: Brain },
-  { name: 'Review', href: '/ml-review', icon: ClipboardCheck },
+  { name: 'Review', href: '/ml-review', icon: ClipboardText },
   { name: 'Safety', href: '/safety', icon: Shield },
-  { name: 'Sync', href: '/sync', icon: RefreshCw },
+  { name: 'Sync', href: '/sync', icon: ArrowsClockwise },
 ];
 
 export function Navigation() {
@@ -24,22 +36,22 @@ export function Navigation() {
   }
 
   return (
-    <nav className="border-b bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+    <nav className="border-b border-border bg-card/80 backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex h-14 items-center justify-between">
           {/* Logo/Brand */}
-          <div className="flex items-center space-x-8">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">YT</span>
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
+                <span className="text-sm font-bold text-white">YT</span>
               </div>
-              <span className="font-semibold text-lg hidden sm:block">
+              <span className="hidden text-lg font-semibold text-foreground sm:block">
                 YouTube Organiser
               </span>
             </Link>
 
             {/* Navigation Links */}
-            <div className="flex space-x-1">
+            <div className="flex gap-0.5">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -47,29 +59,35 @@ export function Navigation() {
                   <Link
                     key={item.name}
                     href={item.href}
+                    title={item.name}
                     className={cn(
-                      'flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
                       isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-accent font-medium text-accent-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:block">{item.name}</span>
+                    <Icon size={18} weight={isActive ? 'fill' : 'regular'} />
+                    <span className="hidden md:block">{item.name}</span>
                   </Link>
                 );
               })}
             </div>
           </div>
 
-          {/* Sign Out */}
-          <a
-            href="/api/auth/signout"
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:block">Sign Out</span>
-          </a>
+          {/* Right section: Theme Toggle + Sign Out */}
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 text-muted-foreground hover:text-accent-foreground"
+              onClick={() => signOut({ callbackUrl: '/' })}
+              title="Sign Out"
+            >
+              <SignOut size={18} />
+              <span className="hidden md:block">Sign Out</span>
+            </Button>
+          </div>
         </div>
       </div>
     </nav>
