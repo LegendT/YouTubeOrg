@@ -9,15 +9,17 @@ import {
 } from '@/app/actions/backup';
 import type { BackupSnapshotMeta } from '@/types/backup';
 import { ConfirmDialog } from './confirm-dialog';
+import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
-  Download,
-  RotateCcw,
-  Trash2,
+  DownloadSimple,
+  ArrowCounterClockwise,
+  Trash,
   Plus,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-} from 'lucide-react';
+  CheckCircle,
+  WarningCircle,
+  ShieldCheck,
+} from '@phosphor-icons/react';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -41,15 +43,15 @@ function formatRelativeTime(date: Date): string {
 }
 
 const triggerBadgeStyles: Record<string, string> = {
-  manual: 'bg-blue-100 text-blue-800',
-  pre_delete: 'bg-red-100 text-red-800',
-  pre_merge: 'bg-amber-100 text-amber-800',
-  pre_sync: 'bg-purple-100 text-purple-800',
-  pre_restore: 'bg-cyan-100 text-cyan-800',
+  manual: 'bg-info/10 text-info',
+  pre_delete: 'bg-destructive/10 text-destructive',
+  pre_merge: 'bg-warning/10 text-warning',
+  pre_sync: 'bg-primary/10 text-primary',
+  pre_restore: 'bg-info/10 text-info',
 };
 
 function TriggerBadge({ trigger }: { trigger: string }) {
-  const style = triggerBadgeStyles[trigger] ?? 'bg-gray-100 text-gray-800';
+  const style = triggerBadgeStyles[trigger] ?? 'bg-muted text-muted-foreground';
   const label = trigger.replace(/_/g, ' ');
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${style}`}>
@@ -149,16 +151,16 @@ export function BackupList({ initialBackups }: BackupListProps) {
     <div className="space-y-4">
       {/* Header with Create button */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {backups.length} backup{backups.length === 1 ? '' : 's'} available
         </p>
         <button
           onClick={handleCreateBackup}
           disabled={isPending && activeAction === 'create'}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           {isPending && activeAction === 'create' ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Spinner size={16} className="text-primary-foreground" />
           ) : (
             <Plus className="h-4 w-4" />
           )}
@@ -171,14 +173,14 @@ export function BackupList({ initialBackups }: BackupListProps) {
         <div
           className={`flex items-center gap-2 rounded-md px-4 py-3 text-sm ${
             message.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
+              ? 'bg-success/10 text-success border border-success/20'
+              : 'bg-destructive/10 text-destructive border border-destructive/20'
           }`}
         >
           {message.type === 'success' ? (
-            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 flex-shrink-0" />
           ) : (
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <WarningCircle className="h-4 w-4 flex-shrink-0" />
           )}
           {message.text}
         </div>
@@ -186,46 +188,49 @@ export function BackupList({ initialBackups }: BackupListProps) {
 
       {/* Backup list */}
       {backups.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="text-gray-500">No backups yet. Create your first backup to get started.</p>
-        </div>
+        <EmptyState
+          icon={ShieldCheck}
+          title="No backups yet"
+          description="Backups are created automatically before destructive operations, or you can create one manually."
+          action={{ label: 'Create Backup', onClick: handleCreateBackup }}
+        />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Trigger
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Created
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Size
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Entities
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-border bg-card">
               {backups.map((backup) => (
-                <tr key={backup.id} className="hover:bg-gray-50">
+                <tr key={backup.id} className="hover:bg-muted/50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <TriggerBadge trigger={backup.trigger} />
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">
                     <span title={new Date(backup.createdAt).toLocaleString('en-GB')}>
                       {formatRelativeTime(backup.createdAt)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">
                     {formatFileSize(backup.fileSizeBytes)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">
                     {backup.entityCount.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -233,33 +238,33 @@ export function BackupList({ initialBackups }: BackupListProps) {
                       <a
                         href={`/api/backup/${backup.id}`}
                         download
-                        className="inline-flex items-center rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                        className="inline-flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                         title="Download backup"
                       >
-                        <Download className="h-4 w-4" />
+                        <DownloadSimple className="h-4 w-4" />
                       </a>
                       <button
                         onClick={() => handleRestore(backup)}
                         disabled={isPending}
-                        className="inline-flex items-center rounded-md p-1.5 text-gray-500 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-info/10 hover:text-info disabled:opacity-50 transition-colors"
                         title="Restore from backup"
                       >
                         {isPending && activeAction === `restore-${backup.id}` ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Spinner size={16} />
                         ) : (
-                          <RotateCcw className="h-4 w-4" />
+                          <ArrowCounterClockwise className="h-4 w-4" />
                         )}
                       </button>
                       <button
                         onClick={() => handleDelete(backup)}
                         disabled={isPending}
-                        className="inline-flex items-center rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 transition-colors"
                         title="Delete backup"
                       >
                         {isPending && activeAction === `delete-${backup.id}` ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Spinner size={16} />
                         ) : (
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         )}
                       </button>
                     </div>

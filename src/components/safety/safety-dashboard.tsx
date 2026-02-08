@@ -5,7 +5,7 @@ import { BackupList } from './backup-list';
 import { OperationLogTable } from './operation-log-table';
 import { PendingChanges } from './pending-changes';
 import type { BackupSnapshotMeta, OperationLogEntry, PendingChangeSummary } from '@/types/backup';
-import { HardDrive, ScrollText, Clock } from 'lucide-react';
+import { HardDrive, Scroll, Clock } from '@phosphor-icons/react';
 
 interface SafetyDashboardProps {
   initialBackups: BackupSnapshotMeta[];
@@ -28,7 +28,7 @@ export function SafetyDashboard({
           Backups
         </TabsTrigger>
         <TabsTrigger value="operation-log" className="flex items-center gap-1.5">
-          <ScrollText className="h-3.5 w-3.5" />
+          <Scroll className="h-3.5 w-3.5" />
           Operation Log
         </TabsTrigger>
         <TabsTrigger value="pending-changes" className="flex items-center gap-1.5">
@@ -38,13 +38,13 @@ export function SafetyDashboard({
       </TabsList>
 
       <TabsContent value="backups">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <BackupList initialBackups={initialBackups} />
         </div>
       </TabsContent>
 
       <TabsContent value="operation-log">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <OperationLogTable
             initialEntries={initialOperationLog}
             initialTotal={initialOperationLogTotal}
@@ -53,7 +53,7 @@ export function SafetyDashboard({
       </TabsContent>
 
       <TabsContent value="pending-changes">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <PendingChanges initialSummary={initialPendingChanges} />
         </div>
       </TabsContent>

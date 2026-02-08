@@ -9,7 +9,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Loader2, AlertTriangle } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
+import { Warning } from '@phosphor-icons/react'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -27,7 +28,7 @@ interface ConfirmDialogProps {
  * Reusable confirmation dialog for destructive or important actions.
  *
  * Based on the DeleteCategoryDialog pattern. Supports an optional
- * amber warning section, loading state on the confirm button, and
+ * warning section, loading state on the confirm button, and
  * cancel/confirm footer buttons.
  *
  * Parent controls open state and isPending via useTransition or useState.
@@ -52,8 +53,8 @@ export function ConfirmDialog({
         </DialogHeader>
 
         {warning && (
-          <div className="flex items-start gap-2 text-sm px-3 py-2 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 text-sm px-3 py-2 rounded-md bg-warning/10 text-warning">
+            <Warning className="h-4 w-4 shrink-0 mt-0.5" />
             <span>{warning}</span>
           </div>
         )}
@@ -73,7 +74,7 @@ export function ConfirmDialog({
           >
             {isPending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner size={16} className={variant === 'destructive' ? 'text-destructive-foreground' : 'text-primary-foreground'} />
                 {confirmLabel}...
               </>
             ) : (
