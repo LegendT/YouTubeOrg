@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 10 in progress — UI polish & code quality
+**Current focus:** Phase 10 complete — Ready for Phase 11 (Launch Prep)
 
 ## Current Position
 
 Phase: 10 of 11 (UI Polish & Code Quality)
-Plan: 2 of 3
-Status: In progress
-Last activity: 2026-02-08 — Completed 10-02-PLAN.md (DB table rename to British English)
+Plan: 3 of 3
+Status: Phase complete
+Last activity: 2026-02-08 — Completed 10-03-PLAN.md (Application-layer British English rename)
 
-Progress: [█████████████████████████████████████████████░] 49/50 plans (98%)
+Progress: [██████████████████████████████████████████████] 50/50 plans (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49
+- Total plans completed: 50
 - Average duration: 3.5 min
-- Total execution time: 4.04 hours
+- Total execution time: 4.17 hours
 
 **By Phase:**
 
@@ -37,10 +37,10 @@ Progress: [███████████████████████
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
 | 8 - Batch Sync Operations | 4/4 | 18.6 min | 4.65 min |
 | 9 - Auth Hardening | 3/3 | 7.5 min | 2.5 min |
-| 10 - UI Polish & Code Quality | 2/3 | 11.5 min | 5.75 min |
+| 10 - UI Polish & Code Quality | 3/3 | 19.5 min | 6.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 09-01 (2.5min), 09-02 (2.5min), 09-03 (2.5min), 10-01 (5min), 10-02 (6.5min)
+- Last 5 plans: 09-03 (2.5min), 10-01 (5min), 10-02 (6.5min), 10-03 (8min)
 - Trend: Code quality plans slightly longer due to cross-codebase rename verification
 
 *Updated after each plan completion*
@@ -368,6 +368,14 @@ Recent decisions affecting current work:
 - Drizzle auto-generated files (drizzle/schema.ts, drizzle/relations.ts) committed to version control
 - BackupData interface field renamed to mlCategorisations (British) for full consistency across codebase
 
+**From 10-03 execution (2026-02-08):**
+- Route /ml-categorization renamed to /ml-categorisation (directory, page, component files)
+- All type interfaces renamed: MLCategorisationResult, CategorisationResult, RunMLCategorisationResult
+- All exported functions renamed: getDataForCategorisation, saveCategorisationResults, recategoriseVideo
+- Variable names: uncategorized -> uncategorised in categories.ts
+- UI text: Organizer -> Organiser, Organize -> Organise on landing page
+- CSS/Tailwind colour tokens intentionally left untouched
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -395,7 +403,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 10-02-PLAN.md (DB table rename to British English)
+Stopped at: Completed 10-03-PLAN.md (Application-layer British English rename) — Phase 10 complete
 Resume file: None
 
 ---
