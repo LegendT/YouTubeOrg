@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Auth Hardening** - Middleware + selective auth guards (gap closure)
 - [x] **Phase 10: UI Polish & Code Quality** - Toast notifications, TS fixes, British English sweep (gap closure)
 - [ ] **Phase 11: UX Refinements** - Approval toggle, checkbox separation, cancel button (gap closure)
+- [ ] **Phase 12: UX Audit** - Comprehensive UX review across all pages to align with best-in-class standards
 
 ## Phase Details
 
@@ -294,6 +295,28 @@ Plans:
   2. Checkboxes are used only for batch selection (merge, bulk approve/reject), not conflated with approval state
   3. Final Review & Execute dialog has an explicit Cancel button alongside the Execute action
 
+**Plans**: 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Reset button + server action for approval toggle behaviour
+- [ ] 11-02-PLAN.md — Visual separation of checkboxes from approval state, batch reset in toolbar
+- [ ] 11-03-PLAN.md — Cancel button in Final Review dialog
+
+---
+
+### Phase 12: UX Audit
+**Goal**: Comprehensive UX review across all pages to align with best-in-class standards. Evaluate layout, interactions, feedback patterns, empty states, loading states, and overall polish across every user-facing page.
+
+**Depends on**: Phase 11 (all scoped UX fixes complete first)
+
+**Requirements**: Quality bar — ensure every page meets best-in-class UX standards
+
+**Success Criteria** (what must be TRUE):
+  1. Every page reviewed for UX quality (dashboard, analysis, videos, ML categorisation, ML review, sync, safety)
+  2. Identified UX issues documented and resolved
+  3. Consistent interaction patterns across all pages (loading states, error handling, empty states)
+  4. Navigation flow is intuitive with no dead ends
+
 **Plans**: TBD (created by /gsd:plan-phase)
 
 ---
@@ -301,7 +324,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -315,8 +338,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Batch Sync Operations | 4/4 | Complete | 2026-02-07 |
 | 9. Auth Hardening | 3/3 | Complete | 2026-02-08 |
 | 10. UI Polish & Code Quality | 3/3 | Complete | 2026-02-08 |
-| 11. UX Refinements | 0/? | Not started | — |
+| 11. UX Refinements | 0/3 | Not started | — |
+| 12. UX Audit | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-08 (Phase 10 complete: 3 plans executed)*
+*Last updated: 2026-02-08 (Phase 11 planned: 3 plans in 2 waves)*
