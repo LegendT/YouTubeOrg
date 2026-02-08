@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import type { Icon } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
-  icon: React.ComponentType<{ size?: number; weight?: string; className?: string }>
+  icon: Icon
   title: string
   description: string
   action?: {
