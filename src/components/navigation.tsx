@@ -36,7 +36,7 @@ export function Navigation() {
   }
 
   return (
-    <nav className="border-b border-border bg-card/80 backdrop-blur-sm">
+    <nav aria-label="Main navigation" className="border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-14 items-center justify-between">
           {/* Logo/Brand */}
@@ -83,6 +83,7 @@ export function Navigation() {
               className="flex items-center gap-2 text-muted-foreground hover:text-accent-foreground"
               onClick={() => signOut({ callbackUrl: '/' })}
               title="Sign Out"
+              aria-label="Sign out"
             >
               <SignOut size={18} />
               <span className="hidden md:block">Sign Out</span>

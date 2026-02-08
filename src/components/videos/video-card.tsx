@@ -61,7 +61,7 @@ export function VideoCard({
             onToggleSelect(video.id);
           }}
         >
-          <Checkbox checked={isSelected} className="bg-card/90 hover:bg-card" />
+          <Checkbox checked={isSelected} aria-label={`Select ${video.title}`} className="bg-card/90 hover:bg-card" />
         </div>
       </div>
 
