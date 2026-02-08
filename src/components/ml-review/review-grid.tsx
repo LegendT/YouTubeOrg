@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { ReviewResult } from '@/types/ml';
 import { ReviewCard } from './review-card';
@@ -13,7 +13,38 @@ interface ReviewGridProps {
 }
 
 const ROW_HEIGHT = 340;
-const COLUMN_COUNT = 3;
+const MIN_CARD_WIDTH = 280;
+const MAX_COLUMNS = 3;
+const MIN_COLUMNS = 1;
+
+/**
+ * Responsive column count based on container width.
+ */
+function useColumnCount(containerRef: React.RefObject<HTMLDivElement | null>) {
+  const [columnCount, setColumnCount] = useState(3);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateColumnCount = () => {
+      const width = container.clientWidth;
+      const calculated = Math.floor(width / MIN_CARD_WIDTH);
+      setColumnCount(Math.max(MIN_COLUMNS, Math.min(MAX_COLUMNS, calculated)));
+    };
+
+    updateColumnCount();
+
+    const resizeObserver = new ResizeObserver(updateColumnCount);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [containerRef]);
+
+  return columnCount;
+}
 
 export function ReviewGrid({
   results,
@@ -22,7 +53,8 @@ export function ReviewGrid({
   onFocusChange,
 }: ReviewGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const rowCount = Math.ceil(results.length / COLUMN_COUNT);
+  const columnCount = useColumnCount(parentRef);
+  const rowCount = Math.ceil(results.length / columnCount);
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -39,10 +71,10 @@ export function ReviewGrid({
   // Scroll focused card into view when focusedIndex changes
   useEffect(() => {
     if (focusedIndex >= 0 && focusedIndex < results.length) {
-      const focusedRow = Math.floor(focusedIndex / COLUMN_COUNT);
+      const focusedRow = Math.floor(focusedIndex / columnCount);
       rowVirtualizer.scrollToIndex(focusedRow, { align: 'auto' });
     }
-  }, [focusedIndex, results.length, rowVirtualizer]);
+  }, [focusedIndex, results.length, columnCount, rowVirtualizer]);
 
   // Empty state
   if (results.length === 0) {
@@ -62,8 +94,8 @@ export function ReviewGrid({
         }}
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-          const startIdx = virtualRow.index * COLUMN_COUNT;
-          const rowResults = results.slice(startIdx, startIdx + COLUMN_COUNT);
+          const startIdx = virtualRow.index * columnCount;
+          const rowResults = results.slice(startIdx, startIdx + columnCount);
 
           return (
             <div
@@ -77,11 +109,10 @@ export function ReviewGrid({
               }}
             >
               <div
-                className="grid grid-cols-3"
+                className="grid px-4 md:px-12"
                 style={{
-                  gap: '24px',
-                  paddingLeft: '48px',
-                  paddingRight: '48px',
+                  gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+                  gap: columnCount === 1 ? '16px' : '24px',
                 }}
               >
                 {rowResults.map((result, colIdx) => {
@@ -97,7 +128,7 @@ export function ReviewGrid({
                 })}
                 {/* Fill empty cells in last row to maintain grid alignment */}
                 {Array.from({
-                  length: COLUMN_COUNT - rowResults.length,
+                  length: columnCount - rowResults.length,
                 }).map((_, idx) => (
                   <div key={`empty-${idx}`} />
                 ))}
