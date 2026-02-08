@@ -328,6 +328,7 @@ export function CategoryList({
                       }}
                       disabled={category.isProtected}
                       title="Rename category"
+                      aria-label="Rename category"
                     >
                       <PencilSimple size={14} />
                     </Button>
@@ -345,6 +346,7 @@ export function CategoryList({
                       }}
                       disabled={category.isProtected}
                       title="Delete category"
+                      aria-label="Delete category"
                     >
                       <Trash size={14} />
                     </Button>
@@ -361,6 +363,7 @@ export function CategoryList({
                         )
                       }}
                       title="Assign videos"
+                      aria-label="Assign videos"
                     >
                       <Plus size={14} />
                     </Button>
