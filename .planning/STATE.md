@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 10 of 11 (UI Polish & Code Quality)
-Plan: 1 of 3
+Plan: 2 of 3
 Status: In progress
-Last activity: 2026-02-08 — Completed 10-01-PLAN.md (replace native browser dialogs)
+Last activity: 2026-02-08 — Completed 10-02-PLAN.md (DB table rename to British English)
 
-Progress: [████████████████████████████████████████████░░] 48/50 plans (96%)
+Progress: [█████████████████████████████████████████████░] 49/50 plans (98%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48
+- Total plans completed: 49
 - Average duration: 3.5 min
-- Total execution time: 3.93 hours
+- Total execution time: 4.04 hours
 
 **By Phase:**
 
@@ -37,11 +37,11 @@ Progress: [███████████████████████
 | 7 - Safety & Archive System | 4/4 | 12.1 min | 3.0 min |
 | 8 - Batch Sync Operations | 4/4 | 18.6 min | 4.65 min |
 | 9 - Auth Hardening | 3/3 | 7.5 min | 2.5 min |
-| 10 - UI Polish & Code Quality | 1/3 | 5 min | 5.0 min |
+| 10 - UI Polish & Code Quality | 2/3 | 11.5 min | 5.75 min |
 
 **Recent Trend:**
-- Last 5 plans: 08-04 (5min), 09-01 (2.5min), 09-02 (2.5min), 09-03 (2.5min), 10-01 (5min)
-- Trend: UI polish plan slightly longer due to pre-existing TS spelling mismatch fix
+- Last 5 plans: 09-01 (2.5min), 09-02 (2.5min), 09-03 (2.5min), 10-01 (5min), 10-02 (6.5min)
+- Trend: Code quality plans slightly longer due to cross-codebase rename verification
 
 *Updated after each plan completion*
 
@@ -362,6 +362,12 @@ Recent decisions affecting current work:
 - Reusable ConfirmDialog component: parent-controlled isPending via useTransition, supports warning section
 - mlCategorisations British English standardised: backward-compat alias in schema.ts, all usages normalised
 
+**From 10-02 execution (2026-02-08):**
+- Raw SQL ALTER TABLE for table rename (drizzle-kit push unreliable for renames -- may misinterpret as drop+create)
+- FK constraints renamed alongside table for full consistency
+- Drizzle auto-generated files (drizzle/schema.ts, drizzle/relations.ts) committed to version control
+- BackupData interface field renamed to mlCategorisations (British) for full consistency across codebase
+
 ### Pending Todos
 
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
@@ -389,7 +395,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 10-01-PLAN.md (replace native browser dialogs)
+Stopped at: Completed 10-02-PLAN.md (DB table rename to British English)
 Resume file: None
 
 ---
