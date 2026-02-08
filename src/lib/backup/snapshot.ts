@@ -106,7 +106,7 @@ async function gatherSnapshotData(scope: string): Promise<BackupData['data']> {
 
   return {
     categories: backupCategories,
-    mlCategorizations: backupMLCategorizations,
+    mlCategorisations: backupMLCategorizations,
     metadata: {
       totalCategories: backupCategories.length,
       totalVideos: uniqueVideoIds.size,

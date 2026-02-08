@@ -147,7 +147,7 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
     }
 
     // Step e: Restore ML categorizations if present
-    if (backupData.data.mlCategorizations && backupData.data.mlCategorizations.length > 0) {
+    if (backupData.data.mlCategorisations && backupData.data.mlCategorisations.length > 0) {
       // Clear existing ML categorizations
       await tx.delete(mlCategorisations);
 
@@ -155,7 +155,7 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
       const restoredCats = await tx.select({ id: categories.id, name: categories.name }).from(categories);
       const catNameMap = new Map(restoredCats.map(c => [c.name, c.id]));
 
-      for (const mlCat of backupData.data.mlCategorizations) {
+      for (const mlCat of backupData.data.mlCategorisations) {
         const videoId = videoIdMap.get(mlCat.videoYoutubeId);
         const suggestedCategoryId = catNameMap.get(mlCat.suggestedCategoryName);
 

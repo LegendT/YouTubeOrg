@@ -8,6 +8,7 @@ import {
   deleteBackup,
 } from '@/app/actions/backup';
 import type { BackupSnapshotMeta } from '@/types/backup';
+import { ConfirmDialog } from './confirm-dialog';
 import {
   Download,
   RotateCcw,
@@ -66,6 +67,7 @@ export function BackupList({ initialBackups }: BackupListProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeAction, setActiveAction] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'restore' | 'delete'; snapshot: BackupSnapshotMeta } | null>(null);
 
   function clearMessage() {
     setTimeout(() => setMessage(null), 5000);
@@ -95,48 +97,52 @@ export function BackupList({ initialBackups }: BackupListProps) {
   }
 
   function handleRestore(snapshot: BackupSnapshotMeta) {
-    const confirmed = window.confirm(
-      `Restore from backup '${snapshot.filename}'?\n\nThis will replace all current categories and video assignments. A safety backup will be created automatically before restoring.`
-    );
-    if (!confirmed) return;
-
-    setActiveAction(`restore-${snapshot.id}`);
-    startTransition(async () => {
-      const result = await restoreBackup(snapshot.id);
-      if (result.success) {
-        setMessage({
-          type: 'success',
-          text: `Restored ${result.restoredCategories} categories and ${result.restoredVideos} videos. Safety backup created (ID: ${result.preRestoreBackupId}).${
-            result.warnings?.length ? ` Warnings: ${result.warnings.join(', ')}` : ''
-          }`,
-        });
-        await refreshBackups();
-      } else {
-        setMessage({ type: 'error', text: result.error });
-      }
-      setActiveAction(null);
-      clearMessage();
-    });
+    setConfirmAction({ type: 'restore', snapshot });
   }
 
   function handleDelete(snapshot: BackupSnapshotMeta) {
-    const confirmed = window.confirm(
-      `Delete backup '${snapshot.filename}'?\n\nThis cannot be undone.`
-    );
-    if (!confirmed) return;
+    setConfirmAction({ type: 'delete', snapshot });
+  }
 
-    setActiveAction(`delete-${snapshot.id}`);
-    startTransition(async () => {
-      const result = await deleteBackup(snapshot.id);
-      if (result.success) {
-        setMessage({ type: 'success', text: 'Backup deleted.' });
-        await refreshBackups();
-      } else {
-        setMessage({ type: 'error', text: result.error });
-      }
-      setActiveAction(null);
-      clearMessage();
-    });
+  async function handleConfirmAction() {
+    if (!confirmAction) return;
+
+    const { type, snapshot } = confirmAction;
+
+    if (type === 'restore') {
+      setActiveAction(`restore-${snapshot.id}`);
+      startTransition(async () => {
+        const result = await restoreBackup(snapshot.id);
+        if (result.success) {
+          setMessage({
+            type: 'success',
+            text: `Restored ${result.restoredCategories} categories and ${result.restoredVideos} videos. Safety backup created (ID: ${result.preRestoreBackupId}).${
+              result.warnings?.length ? ` Warnings: ${result.warnings.join(', ')}` : ''
+            }`,
+          });
+          await refreshBackups();
+        } else {
+          setMessage({ type: 'error', text: result.error });
+        }
+        setActiveAction(null);
+        setConfirmAction(null);
+        clearMessage();
+      });
+    } else {
+      setActiveAction(`delete-${snapshot.id}`);
+      startTransition(async () => {
+        const result = await deleteBackup(snapshot.id);
+        if (result.success) {
+          setMessage({ type: 'success', text: 'Backup deleted.' });
+          await refreshBackups();
+        } else {
+          setMessage({ type: 'error', text: result.error });
+        }
+        setActiveAction(null);
+        setConfirmAction(null);
+        clearMessage();
+      });
+    }
   }
 
   return (
@@ -264,6 +270,26 @@ export function BackupList({ initialBackups }: BackupListProps) {
           </table>
         </div>
       )}
+      {/* Confirmation dialog for restore/delete */}
+      <ConfirmDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => { if (!open) setConfirmAction(null) }}
+        title={confirmAction?.type === 'restore' ? 'Restore Backup' : 'Delete Backup'}
+        description={
+          confirmAction?.type === 'restore'
+            ? `Restore from backup '${confirmAction.snapshot.filename}'?`
+            : `Delete backup '${confirmAction?.snapshot.filename}'? This cannot be undone.`
+        }
+        warning={
+          confirmAction?.type === 'restore'
+            ? 'This will replace all current categories and video assignments. A safety backup will be created automatically.'
+            : undefined
+        }
+        confirmLabel={confirmAction?.type === 'restore' ? 'Restore' : 'Delete'}
+        variant={confirmAction?.type === 'delete' ? 'destructive' : 'default'}
+        onConfirm={handleConfirmAction}
+        isPending={isPending && confirmAction !== null}
+      />
     </div>
   );
 }
