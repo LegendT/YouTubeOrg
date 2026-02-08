@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { getDataForCategorisation, saveCategorisationResults } from '@/app/actions/ml-categorisation';
 import { MLCategorisationEngine } from '@/lib/ml/categorisation-engine';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import type { RunMLCategorisationResult } from '@/types/ml';
 
 interface CategorisationTriggerProps {
@@ -68,16 +70,22 @@ export function CategorisationTrigger({ onProgressUpdate, onComplete }: Categori
 
   return (
     <div className="flex flex-col gap-2">
-      <button
+      <Button
         onClick={handleRunCategorisation}
         disabled={isRunning}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
-        {isRunning ? 'Categorising...' : 'Run ML Categorisation'}
-      </button>
+        {isRunning ? (
+          <>
+            <Spinner size={16} className="mr-2" />
+            Categorising...
+          </>
+        ) : (
+          'Run ML Categorisation'
+        )}
+      </Button>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+        <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
           Error: {error}
         </div>
       )}

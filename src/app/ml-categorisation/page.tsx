@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from '@/lib/auth/session';
+import { Spinner } from '@/components/ui/spinner';
 import { MLCategorisationPage } from './ml-categorisation-page';
 
 export default async function Page() {
@@ -11,7 +12,7 @@ export default async function Page() {
   }
 
   return (
-    <Suspense fallback={<div className="p-8">Loading ML categorisation...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center p-8 bg-background"><Spinner size={24} /></div>}>
       <MLCategorisationPage />
     </Suspense>
   );
