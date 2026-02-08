@@ -14,6 +14,7 @@ import { UndoBanner } from '@/components/analysis/undo-banner';
 import { useUndoStack } from '@/lib/categories/undo-stack';
 import { parseDurationToSeconds } from '@/lib/videos/format';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface VideoBrowsePageProps {
   initialCategories: CategoryListItem[];
@@ -237,9 +238,7 @@ export function VideoBrowsePage({
       const updatedCategories = await getCategories();
       setCategories(updatedCategories);
     } else {
-      // Show error (could use toast here)
-      console.error('Move/copy failed:', result.error);
-      alert(result.error || 'Failed to move/copy videos');
+      toast.error(result.error || 'Failed to move/copy videos', { duration: Infinity });
     }
   };
 
@@ -255,9 +254,7 @@ export function VideoBrowsePage({
       const updatedVideos = await getVideosForCategory(selectedCategoryId);
       setVideos(updatedVideos);
     } else {
-      // Show error
-      console.error('Undo failed:', result.error);
-      alert(result.error || 'Failed to undo');
+      toast.error(result.error || 'Failed to undo', { duration: Infinity });
     }
   };
 

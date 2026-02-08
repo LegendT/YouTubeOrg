@@ -8,7 +8,7 @@ import {
   categories,
   categoryVideos,
   videos,
-  mlCategorizations,
+  mlCategorisations,
 } from '@/lib/db/schema';
 import type { BackupData } from '@/types/backup';
 import { createSnapshot } from './snapshot';
@@ -149,7 +149,7 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
     // Step e: Restore ML categorizations if present
     if (backupData.data.mlCategorizations && backupData.data.mlCategorizations.length > 0) {
       // Clear existing ML categorizations
-      await tx.delete(mlCategorizations);
+      await tx.delete(mlCategorisations);
 
       // Build category name -> ID lookup from the newly restored categories
       const restoredCats = await tx.select({ id: categories.id, name: categories.name }).from(categories);
@@ -172,7 +172,7 @@ export async function restoreFromSnapshot(snapshotId: number): Promise<RestoreRe
           ? catNameMap.get(mlCat.manualCategoryName) ?? null
           : null;
 
-        await tx.insert(mlCategorizations).values({
+        await tx.insert(mlCategorisations).values({
           videoId,
           suggestedCategoryId,
           confidence: mlCat.confidence,

@@ -125,7 +125,7 @@ export const categories = pgTable('categories', {
   name: text('name').notNull(),
   sourceProposalId: integer('source_proposal_id').references(() => consolidationProposals.id), // Tracks origin for traceability
   videoCount: integer('video_count').notNull().default(0), // Denormalized for fast list rendering -- avoids COUNT joins
-  isProtected: boolean('is_protected').notNull().default(false), // true for "Uncategorized" -- prevents rename/delete
+  isProtected: boolean('is_protected').notNull().default(false), // true for "Uncategorised" -- prevents rename/delete
   youtubePlaylistId: text('youtube_playlist_id'), // Phase 8: stores the YouTube playlist ID after creation during sync
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -140,13 +140,13 @@ export const categoryVideos = pgTable('category_videos', {
   source: text('source').default('consolidation'), // Values: 'consolidation', 'manual', 'merge', 'orphan', 'undo'
 });
 
-// --- Phase 5: ML Categorization Engine ---
+// --- Phase 5: ML Categorisation Engine ---
 
-// Confidence level enum for ML categorization results
+// Confidence level enum for ML categorisation results
 export const confidenceLevelEnum = pgEnum('confidence_level', ['HIGH', 'MEDIUM', 'LOW']);
 
-// ML Categorizations table - stores auto-categorization results from Transformers.js
-export const mlCategorizations = pgTable('ml_categorizations', {
+// ML Categorisations table - stores auto-categorisation results from Transformers.js
+export const mlCategorisations = pgTable('ml_categorisations', {
   id: serial('id').primaryKey(),
   videoId: integer('video_id').references(() => videos.id, { onDelete: 'cascade' }).notNull(),
   suggestedCategoryId: integer('suggested_category_id').references(() => categories.id, { onDelete: 'cascade' }).notNull(),
@@ -160,10 +160,10 @@ export const mlCategorizations = pgTable('ml_categorizations', {
 });
 
 // Index for efficient querying by video (review interface)
-// CREATE INDEX idx_ml_cat_video ON ml_categorizations(video_id);
+// CREATE INDEX idx_ml_cat_video ON ml_categorisations(video_id);
 
 // Index for filtering by confidence level (low-confidence review workflow)
-// CREATE INDEX idx_ml_cat_confidence ON ml_categorizations(confidence, created_at);
+// CREATE INDEX idx_ml_cat_confidence ON ml_categorisations(confidence, created_at);
 
 // --- Phase 7: Safety & Archive System ---
 
