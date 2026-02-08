@@ -4,6 +4,7 @@ import { Navigation } from "@/components/navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { IconProvider } from "@/components/icon-provider";
+import { KeyboardShortcutsOverlay } from "@/components/keyboard-shortcuts-overlay";
 
 export const metadata: Metadata = {
   title: "YouTube Playlist Organiser",
@@ -22,6 +23,7 @@ export default function RootLayout({
           <IconProvider>
             <Navigation />
             {children}
+            <KeyboardShortcutsOverlay />
             <Toaster position="bottom-right" richColors expand visibleToasts={100} closeButton toastOptions={{ duration: 3000 }} />
           </IconProvider>
         </ThemeProvider>
