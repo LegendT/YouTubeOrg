@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
 import { renameCategory } from '@/app/actions/categories'
 
 interface RenameCategoryDialogProps {
@@ -135,7 +135,7 @@ export function RenameCategoryDialog({
           >
             {isRenaming ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner size={16} />
                 Renaming...
               </>
             ) : (

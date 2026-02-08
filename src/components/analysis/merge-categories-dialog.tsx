@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Merge, AlertTriangle } from 'lucide-react'
+import { GitMerge, Warning } from '@phosphor-icons/react'
+import { Spinner } from '@/components/ui/spinner'
 import { mergeCategories } from '@/app/actions/categories'
 import type { MergeUndoData } from '@/types/categories'
 
@@ -102,7 +103,7 @@ export function MergeCategoriesDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Merge className="h-5 w-5" />
+            <GitMerge className="h-5 w-5" />
             Merge Categories
           </DialogTitle>
           <DialogDescription>
@@ -143,9 +144,9 @@ export function MergeCategoriesDialog({
 
           {/* Warning for near-limit */}
           {isNearLimit && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
-              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-600 dark:text-amber-400">
+            <div className="flex items-start gap-2 rounded-md border border-warning/50 bg-warning/10 p-3">
+              <Warning className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+              <p className="text-sm text-warning">
                 Combined video count is approaching the 5,000 limit. The actual
                 count after deduplication may be lower.
               </p>
@@ -155,7 +156,7 @@ export function MergeCategoriesDialog({
           {/* Block for over-limit */}
           {isOverLimit && (
             <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
-              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <Warning className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
                 Combined video count exceeds the 5,000 limit. Cannot merge these
                 categories. The actual count after deduplication may be lower --
@@ -210,9 +211,9 @@ export function MergeCategoriesDialog({
           </Button>
           <Button onClick={handleSubmit} disabled={!canSubmit}>
             {isMerging ? (
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              <Spinner size={16} className="mr-1.5" />
             ) : (
-              <Merge className="h-4 w-4 mr-1.5" />
+              <GitMerge className="h-4 w-4 mr-1.5" />
             )}
             Merge {sourceCategories.length} categories
           </Button>
