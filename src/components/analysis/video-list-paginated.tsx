@@ -170,7 +170,8 @@ export function VideoListPaginated({
           placeholder="Search videos by title..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="flex h-8 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-64"
+          aria-label="Search videos by title"
+          className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-64"
         />
         <select
           value={
@@ -185,7 +186,8 @@ export function VideoListPaginated({
               return [...others, { id: 'sourcePlaylist', value: val }]
             })
           }}
-          className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm"
+          aria-label="Filter by playlist"
+          className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="all">All playlists</option>
           {sourcePlaylists.map((p) => (
@@ -201,7 +203,8 @@ export function VideoListPaginated({
             setPageSize(val === 'all' ? -1 : Number(val))
             table.setPageIndex(0)
           }}
-          className="flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm"
+          aria-label="Items per page"
+          className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value={50}>50 per page</option>
           <option value={100}>100 per page</option>
