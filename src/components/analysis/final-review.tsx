@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -284,29 +285,33 @@ export function FinalReview({
           </div>
         </ScrollArea>
 
-        <Separator />
+        {/* Result feedback (above footer) */}
+        {result && (
+          <div
+            className={`flex items-center gap-2 text-sm rounded-md p-3 ${
+              result.type === 'success'
+                ? 'bg-green-50 text-green-800 dark:bg-green-950/20 dark:text-green-200'
+                : 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-200'
+            }`}
+          >
+            {result.type === 'success' ? (
+              <CheckCircle className="h-4 w-4 shrink-0" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+            )}
+            <span>{result.message}</span>
+          </div>
+        )}
 
-        {/* Section 4: Execution */}
-        <div className="pt-4 space-y-3">
-          {result && (
-            <div
-              className={`flex items-center gap-2 text-sm rounded-md p-3 ${
-                result.type === 'success'
-                  ? 'bg-green-50 text-green-800 dark:bg-green-950/20 dark:text-green-200'
-                  : 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-200'
-              }`}
-            >
-              {result.type === 'success' ? (
-                <CheckCircle className="h-4 w-4 shrink-0" />
-              ) : (
-                <AlertTriangle className="h-4 w-4 shrink-0" />
-              )}
-              <span>{result.message}</span>
-            </div>
-          )}
-
+        <DialogFooter>
           <Button
-            className="w-full"
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isPending || result?.type === 'success'}
+          >
+            Cancel
+          </Button>
+          <Button
             size="lg"
             onClick={handleExecute}
             disabled={approved.length === 0 || isPending || result?.type === 'success'}
@@ -325,7 +330,7 @@ export function FinalReview({
               'Execute consolidation'
             )}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
