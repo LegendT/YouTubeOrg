@@ -31,6 +31,7 @@ import type {
   CategoryMetrics,
   VideoDetail,
   ConfidenceLevel,
+  ProposalStatus,
 } from '@/types/analysis';
 import type { AlgorithmMode } from '@/types/analysis';
 
@@ -156,6 +157,29 @@ export async function rejectProposal(proposalId: number, notes?: string): Promis
       .set({
         status: 'rejected',
         notes: notes ?? null,
+        updatedAt: new Date(),
+      })
+      .where(eq(consolidationProposals.id, proposalId));
+
+    revalidatePath('/analysis');
+    return { success: true as const };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false as const, error: message };
+  }
+}
+
+/**
+ * Reset a consolidation proposal back to pending state.
+ * Clears the approvedAt timestamp so the proposal can be reconsidered.
+ */
+export async function resetProposal(proposalId: number): Promise<ProposalActionResult> {
+  try {
+    await db
+      .update(consolidationProposals)
+      .set({
+        status: 'pending',
+        approvedAt: null,
         updatedAt: new Date(),
       })
       .where(eq(consolidationProposals.id, proposalId));
@@ -633,7 +657,7 @@ export async function resolveDuplicates(
  */
 export async function bulkUpdateStatus(
   proposalIds: number[],
-  status: 'approved' | 'rejected'
+  status: ProposalStatus
 ): Promise<{ success: boolean; updatedCount?: number; error?: string }> {
   try {
     if (proposalIds.length === 0) {
@@ -648,6 +672,8 @@ export async function bulkUpdateStatus(
 
     if (status === 'approved') {
       updateData.approvedAt = now;
+    } else if (status === 'pending') {
+      updateData.approvedAt = null;
     }
 
     await db
