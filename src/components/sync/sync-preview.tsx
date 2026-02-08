@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FolderPlus, ListBullets, Trash, Info, CaretDown, CaretUp } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import type { SyncPreview } from '@/types/sync';
 
@@ -43,9 +44,11 @@ function CollapsibleList({ items, emptyMessage }: { items: string[]; emptyMessag
         ))}
       </ul>
       {hiddenCount > 0 && (
-        <button
+        <Button
+          variant="link"
+          size="sm"
           onClick={() => setExpanded(!expanded)}
-          className="mt-1.5 flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
+          className="mt-1.5 h-auto p-0 gap-1"
         >
           {expanded ? (
             <>
@@ -58,7 +61,7 @@ function CollapsibleList({ items, emptyMessage }: { items: string[]; emptyMessag
               and {hiddenCount} more
             </>
           )}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -240,14 +243,14 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
 
       {/* Action Section */}
       <div className="border-t border-border pt-6">
-        <button
+        <Button
           onClick={onStartSync}
           disabled={isStarting}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          size="lg"
         >
-          {isStarting && <Spinner size={20} className="text-primary-foreground" />}
+          {isStarting && <Spinner size={20} />}
           {isStarting ? 'Starting Sync...' : 'Start Sync'}
-        </button>
+        </Button>
         <p className="text-sm text-muted-foreground mt-2 max-w-lg">
           This will create playlists, add videos, and delete old playlists on your YouTube
           account. New playlists will be created as Private.

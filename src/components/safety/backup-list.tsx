@@ -9,6 +9,7 @@ import {
 } from '@/app/actions/backup';
 import type { BackupSnapshotMeta } from '@/types/backup';
 import { ConfirmDialog } from './confirm-dialog';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
@@ -154,18 +155,18 @@ export function BackupList({ initialBackups }: BackupListProps) {
         <p className="text-sm text-muted-foreground">
           {backups.length} backup{backups.length === 1 ? '' : 's'} available
         </p>
-        <button
+        <Button
           onClick={handleCreateBackup}
           disabled={isPending && activeAction === 'create'}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          size="sm"
         >
           {isPending && activeAction === 'create' ? (
-            <Spinner size={16} className="text-primary-foreground" />
+            <Spinner size={16} />
           ) : (
             <Plus className="h-4 w-4" />
           )}
           Create Backup
-        </button>
+        </Button>
       </div>
 
       {/* Status message */}
@@ -243,30 +244,36 @@ export function BackupList({ initialBackups }: BackupListProps) {
                       >
                         <DownloadSimple className="h-4 w-4" />
                       </a>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleRestore(backup)}
                         disabled={isPending}
-                        className="inline-flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-info/10 hover:text-info disabled:opacity-50 transition-colors"
+                        className="h-7 w-7 text-muted-foreground hover:bg-info/10 hover:text-info"
                         title="Restore from backup"
+                        aria-label={`Restore backup from ${formatRelativeTime(backup.createdAt)}`}
                       >
                         {isPending && activeAction === `restore-${backup.id}` ? (
                           <Spinner size={16} />
                         ) : (
                           <ArrowCounterClockwise className="h-4 w-4" />
                         )}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleDelete(backup)}
                         disabled={isPending}
-                        className="inline-flex items-center rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 transition-colors"
+                        className="h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         title="Delete backup"
+                        aria-label={`Delete backup from ${formatRelativeTime(backup.createdAt)}`}
                       >
                         {isPending && activeAction === `delete-${backup.id}` ? (
                           <Spinner size={16} />
                         ) : (
                           <Trash className="h-4 w-4" />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

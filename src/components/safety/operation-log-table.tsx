@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { getOperationLog } from '@/app/actions/operation-log';
 import type { OperationLogEntry } from '@/types/backup';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 
 function formatRelativeTime(date: Date): string {
@@ -144,16 +145,16 @@ export function OperationLogTable({ initialEntries, initialTotal }: OperationLog
       {/* Load more */}
       {hasMore && (
         <div className="flex justify-center">
-          <button
+          <Button
+            variant="outline"
             onClick={handleLoadMore}
             disabled={isPending}
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             {isPending ? (
               <Spinner size={16} />
             ) : null}
             Load More ({total - offset} remaining)
-          </button>
+          </Button>
         </div>
       )}
     </div>

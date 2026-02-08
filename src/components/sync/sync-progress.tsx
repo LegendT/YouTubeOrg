@@ -11,6 +11,7 @@ import {
   CaretUp,
   XCircle,
 } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { runSyncBatch, getSyncProgress } from '@/app/actions/sync';
 import { STAGE_LABELS } from '@/types/sync';
@@ -119,9 +120,10 @@ function ErrorSummary({ errors }: { errors: SyncError[] }) {
 
   return (
     <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm font-medium text-destructive w-full"
+        className="flex items-center gap-2 text-sm font-medium text-destructive w-full h-auto p-0 hover:bg-transparent hover:text-destructive"
       >
         <Warning className="h-4 w-4" />
         <span>{errors.length} error{errors.length !== 1 ? 's' : ''} collected</span>
@@ -132,7 +134,7 @@ function ErrorSummary({ errors }: { errors: SyncError[] }) {
             <CaretDown className="h-4 w-4" />
           )}
         </span>
-      </button>
+      </Button>
       {expanded && (
         <div className="mt-3 space-y-3">
           {Object.entries(byStage).map(([stage, stageErrors]) => (
@@ -457,33 +459,33 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
       {/* Action Buttons */}
       <div className="flex gap-3">
         {isActive && (
-          <button
+          <Button
             onClick={handlePause}
             disabled={isPausing}
-            className="inline-flex items-center gap-2 rounded-lg bg-warning px-5 py-2.5 text-sm font-medium text-warning-foreground shadow-sm hover:bg-warning/90 transition-colors disabled:opacity-50"
+            variant="secondary"
+            className="bg-warning text-warning-foreground hover:bg-warning/90"
           >
             {isPausing ? (
-              <Spinner size={16} className="text-warning-foreground" />
+              <Spinner size={16} />
             ) : (
               <Pause className="h-4 w-4" />
             )}
             Pause Sync
-          </button>
+          </Button>
         )}
 
         {isPaused && (
-          <button
+          <Button
             onClick={handleResume}
             disabled={isResuming}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {isResuming ? (
-              <Spinner size={16} className="text-primary-foreground" />
+              <Spinner size={16} />
             ) : (
               <Play className="h-4 w-4" />
             )}
             Resume Sync
-          </button>
+          </Button>
         )}
       </div>
     </div>
