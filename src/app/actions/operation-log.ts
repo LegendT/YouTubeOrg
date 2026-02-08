@@ -3,7 +3,7 @@
 import { db } from '@/lib/db';
 import {
   operationLog,
-  mlCategorizations,
+  mlCategorisations,
   categoryVideos,
 } from '@/lib/db/schema';
 import { desc, isNotNull, count } from 'drizzle-orm';
@@ -108,22 +108,22 @@ export async function getPendingChanges(): Promise<PendingChangeSummary> {
     // Count accepted ML categorisations
     const [acceptedRow] = await db
       .select({ cnt: count() })
-      .from(mlCategorizations)
-      .where(isNotNull(mlCategorizations.acceptedAt));
+      .from(mlCategorisations)
+      .where(isNotNull(mlCategorisations.acceptedAt));
     const acceptedCount = Number(acceptedRow.cnt);
 
     // Count rejected ML categorisations
     const [rejectedRow] = await db
       .select({ cnt: count() })
-      .from(mlCategorizations)
-      .where(isNotNull(mlCategorizations.rejectedAt));
+      .from(mlCategorisations)
+      .where(isNotNull(mlCategorisations.rejectedAt));
     const rejectedCount = Number(rejectedRow.cnt);
 
     // Count manually recategorised videos
     const [manualRow] = await db
       .select({ cnt: count() })
-      .from(mlCategorizations)
-      .where(isNotNull(mlCategorizations.manualCategoryId));
+      .from(mlCategorisations)
+      .where(isNotNull(mlCategorisations.manualCategoryId));
     const manualCount = Number(manualRow.cnt);
 
     // Count categoryVideos entries by source type
@@ -146,7 +146,7 @@ export async function getPendingChanges(): Promise<PendingChangeSummary> {
       changes.push({
         type: 'ml_accepted',
         description: `${acceptedCount} ML categorisation${acceptedCount === 1 ? '' : 's'} accepted`,
-        entityType: 'ml_categorization',
+        entityType: 'ml_categorisation',
         count: acceptedCount,
         timestamp: now,
       });
@@ -156,7 +156,7 @@ export async function getPendingChanges(): Promise<PendingChangeSummary> {
       changes.push({
         type: 'ml_rejected',
         description: `${rejectedCount} ML categorisation${rejectedCount === 1 ? '' : 's'} rejected`,
-        entityType: 'ml_categorization',
+        entityType: 'ml_categorisation',
         count: rejectedCount,
         timestamp: now,
       });
@@ -166,7 +166,7 @@ export async function getPendingChanges(): Promise<PendingChangeSummary> {
       changes.push({
         type: 'ml_recategorised',
         description: `${manualCount} video${manualCount === 1 ? '' : 's'} manually recategorised`,
-        entityType: 'ml_categorization',
+        entityType: 'ml_categorisation',
         count: manualCount,
         timestamp: now,
       });

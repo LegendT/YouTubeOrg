@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { videos, categories, mlCategorizations } from '@/lib/db/schema';
+import { videos, categories, mlCategorisations } from '@/lib/db/schema';
 import type { RunMLCategorizationResult, MLCategorizationResult, CategorizationResult, ReviewResult, ReviewStats, VideoReviewDetail } from '@/types/ml';
 import { eq, inArray, and, isNull, isNotNull, count, sql } from 'drizzle-orm';
 import type { Category } from '@/types/categories';
@@ -80,8 +80,8 @@ export async function saveCategorizationResults(
     // Delete existing ML categorizations for these videos (re-run scenario)
     const videoIds = results.map((r) => r.videoId);
     await db
-      .delete(mlCategorizations)
-      .where(inArray(mlCategorizations.videoId, videoIds));
+      .delete(mlCategorisations)
+      .where(inArray(mlCategorisations.videoId, videoIds));
 
     // Insert new categorization results
     const categorizationRecords = results.map((result) => ({
@@ -92,7 +92,7 @@ export async function saveCategorizationResults(
       modelVersion: 'all-MiniLM-L6-v2',
     }));
 
-    await db.insert(mlCategorizations).values(categorizationRecords);
+    await db.insert(mlCategorisations).values(categorizationRecords);
 
     // Calculate statistics
     const highCount = results.filter((r) => r.confidence === 'HIGH').length;
@@ -127,8 +127,8 @@ export async function getMLCategorizationForVideo(
   try {
     const result = await db
       .select()
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.videoId, videoId))
+      .from(mlCategorisations)
+      .where(eq(mlCategorisations.videoId, videoId))
       .limit(1);
 
     if (result.length === 0) return null;
@@ -153,9 +153,9 @@ export async function getMLCategorizationResults(
     const results = confidenceFilter
       ? await db
           .select()
-          .from(mlCategorizations)
-          .where(eq(mlCategorizations.confidence, confidenceFilter))
-      : await db.select().from(mlCategorizations);
+          .from(mlCategorisations)
+          .where(eq(mlCategorisations.confidence, confidenceFilter))
+      : await db.select().from(mlCategorisations);
 
     return results as MLCategorizationResult[];
   } catch (error) {
@@ -178,13 +178,13 @@ export async function acceptSuggestion(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await db
-      .update(mlCategorizations)
+      .update(mlCategorisations)
       .set({
         acceptedAt: new Date(),
         rejectedAt: null,
         manualCategoryId: null,
       })
-      .where(eq(mlCategorizations.videoId, videoId));
+      .where(eq(mlCategorisations.videoId, videoId));
 
     return { success: true };
   } catch (error) {
@@ -208,12 +208,12 @@ export async function rejectSuggestion(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await db
-      .update(mlCategorizations)
+      .update(mlCategorisations)
       .set({
         rejectedAt: new Date(),
         acceptedAt: null,
       })
-      .where(eq(mlCategorizations.videoId, videoId));
+      .where(eq(mlCategorisations.videoId, videoId));
 
     return { success: true };
   } catch (error) {
@@ -240,9 +240,9 @@ export async function recategorizeVideo(
   try {
     // Fetch current state to check if already rejected
     const existing = await db
-      .select({ rejectedAt: mlCategorizations.rejectedAt })
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.videoId, videoId))
+      .select({ rejectedAt: mlCategorisations.rejectedAt })
+      .from(mlCategorisations)
+      .where(eq(mlCategorisations.videoId, videoId))
       .limit(1);
 
     if (existing.length === 0) {
@@ -264,9 +264,9 @@ export async function recategorizeVideo(
     }
 
     await db
-      .update(mlCategorizations)
+      .update(mlCategorisations)
       .set(updateData)
-      .where(eq(mlCategorizations.videoId, videoId));
+      .where(eq(mlCategorisations.videoId, videoId));
 
     return { success: true };
   } catch (error) {
@@ -279,7 +279,7 @@ export async function recategorizeVideo(
 }
 
 /**
- * Fetch enriched review data with three-way join (videos -> mlCategorizations -> categories).
+ * Fetch enriched review data with three-way join (videos -> mlCategorisations -> categories).
  * Supports filtering by confidence level and review status.
  *
  * @param confidenceFilter - Optional: filter by confidence level
@@ -295,21 +295,21 @@ export async function getReviewData(
     const conditions = [];
 
     if (confidenceFilter) {
-      conditions.push(eq(mlCategorizations.confidence, confidenceFilter));
+      conditions.push(eq(mlCategorisations.confidence, confidenceFilter));
     }
 
     if (reviewStatus === 'pending') {
-      conditions.push(isNull(mlCategorizations.acceptedAt));
-      conditions.push(isNull(mlCategorizations.rejectedAt));
+      conditions.push(isNull(mlCategorisations.acceptedAt));
+      conditions.push(isNull(mlCategorisations.rejectedAt));
     } else if (reviewStatus === 'accepted') {
-      conditions.push(isNotNull(mlCategorizations.acceptedAt));
+      conditions.push(isNotNull(mlCategorisations.acceptedAt));
     } else if (reviewStatus === 'rejected') {
-      conditions.push(isNotNull(mlCategorizations.rejectedAt));
+      conditions.push(isNotNull(mlCategorisations.rejectedAt));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Three-way join: videos -> mlCategorizations -> categories
+    // Three-way join: videos -> mlCategorisations -> categories
     const results = await db
       .select({
         videoId: videos.id,
@@ -319,17 +319,17 @@ export async function getReviewData(
         channelTitle: videos.channelTitle,
         duration: videos.duration,
         publishedAt: videos.publishedAt,
-        suggestedCategoryId: mlCategorizations.suggestedCategoryId,
+        suggestedCategoryId: mlCategorisations.suggestedCategoryId,
         suggestedCategoryName: categories.name,
-        confidence: mlCategorizations.confidence,
-        similarityScore: mlCategorizations.similarityScore,
-        acceptedAt: mlCategorizations.acceptedAt,
-        rejectedAt: mlCategorizations.rejectedAt,
-        manualCategoryId: mlCategorizations.manualCategoryId,
+        confidence: mlCategorisations.confidence,
+        similarityScore: mlCategorisations.similarityScore,
+        acceptedAt: mlCategorisations.acceptedAt,
+        rejectedAt: mlCategorisations.rejectedAt,
+        manualCategoryId: mlCategorisations.manualCategoryId,
       })
-      .from(mlCategorizations)
-      .innerJoin(videos, eq(mlCategorizations.videoId, videos.id))
-      .innerJoin(categories, eq(mlCategorizations.suggestedCategoryId, categories.id))
+      .from(mlCategorisations)
+      .innerJoin(videos, eq(mlCategorisations.videoId, videos.id))
+      .innerJoin(categories, eq(mlCategorisations.suggestedCategoryId, categories.id))
       .where(whereClause);
 
     return results as ReviewResult[];
@@ -370,8 +370,8 @@ export async function getVideoReviewDetail(
     // Fetch ML categorization for this video
     const categorizationResult = await db
       .select()
-      .from(mlCategorizations)
-      .where(eq(mlCategorizations.videoId, videoId))
+      .from(mlCategorisations)
+      .where(eq(mlCategorisations.videoId, videoId))
       .limit(1);
 
     if (categorizationResult.length === 0) return null;
@@ -411,7 +411,7 @@ export async function getVideoReviewDetail(
 }
 
 /**
- * Calculate review statistics from mlCategorizations table.
+ * Calculate review statistics from mlCategorisations table.
  * Provides dashboard-level counts for total, reviewed, pending, and confidence breakdowns.
  *
  * @returns ReviewStats with 6 statistics
@@ -422,13 +422,13 @@ export async function getReviewStats(): Promise<ReviewStats> {
     const result = await db
       .select({
         total: count(),
-        reviewed: sql<string>`count(*) filter (where ${mlCategorizations.acceptedAt} is not null or ${mlCategorizations.rejectedAt} is not null)`,
-        pending: sql<string>`count(*) filter (where ${mlCategorizations.acceptedAt} is null and ${mlCategorizations.rejectedAt} is null)`,
-        highConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'HIGH')`,
-        mediumConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'MEDIUM')`,
-        lowConfidence: sql<string>`count(*) filter (where ${mlCategorizations.confidence} = 'LOW')`,
+        reviewed: sql<string>`count(*) filter (where ${mlCategorisations.acceptedAt} is not null or ${mlCategorisations.rejectedAt} is not null)`,
+        pending: sql<string>`count(*) filter (where ${mlCategorisations.acceptedAt} is null and ${mlCategorisations.rejectedAt} is null)`,
+        highConfidence: sql<string>`count(*) filter (where ${mlCategorisations.confidence} = 'HIGH')`,
+        mediumConfidence: sql<string>`count(*) filter (where ${mlCategorisations.confidence} = 'MEDIUM')`,
+        lowConfidence: sql<string>`count(*) filter (where ${mlCategorisations.confidence} = 'LOW')`,
       })
-      .from(mlCategorizations);
+      .from(mlCategorisations);
 
     const row = result[0];
     return {

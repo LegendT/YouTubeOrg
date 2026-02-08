@@ -8,7 +8,7 @@ import {
   categories,
   categoryVideos,
   videos,
-  mlCategorizations,
+  mlCategorisations,
 } from '@/lib/db/schema';
 import type { BackupData, BackupCategory, BackupCategoryVideo, BackupMLCategorization } from '@/types/backup';
 
@@ -68,15 +68,15 @@ async function gatherSnapshotData(scope: string): Promise<BackupData['data']> {
     .select({
       videoYoutubeId: videos.youtubeId,
       suggestedCategoryName: categories.name,
-      confidence: mlCategorizations.confidence,
-      similarityScore: mlCategorizations.similarityScore,
-      acceptedAt: mlCategorizations.acceptedAt,
-      rejectedAt: mlCategorizations.rejectedAt,
-      manualCategoryId: mlCategorizations.manualCategoryId,
+      confidence: mlCategorisations.confidence,
+      similarityScore: mlCategorisations.similarityScore,
+      acceptedAt: mlCategorisations.acceptedAt,
+      rejectedAt: mlCategorisations.rejectedAt,
+      manualCategoryId: mlCategorisations.manualCategoryId,
     })
-    .from(mlCategorizations)
-    .innerJoin(videos, eq(mlCategorizations.videoId, videos.id))
-    .innerJoin(categories, eq(mlCategorizations.suggestedCategoryId, categories.id));
+    .from(mlCategorisations)
+    .innerJoin(videos, eq(mlCategorisations.videoId, videos.id))
+    .innerJoin(categories, eq(mlCategorisations.suggestedCategoryId, categories.id));
 
   // Resolve manualCategoryId to category name where present
   const backupMLCategorizations: BackupMLCategorization[] = mlRows.map(row => {
