@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  CheckCircle2,
-  AlertTriangle,
-  RefreshCw,
+  CheckCircle,
+  Warning,
+  ArrowsClockwise,
   Shield,
   Info,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+  CaretDown,
+  CaretUp,
+} from '@phosphor-icons/react';
 import type { SyncJobRecord, SyncError } from '@/types/sync';
 
 interface SyncReportProps {
@@ -94,50 +94,50 @@ function ErrorTable({ errors }: { errors: SyncError[] }) {
   const hiddenCount = errors.length - VISIBLE_COUNT;
 
   return (
-    <div className="rounded-lg border border-red-200 bg-white shadow-sm overflow-hidden">
-      <div className="px-6 py-4 bg-red-50 border-b border-red-200">
-        <h3 className="text-sm font-medium text-red-800 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4" />
+    <div className="rounded-lg border border-destructive/20 bg-card shadow-sm overflow-hidden">
+      <div className="px-6 py-4 bg-destructive/10 border-b border-destructive/20">
+        <h3 className="text-sm font-medium text-destructive flex items-center gap-2">
+          <Warning className="h-4 w-4" />
           {errors.length} Error{errors.length !== 1 ? 's' : ''} Encountered
         </h3>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Stage
               </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Type
               </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Entity ID
               </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Error Message
               </th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Time
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-card divide-y divide-border">
             {visibleErrors.map((err, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="px-4 py-2 text-sm text-gray-700">
+              <tr key={i} className="hover:bg-muted/50">
+                <td className="px-4 py-2 text-sm text-foreground">
                   {REPORT_STAGE_LABELS[err.stage] ?? err.stage}
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-600 capitalize">
+                <td className="px-4 py-2 text-sm text-muted-foreground capitalize">
                   {err.entityType}
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-500 font-mono text-xs">
+                <td className="px-4 py-2 text-sm text-muted-foreground font-mono text-xs">
                   {err.entityId}
                 </td>
-                <td className="px-4 py-2 text-sm text-red-700 max-w-xs truncate">
+                <td className="px-4 py-2 text-sm text-destructive max-w-xs truncate">
                   {err.message}
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-400 whitespace-nowrap">
+                <td className="px-4 py-2 text-sm text-muted-foreground/60 whitespace-nowrap">
                   {formatDate(err.timestamp)}
                 </td>
               </tr>
@@ -146,19 +146,19 @@ function ErrorTable({ errors }: { errors: SyncError[] }) {
         </table>
       </div>
       {hiddenCount > 0 && (
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="px-6 py-3 bg-muted border-t border-border">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
           >
             {expanded ? (
               <>
-                <ChevronUp className="h-3.5 w-3.5" />
+                <CaretUp className="h-3.5 w-3.5" />
                 Show fewer errors
               </>
             ) : (
               <>
-                <ChevronDown className="h-3.5 w-3.5" />
+                <CaretDown className="h-3.5 w-3.5" />
                 Show all {errors.length} errors
               </>
             )}
@@ -197,31 +197,31 @@ export function SyncReport({ job, onStartNewSync }: SyncReportProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-3">
           {hasErrors ? (
-            <AlertTriangle className="h-7 w-7 text-amber-500" />
+            <Warning className="h-7 w-7 text-warning" />
           ) : (
-            <CheckCircle2 className="h-7 w-7 text-green-600" />
+            <CheckCircle className="h-7 w-7 text-success" />
           )}
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-foreground">
             {hasErrors ? 'Sync Finished with Errors' : 'Sync Complete'}
           </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
           <div>
-            <span className="text-gray-500">Started:</span>{' '}
+            <span className="text-muted-foreground/60">Started:</span>{' '}
             {formatDate(job.startedAt)}
           </div>
           {job.completedAt && (
             <div>
-              <span className="text-gray-500">Completed:</span>{' '}
+              <span className="text-muted-foreground/60">Completed:</span>{' '}
               {formatDate(job.completedAt)}
             </div>
           )}
           {job.completedAt && (
             <div>
-              <span className="text-gray-500">Duration:</span>{' '}
+              <span className="text-muted-foreground/60">Duration:</span>{' '}
               {formatDuration(job.startedAt, job.completedAt)}
             </div>
           )}
@@ -230,17 +230,17 @@ export function SyncReport({ job, onStartNewSync }: SyncReportProps) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm text-centre">
-          <p className="text-2xl font-bold text-gray-900">
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm text-centre">
+          <p className="text-2xl font-bold text-foreground">
             {formatNumber(job.quotaUsedThisSync)}
           </p>
-          <p className="text-sm text-gray-500">Total quota used</p>
+          <p className="text-sm text-muted-foreground">Total quota used</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm text-centre">
-          <p className="text-2xl font-bold text-gray-900">
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm text-centre">
+          <p className="text-2xl font-bold text-foreground">
             {formatNumber(totalOperations)}
           </p>
-          <p className="text-sm text-gray-500">Total operations</p>
+          <p className="text-sm text-muted-foreground">Total operations</p>
         </div>
       </div>
 
@@ -255,23 +255,23 @@ export function SyncReport({ job, onStartNewSync }: SyncReportProps) {
           return (
             <div
               key={stage}
-              className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+              className="rounded-lg border border-border bg-card p-5 shadow-sm"
             >
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">
                 {REPORT_STAGE_LABELS[stage]}
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-700">Succeeded</span>
-                  <span className="font-medium text-green-700">{formatNumber(succeeded)}</span>
+                  <span className="text-success">Succeeded</span>
+                  <span className="font-medium text-success">{formatNumber(succeeded)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-red-600">Failed</span>
-                  <span className="font-medium text-red-600">{formatNumber(failed)}</span>
+                  <span className="text-destructive">Failed</span>
+                  <span className="font-medium text-destructive">{formatNumber(failed)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Skipped</span>
-                  <span className="font-medium text-gray-400">{formatNumber(skipped)}</span>
+                  <span className="text-muted-foreground/60">Skipped</span>
+                  <span className="font-medium text-muted-foreground/60">{formatNumber(skipped)}</span>
                 </div>
               </div>
             </div>
@@ -283,12 +283,12 @@ export function SyncReport({ job, onStartNewSync }: SyncReportProps) {
       {hasErrors && <ErrorTable errors={job.errors} />}
 
       {/* Watch Later Notice */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div className="rounded-lg border border-warning/20 bg-warning/10 p-4">
         <div className="flex gap-3">
-          <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <Info className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-blue-800">Watch Later</h4>
-            <p className="text-sm text-blue-700 mt-0.5">
+            <h4 className="text-sm font-medium text-warning">Watch Later</h4>
+            <p className="text-sm text-warning/80 mt-0.5">
               Watch Later videos cannot be removed via the YouTube API (deprecated since 2020).
               After sync completes, you can manually remove categorised videos from Watch Later
               through the YouTube interface.
@@ -298,17 +298,17 @@ export function SyncReport({ job, onStartNewSync }: SyncReportProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3 border-t border-gray-200 pt-6">
+      <div className="flex flex-wrap gap-3 border-t border-border pt-6">
         <button
           onClick={onStartNewSync}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
         >
-          <RefreshCw className="h-4 w-4" />
+          <ArrowsClockwise className="h-4 w-4" />
           Start New Sync
         </button>
         <Link
           href="/safety"
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm hover:bg-muted transition-colors"
         >
           <Shield className="h-4 w-4" />
           Review Backups

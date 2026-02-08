@@ -138,15 +138,15 @@ export function SyncPageClient({
   // Error state
   if (view === 'error') {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-        <h2 className="text-lg font-medium text-red-800">Unable to Load Preview</h2>
-        <p className="text-sm text-red-700 mt-1">{error}</p>
+      <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6">
+        <h2 className="text-lg font-medium text-destructive">Unable to Load Preview</h2>
+        <p className="text-sm text-destructive/80 mt-1">{error}</p>
         <button
           onClick={() => {
             setError(undefined);
             router.refresh();
           }}
-          className="mt-3 text-sm text-red-600 hover:text-red-800 underline"
+          className="mt-3 text-sm text-destructive hover:text-destructive/80 underline"
         >
           Try again
         </button>
@@ -179,9 +179,9 @@ export function SyncPageClient({
   // No active job, no preview: empty state
   if (!preview) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm text-center">
-        <h2 className="text-lg font-medium text-gray-900">No Preview Available</h2>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm text-center">
+        <h2 className="text-lg font-medium text-foreground">No Preview Available</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           There are no category assignments to synchronise. Assign videos to categories
           first, then return here to sync.
         </p>

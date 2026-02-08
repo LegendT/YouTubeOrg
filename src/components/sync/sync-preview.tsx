@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { FolderPlus, ListVideo, Trash2, Info, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { FolderPlus, ListBullets, Trash, Info, CaretDown, CaretUp } from '@phosphor-icons/react';
+import { Spinner } from '@/components/ui/spinner';
 import type { SyncPreview } from '@/types/sync';
 
 interface SyncPreviewProps {
@@ -26,7 +27,7 @@ function CollapsibleList({ items, emptyMessage }: { items: string[]; emptyMessag
   const VISIBLE_COUNT = 5;
 
   if (items.length === 0) {
-    return <p className="text-sm text-gray-500 italic">{emptyMessage}</p>;
+    return <p className="text-sm text-muted-foreground italic">{emptyMessage}</p>;
   }
 
   const visibleItems = expanded ? items : items.slice(0, VISIBLE_COUNT);
@@ -36,7 +37,7 @@ function CollapsibleList({ items, emptyMessage }: { items: string[]; emptyMessag
     <div className="mt-2">
       <ul className="space-y-1">
         {visibleItems.map((item) => (
-          <li key={item} className="text-sm text-gray-600 pl-2 border-l-2 border-gray-200">
+          <li key={item} className="text-sm text-muted-foreground pl-2 border-l-2 border-border">
             {item}
           </li>
         ))}
@@ -44,16 +45,16 @@ function CollapsibleList({ items, emptyMessage }: { items: string[]; emptyMessag
       {hiddenCount > 0 && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-1.5 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          className="mt-1.5 flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
         >
           {expanded ? (
             <>
-              <ChevronUp className="h-3.5 w-3.5" />
+              <CaretUp className="h-3.5 w-3.5" />
               Show less
             </>
           ) : (
             <>
-              <ChevronDown className="h-3.5 w-3.5" />
+              <CaretDown className="h-3.5 w-3.5" />
               and {hiddenCount} more
             </>
           )}
@@ -77,8 +78,8 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Sync Preview</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-xl font-semibold text-foreground">Sync Preview</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Review the changes that will be synchronised to YouTube
         </p>
       </div>
@@ -87,39 +88,39 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
       <div
         className={`rounded-lg border p-6 shadow-sm ${
           estimatedDays > 7
-            ? 'border-amber-200 bg-amber-50'
-            : 'border-gray-200 bg-white'
+            ? 'border-warning/20 bg-warning/10'
+            : 'border-border bg-card'
         }`}
       >
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
           Quota Summary
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               {formatNumber(totalQuotaCost)}
             </p>
-            <p className="text-sm text-gray-500">Total API units</p>
+            <p className="text-sm text-muted-foreground">Total API units</p>
           </div>
           <div>
             <p
               className={`text-2xl font-bold ${
-                estimatedDays > 7 ? 'text-amber-700' : 'text-gray-900'
+                estimatedDays > 7 ? 'text-warning' : 'text-foreground'
               }`}
             >
               ~{estimatedDays} days
             </p>
-            <p className="text-sm text-gray-500">Estimated duration</p>
+            <p className="text-sm text-muted-foreground">Estimated duration</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               {formatNumber(dailyQuotaLimit)}
             </p>
-            <p className="text-sm text-gray-500">Daily limit (units/day)</p>
+            <p className="text-sm text-muted-foreground">Daily limit (units/day)</p>
           </div>
         </div>
         {estimatedDays > 7 && (
-          <p className="mt-3 text-sm text-amber-700">
+          <p className="mt-3 text-sm text-warning">
             This sync will span multiple weeks due to YouTube API quota limits.
             The operation can be paused and resumed at any time.
           </p>
@@ -129,19 +130,19 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
       {/* Stage Cards */}
       <div className="space-y-4">
         {/* Card 1: Create Playlists */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-              <FolderPlus className="h-5 w-5 text-green-600" />
+            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+              <FolderPlus className="h-5 w-5 text-success" />
             </div>
             <div className="flex-1">
               <div className="flex items-baseline justify-between">
-                <h3 className="font-medium text-gray-900">Create Playlists</h3>
-                <span className="text-sm text-gray-500">
+                <h3 className="font-medium text-foreground">Create Playlists</h3>
+                <span className="text-sm text-muted-foreground">
                   {formatNumber(stages.createPlaylists.quotaCost)} units
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {stages.createPlaylists.count} new playlist{stages.createPlaylists.count !== 1 ? 's' : ''} to create on YouTube
               </p>
               <CollapsibleList
@@ -153,22 +154,22 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
         </div>
 
         {/* Card 2: Add Videos to Playlists */}
-        <div className="rounded-lg border border-blue-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-info/20 bg-card p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-              <ListVideo className="h-5 w-5 text-blue-600" />
+            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+              <ListBullets className="h-5 w-5 text-info" />
             </div>
             <div className="flex-1">
               <div className="flex items-baseline justify-between">
-                <h3 className="font-medium text-gray-900">Add Videos to Playlists</h3>
-                <span className="text-sm text-gray-500">
+                <h3 className="font-medium text-foreground">Add Videos to Playlists</h3>
+                <span className="text-sm text-muted-foreground">
                   {formatNumber(stages.addVideos.quotaCost)} units
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {formatNumber(stages.addVideos.count)} video assignment{stages.addVideos.count !== 1 ? 's' : ''} across all categories
               </p>
-              <p className="text-xs text-blue-600 font-medium mt-1">
+              <p className="text-xs text-info font-medium mt-1">
                 This is the largest stage and will use most of the quota
               </p>
               {/* Per-category breakdown */}
@@ -181,14 +182,14 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
                       key={cat.categoryId}
                       className="flex items-center justify-between text-sm"
                     >
-                      <span className="text-gray-600 truncate mr-2">{cat.categoryName}</span>
-                      <span className="text-gray-400 flex-shrink-0">
+                      <span className="text-muted-foreground truncate mr-2">{cat.categoryName}</span>
+                      <span className="text-muted-foreground/60 flex-shrink-0">
                         {formatNumber(cat.videoCount)} video{cat.videoCount !== 1 ? 's' : ''}
                       </span>
                     </div>
                   ))}
                 {stages.addVideos.byCategory.length > 10 && (
-                  <p className="text-sm text-gray-400 italic">
+                  <p className="text-sm text-muted-foreground/60 italic">
                     and {stages.addVideos.byCategory.length - 10} more categories
                   </p>
                 )}
@@ -198,19 +199,19 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
         </div>
 
         {/* Card 3: Delete Old Playlists */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center">
-              <Trash2 className="h-5 w-5 text-red-500" />
+            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+              <Trash className="h-5 w-5 text-destructive" />
             </div>
             <div className="flex-1">
               <div className="flex items-baseline justify-between">
-                <h3 className="font-medium text-gray-900">Delete Old Playlists</h3>
-                <span className="text-sm text-gray-500">
+                <h3 className="font-medium text-foreground">Delete Old Playlists</h3>
+                <span className="text-sm text-muted-foreground">
                   {formatNumber(stages.deletePlaylists.quotaCost)} units
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {stages.deletePlaylists.count} old playlist{stages.deletePlaylists.count !== 1 ? 's' : ''} to remove from YouTube
               </p>
               <CollapsibleList
@@ -223,12 +224,12 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
       </div>
 
       {/* Watch Later Notice */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div className="rounded-lg border border-warning/20 bg-warning/10 p-4">
         <div className="flex gap-3">
-          <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <Info className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-blue-800">Watch Later</h4>
-            <p className="text-sm text-blue-700 mt-0.5">
+            <h4 className="text-sm font-medium text-warning">Watch Later</h4>
+            <p className="text-sm text-warning/80 mt-0.5">
               Watch Later videos cannot be removed via the YouTube API (deprecated since 2020).
               After sync completes, you can manually remove categorised videos from Watch Later
               through the YouTube interface.
@@ -238,16 +239,16 @@ export function SyncPreview({ preview, onStartSync, isStarting }: SyncPreviewPro
       </div>
 
       {/* Action Section */}
-      <div className="border-t border-gray-200 pt-6">
+      <div className="border-t border-border pt-6">
         <button
           onClick={onStartSync}
           disabled={isStarting}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isStarting && <Loader2 className="h-5 w-5 animate-spin" />}
+          {isStarting && <Spinner size={20} className="text-primary-foreground" />}
           {isStarting ? 'Starting Sync...' : 'Start Sync'}
         </button>
-        <p className="text-sm text-gray-500 mt-2 max-w-lg">
+        <p className="text-sm text-muted-foreground mt-2 max-w-lg">
           This will create playlists, add videos, and delete old playlists on your YouTube
           account. New playlists will be created as Private.
         </p>

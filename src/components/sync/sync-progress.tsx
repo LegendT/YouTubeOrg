@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  CheckCircle2,
+  CheckCircle,
   Circle,
-  Loader2,
   Pause,
   Play,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
+  Warning,
+  CaretDown,
+  CaretUp,
   XCircle,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
+import { Spinner } from '@/components/ui/spinner';
 import { runSyncBatch, getSyncProgress } from '@/app/actions/sync';
 import { STAGE_LABELS } from '@/types/sync';
 import type { SyncJobRecord, SyncStage, SyncError } from '@/types/sync';
@@ -118,18 +118,18 @@ function ErrorSummary({ errors }: { errors: SyncError[] }) {
   }, {});
 
   return (
-    <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+    <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm font-medium text-red-800 w-full"
+        className="flex items-center gap-2 text-sm font-medium text-destructive w-full"
       >
-        <AlertTriangle className="h-4 w-4" />
+        <Warning className="h-4 w-4" />
         <span>{errors.length} error{errors.length !== 1 ? 's' : ''} collected</span>
         <span className="ml-auto">
           {expanded ? (
-            <ChevronUp className="h-4 w-4" />
+            <CaretUp className="h-4 w-4" />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <CaretDown className="h-4 w-4" />
           )}
         </span>
       </button>
@@ -137,14 +137,14 @@ function ErrorSummary({ errors }: { errors: SyncError[] }) {
         <div className="mt-3 space-y-3">
           {Object.entries(byStage).map(([stage, stageErrors]) => (
             <div key={stage}>
-              <h4 className="text-xs font-medium text-red-700 uppercase tracking-wider mb-1">
+              <h4 className="text-xs font-medium text-destructive/80 uppercase tracking-wider mb-1">
                 {PIPELINE_LABELS[stage] ?? stage} ({stageErrors.length})
               </h4>
               <ul className="space-y-1">
                 {stageErrors.map((err, i) => (
-                  <li key={i} className="text-sm text-red-700 pl-3 border-l-2 border-red-200">
+                  <li key={i} className="text-sm text-destructive/80 pl-3 border-l-2 border-destructive/20">
                     <span className="font-medium">{err.entityType}</span>{' '}
-                    <span className="text-red-500">{err.entityId}</span>:{' '}
+                    <span className="text-destructive/60">{err.entityId}</span>:{' '}
                     {err.message}
                   </li>
                 ))}
@@ -277,36 +277,36 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
   return (
     <div className="space-y-6">
       {/* Current Stage Card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         {/* Active state header */}
         {isActive && (
           <>
             <div className="flex items-center gap-2 mb-4">
-              <span className="inline-block h-2.5 w-2.5 rounded-full bg-green-400 animate-pulse" />
-              <h2 className="text-lg font-medium text-gray-900">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
+              <h2 className="text-lg font-medium text-foreground">
                 {STAGE_LABELS[job.stage]}
               </h2>
             </div>
 
             {/* Backup stage: spinner only, no count */}
             {job.stage === 'backup' ? (
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Spinner size={20} className="text-info" />
                 <span>Creating pre-sync backup...</span>
               </div>
             ) : (
               /* Other stages: progress bar with count */
               <div>
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <div className="flex justify-between text-sm text-muted-foreground mb-2">
                   <span>
                     {STAGE_LABELS[job.stage]}:{' '}
                     {formatNumber(job.currentStageProgress)} / {formatNumber(job.currentStageTotal)}
                   </span>
                   <span className="font-medium">{progressPercent}%</span>
                 </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                    className="h-full bg-primary rounded-full transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -319,10 +319,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
         {isPaused && (
           <>
             <div className="flex items-center gap-2 mb-4">
-              <Pause className="h-5 w-5 text-amber-500" />
-              <h2 className="text-lg font-medium text-gray-900">Sync Paused</h2>
+              <Pause className="h-5 w-5 text-warning" />
+              <h2 className="text-lg font-medium text-foreground">Sync Paused</h2>
             </div>
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+            <div className="rounded-lg bg-warning/10 border border-warning/20 p-4 text-sm text-warning">
               {job.pauseReason === 'quota_exhausted' && (
                 <p>
                   Sync paused — daily quota exhausted. The quota resets at midnight
@@ -346,10 +346,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
         {isFailed && (
           <>
             <div className="flex items-center gap-2 mb-4">
-              <XCircle className="h-5 w-5 text-red-500" />
-              <h2 className="text-lg font-medium text-red-900">Sync Failed</h2>
+              <XCircle className="h-5 w-5 text-destructive" />
+              <h2 className="text-lg font-medium text-destructive">Sync Failed</h2>
             </div>
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-destructive/80">
               The sync operation encountered a fatal error and could not continue.
             </p>
           </>
@@ -357,8 +357,8 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
       </div>
 
       {/* Stage Pipeline */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
           Pipeline Stages
         </h3>
         <div className="space-y-3">
@@ -380,37 +380,37 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
                 key={stage}
                 className={`flex items-center gap-3 rounded-lg px-4 py-3 ${
                   status === 'current'
-                    ? 'bg-blue-50 border border-blue-200'
+                    ? 'bg-info/10 border border-info/20'
                     : status === 'completed'
-                      ? 'bg-green-50 border border-green-200'
-                      : 'bg-gray-50 border border-gray-100'
+                      ? 'bg-success/10 border border-success/20'
+                      : 'bg-muted border border-border'
                 }`}
               >
                 {/* Stage icon */}
                 {status === 'completed' && (
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
                 )}
                 {status === 'current' && (
                   isActive ? (
-                    <Loader2 className="h-5 w-5 text-blue-600 animate-spin flex-shrink-0" />
+                    <Spinner size={20} className="text-info flex-shrink-0" />
                   ) : isPaused ? (
-                    <Pause className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                    <Pause className="h-5 w-5 text-warning flex-shrink-0" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                    <XCircle className="h-5 w-5 text-destructive flex-shrink-0" />
                   )
                 )}
                 {status === 'future' && (
-                  <Circle className="h-5 w-5 text-gray-300 flex-shrink-0" />
+                  <Circle className="h-5 w-5 text-muted-foreground/40 flex-shrink-0" />
                 )}
 
                 {/* Stage label */}
                 <span
                   className={`text-sm font-medium flex-1 ${
                     status === 'current'
-                      ? 'text-blue-800'
+                      ? 'text-info'
                       : status === 'completed'
-                        ? 'text-green-800'
-                        : 'text-gray-400'
+                        ? 'text-success'
+                        : 'text-muted-foreground'
                   }`}
                 >
                   {PIPELINE_LABELS[stage]}
@@ -420,7 +420,7 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
                 {resultSummary && (
                   <span
                     className={`text-sm ${
-                      status === 'completed' ? 'text-green-600' : 'text-gray-500'
+                      status === 'completed' ? 'text-success' : 'text-muted-foreground'
                     }`}
                   >
                     {resultSummary}
@@ -429,7 +429,7 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
 
                 {/* Current stage progress */}
                 {status === 'current' && isActive && job.currentStageTotal > 0 && stage !== 'backup' && (
-                  <span className="text-sm text-blue-600">
+                  <span className="text-sm text-info">
                     {formatNumber(job.currentStageProgress)}/{formatNumber(job.currentStageTotal)}
                   </span>
                 )}
@@ -440,10 +440,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
       </div>
 
       {/* Stats Row */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">Quota used this sync</span>
-          <span className="font-medium text-gray-900">
+          <span className="text-muted-foreground">Quota used this sync</span>
+          <span className="font-medium text-foreground">
             {formatNumber(job.quotaUsedThisSync)} units
           </span>
         </div>
@@ -460,10 +460,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
           <button
             onClick={handlePause}
             disabled={isPausing}
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-amber-600 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-warning px-5 py-2.5 text-sm font-medium text-warning-foreground shadow-sm hover:bg-warning/90 transition-colors disabled:opacity-50"
           >
             {isPausing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Spinner size={16} className="text-warning-foreground" />
             ) : (
               <Pause className="h-4 w-4" />
             )}
@@ -475,10 +475,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
           <button
             onClick={handleResume}
             disabled={isResuming}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {isResuming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Spinner size={16} className="text-primary-foreground" />
             ) : (
               <Play className="h-4 w-4" />
             )}
