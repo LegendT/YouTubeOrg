@@ -217,6 +217,6 @@ YouTube Data API v3 has a default quota of **10,000 units/day**. The application
 - **OAuth testing mode**: Google Cloud OAuth consent screen must be in "Testing" mode during development (limited to configured test users). Production deployment with >100 users requires Google verification.
 - **Single user**: Designed as a personal tool. No multi-user support.
 
-## License
+## Licence
 
-ISC
+[MIT](LICENSE) — Copyright (c) 2026 Anthony George
