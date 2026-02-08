@@ -381,7 +381,7 @@ Recent decisions affecting current work:
 - UX: Add Cancel button to Final Review & Execute dialog (src/components/analysis/final-review.tsx) — only action is "Execute consolidation", no obvious way to back out besides the X close button
 - UX: Approval should be a toggle (approved → click again → pending), not one-way. Reject should be a separate intentional action, distinct from un-approving.
 - UX: Checkboxes should be for batch selection only (merge, bulk approve/reject), not conflated with approval state
-- i18n: All user-facing text must use British English (e.g., "Uncategorised" not "Uncategorized", "Organise" not "Organize", "Finalise" not "Finalize"). Sweep all UI strings across the codebase.
+- ~~i18n: British English sweep~~ — **DONE** (Phase 10, plans 10-02 and 10-03)
 
 ### Blockers/Concerns
 
