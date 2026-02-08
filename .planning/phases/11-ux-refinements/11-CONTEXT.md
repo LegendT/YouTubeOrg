@@ -51,7 +51,7 @@ Fix three specific UX issues in the analysis workflow (Phase 2 UI): approval tog
 <deferred>
 ## Deferred Ideas
 
-- Broader UX audit of the full application (user mentioned wanting to "verify that the UX of the app is best in class") — this goes beyond the three scoped fixes and would be its own phase
+- Broader UX audit of the full application — captured as Phase 12: UX Audit
 
 </deferred>
 

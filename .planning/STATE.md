@@ -6,7 +6,7 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
 
-**Current focus:** Phase 11 (UX Refinements) — Complete
+**Current focus:** Phase 11 complete — Ready for Phase 12 (UX Audit)
 
 ## Current Position
 
@@ -380,7 +380,7 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 - ~~UX: Add Cancel button to Final Review & Execute dialog~~ — **DONE** (Phase 11, plan 11-03)
-- UX: Approval should be a toggle (approved → click again → pending), not one-way. Reject should be a separate intentional action, distinct from un-approving.
+- ~~UX: Approval should be a toggle (approved → click again → pending), not one-way. Reject should be a separate intentional action, distinct from un-approving.~~ — **DONE** (Phase 11, plan 11-01)
 - ~~UX: Checkboxes should be for batch selection only (merge, bulk approve/reject), not conflated with approval state~~ -- **DONE** (Phase 11, plan 11-02)
 - ~~i18n: British English sweep~~ — **DONE** (Phase 10, plans 10-02 and 10-03)
 

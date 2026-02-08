@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Batch Sync Operations** - Quota-aware sync to YouTube with checkpoint/resume
 - [x] **Phase 9: Auth Hardening** - Middleware + selective auth guards (gap closure)
 - [x] **Phase 10: UI Polish & Code Quality** - Toast notifications, TS fixes, British English sweep (gap closure)
-- [ ] **Phase 11: UX Refinements** - Approval toggle, checkbox separation, cancel button (gap closure)
+- [x] **Phase 11: UX Refinements** - Approval toggle, checkbox separation, cancel button (gap closure)
 - [ ] **Phase 12: UX Audit** - Comprehensive UX review across all pages to align with best-in-class standards
 
 ## Phase Details
@@ -298,9 +298,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Reset button + server action for approval toggle behaviour
-- [ ] 11-02-PLAN.md — Visual separation of checkboxes from approval state, batch reset in toolbar
-- [ ] 11-03-PLAN.md — Cancel button in Final Review dialog
+- [x] 11-01-PLAN.md — Reset button + server action for approval toggle behaviour
+- [x] 11-02-PLAN.md — Visual separation of checkboxes from approval state, batch reset in toolbar
+- [x] 11-03-PLAN.md — Cancel button in Final Review dialog
 
 ---
 
@@ -338,9 +338,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Batch Sync Operations | 4/4 | Complete | 2026-02-07 |
 | 9. Auth Hardening | 3/3 | Complete | 2026-02-08 |
 | 10. UI Polish & Code Quality | 3/3 | Complete | 2026-02-08 |
-| 11. UX Refinements | 0/3 | Not started | — |
+| 11. UX Refinements | 3/3 | Complete | 2026-02-08 |
 | 12. UX Audit | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-05*
-*Last updated: 2026-02-08 (Phase 11 planned: 3 plans in 2 waves)*
+*Last updated: 2026-02-08 (Phase 11 complete: 3 plans executed)*
