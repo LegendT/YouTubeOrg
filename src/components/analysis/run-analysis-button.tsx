@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { runAnalysis } from '@/app/actions/analysis'
 import { useRouter } from 'next/navigation'
-import { Play, ChevronDown } from 'lucide-react'
+import { Play, CaretDown } from '@phosphor-icons/react'
 import type { AlgorithmMode } from '@/types/analysis'
 
 interface RunAnalysisButtonProps {
@@ -50,7 +50,7 @@ export function RunAnalysisButton({
             disabled={isLoading}
           >
             {mode === 'aggressive' ? 'Aggressive' : 'Conservative'}
-            <ChevronDown className="h-3 w-3 ml-1" />
+            <CaretDown size={12} className="ml-1" />
           </Button>
           {showModeMenu && (
             <div className="absolute right-0 top-full mt-1 z-50 rounded-md border bg-popover p-1 shadow-md">
@@ -86,16 +86,16 @@ export function RunAnalysisButton({
           )}
         </div>
         <Button onClick={handleRun} disabled={isLoading}>
-          <Play className="h-4 w-4 mr-2" />
+          <Play size={16} weight="fill" className="mr-2" />
           {isLoading
-            ? 'Analyzing...'
+            ? 'Analysing...'
             : hasExistingProposals
-              ? 'Re-analyze'
+              ? 'Re-analyse'
               : 'Run Analysis'}
         </Button>
       </div>
       {error && (
-        <p className="text-sm text-red-500 max-w-md text-right">{error}</p>
+        <p className="text-sm text-destructive max-w-md text-right">{error}</p>
       )}
     </div>
   )

@@ -19,7 +19,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import type { VideoDetail } from '@/types/analysis'
 import { formatDuration, formatRelativeDate } from '@/lib/videos/format'
 
@@ -273,7 +273,7 @@ export function VideoListPaginated({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft size={16} />
               Previous
             </Button>
             <Button
@@ -283,7 +283,7 @@ export function VideoListPaginated({
               disabled={!table.getCanNextPage()}
             >
               Next
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight size={16} />
             </Button>
           </div>
         </div>

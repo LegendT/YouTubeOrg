@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Check, X, AlertTriangle } from 'lucide-react'
+import { Check, X, Warning } from '@phosphor-icons/react'
 import { approveProposal, rejectProposal } from '@/app/actions/analysis'
 import type { ConsolidationProposal } from '@/types/analysis'
 
@@ -97,13 +97,13 @@ export function ConsolidationProposalTable({
                       <span>{proposal.categoryName}</span>
                       {isOverLimit && (
                         <Badge variant="destructive" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" />
+                          <Warning size={12} weight="fill" />
                           Over Limit
                         </Badge>
                       )}
                       {isNearLimit && (
                         <Badge variant="secondary" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" />
+                          <Warning size={12} />
                           Near Limit
                         </Badge>
                       )}
@@ -166,7 +166,7 @@ export function ConsolidationProposalTable({
                             : 'Approve this consolidation proposal'
                         }
                       >
-                        <Check className="h-4 w-4" />
+                        <Check size={16} weight="bold" />
                         Approve
                       </Button>
                       <Button
@@ -178,7 +178,7 @@ export function ConsolidationProposalTable({
                         }
                         title="Reject this consolidation proposal"
                       >
-                        <X className="h-4 w-4" />
+                        <X size={16} weight="bold" />
                         Reject
                       </Button>
                     </div>
