@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { getOperationLog } from '@/app/actions/operation-log';
 import type { OperationLogEntry } from '@/types/backup';
-import { Loader2 } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 function formatRelativeTime(date: Date): string {
   const now = new Date();
@@ -21,16 +21,16 @@ function formatRelativeTime(date: Date): string {
 }
 
 const actionBadgeStyles: Record<string, string> = {
-  delete_category: 'bg-red-100 text-red-800',
-  delete_backup: 'bg-red-100 text-red-800',
-  merge_categories: 'bg-amber-100 text-amber-800',
-  move_videos: 'bg-amber-100 text-amber-800',
-  restore_backup: 'bg-blue-100 text-blue-800',
-  create_backup: 'bg-green-100 text-green-800',
+  delete_category: 'bg-destructive/10 text-destructive',
+  delete_backup: 'bg-destructive/10 text-destructive',
+  merge_categories: 'bg-warning/10 text-warning',
+  move_videos: 'bg-warning/10 text-warning',
+  restore_backup: 'bg-info/10 text-info',
+  create_backup: 'bg-success/10 text-success',
 };
 
 function ActionBadge({ action }: { action: string }) {
-  const style = actionBadgeStyles[action] ?? 'bg-gray-100 text-gray-800';
+  const style = actionBadgeStyles[action] ?? 'bg-muted text-muted-foreground';
   const label = action.replace(/_/g, ' ');
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${style}`}>
@@ -78,40 +78,40 @@ export function OperationLogTable({ initialEntries, initialTotal }: OperationLog
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         {total} operation{total === 1 ? '' : 's'} recorded
       </p>
 
       {entries.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="text-gray-500">No operations recorded yet. Actions like creating backups, restoring, and merging categories will appear here.</p>
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-muted-foreground">No operations recorded yet. Actions like creating backups, restoring, and merging categories will appear here.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Timestamp
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Action
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Entity Type
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Details
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Linked Backup
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {entries.map((entry) => (
-                <tr key={entry.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+            <tbody className="divide-y divide-border bg-card">
+              {entries.map((entry, i) => (
+                <tr key={entry.id} className={i % 2 === 1 ? 'bg-muted/30' : 'hover:bg-muted/50'}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">
                     <span title={new Date(entry.createdAt).toLocaleString('en-GB')}>
                       {formatRelativeTime(entry.createdAt)}
                     </span>
@@ -119,17 +119,17 @@ export function OperationLogTable({ initialEntries, initialTotal }: OperationLog
                   <td className="px-4 py-3 whitespace-nowrap">
                     <ActionBadge action={entry.action} />
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">
                     {entry.entityType}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
+                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">
                     <span title={formatMetadata(entry.metadata)}>
                       {formatMetadata(entry.metadata) || '-'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                     {entry.backupSnapshotId ? (
-                      <span className="text-blue-600">#{entry.backupSnapshotId}</span>
+                      <span className="text-info">#{entry.backupSnapshotId}</span>
                     ) : (
                       '-'
                     )}
@@ -147,10 +147,10 @@ export function OperationLogTable({ initialEntries, initialTotal }: OperationLog
           <button
             onClick={handleLoadMore}
             disabled={isPending}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Spinner size={16} />
             ) : null}
             Load More ({total - offset} remaining)
           </button>
