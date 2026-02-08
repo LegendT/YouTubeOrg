@@ -12,7 +12,7 @@ import { VideoListPaginated } from './video-list-paginated'
 import { ProposalActions } from './proposal-actions'
 import { SplitWizard } from './split-wizard'
 import { ManualAdjustments } from './manual-adjustments'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { PencilSimple, Trash, Plus } from '@phosphor-icons/react'
 import type {
   ConsolidationProposal,
   CategoryMetrics,
@@ -173,7 +173,7 @@ export function CategoryDetail({
               }
               disabled={category.isProtected}
             >
-              <Pencil className="h-4 w-4 mr-1.5" />
+              <PencilSimple size={16} className="mr-1.5" />
               Rename
             </Button>
             <Button
@@ -188,7 +188,7 @@ export function CategoryDetail({
               }
               disabled={category.isProtected}
             >
-              <Trash2 className="h-4 w-4 mr-1.5" />
+              <Trash size={16} className="mr-1.5" />
               Delete
             </Button>
             <Button
@@ -202,7 +202,7 @@ export function CategoryDetail({
                 )
               }
             >
-              <Plus className="h-4 w-4 mr-1.5" />
+              <Plus size={16} className="mr-1.5" />
               Assign Videos
             </Button>
           </div>

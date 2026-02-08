@@ -10,14 +10,14 @@ import {
   Check,
   X,
   Circle,
-  ArrowUpDown,
-  Search,
-  AlertTriangle,
-  Pencil,
-  Trash2,
+  ArrowsDownUp,
+  MagnifyingGlass,
+  Warning,
+  PencilSimple,
+  Trash,
   Plus,
   FolderOpen,
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import type { ConsolidationProposal, ConfidenceLevel } from '@/types/analysis'
 import type { CategoryListItem } from '@/types/categories'
 
@@ -52,20 +52,20 @@ function getConfidenceLevel(score: number | null | undefined): ConfidenceLevel {
 function getConfidenceColor(level: ConfidenceLevel): string {
   switch (level) {
     case 'HIGH':
-      return 'text-green-600'
+      return 'text-success'
     case 'MEDIUM':
-      return 'text-yellow-600'
+      return 'text-warning'
     case 'LOW':
-      return 'text-red-600'
+      return 'text-destructive'
   }
 }
 
 function getStatusBorderClass(status: string): string {
   switch (status) {
     case 'approved':
-      return 'border-l-[3px] border-l-green-500'
+      return 'border-l-[3px] border-l-[var(--success)]'
     case 'rejected':
-      return 'border-l-[3px] border-l-red-500'
+      return 'border-l-[3px] border-l-destructive'
     default:
       return 'border-l-[3px] border-l-transparent'
   }
@@ -76,21 +76,21 @@ function StatusBadge({ status }: { status: string }) {
     case 'approved':
       return (
         <Badge variant="default" className="text-xs">
-          <Check className="h-3 w-3 mr-1" />
+          <Check size={12} className="mr-1" />
           Approved
         </Badge>
       )
     case 'rejected':
       return (
         <Badge variant="secondary" className="text-xs">
-          <X className="h-3 w-3 mr-1" />
+          <X size={12} className="mr-1" />
           Rejected
         </Badge>
       )
     default:
       return (
         <Badge variant="outline" className="text-xs">
-          <Circle className="h-3 w-3 mr-1" />
+          <Circle size={12} className="mr-1" />
           Pending
         </Badge>
       )
@@ -232,7 +232,7 @@ export function CategoryList({
               />
             )}
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass size={16} className="absolute left-2.5 top-2.5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search categories..."
@@ -256,7 +256,7 @@ export function CategoryList({
                 >
                   {managementSortLabels[field]}
                   {managementSortField === field && (
-                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                    <ArrowsDownUp size={12} className="ml-1" />
                   )}
                 </Button>
               )
@@ -300,7 +300,7 @@ export function CategoryList({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <FolderOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <FolderOpen size={14} className="text-muted-foreground shrink-0" />
                           <span className="font-medium text-sm truncate">
                             {category.name}
                           </span>
@@ -328,7 +328,7 @@ export function CategoryList({
                       disabled={category.isProtected}
                       title="Rename category"
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <PencilSimple size={14} />
                     </Button>
                     <Button
                       variant="ghost"
@@ -345,7 +345,7 @@ export function CategoryList({
                       disabled={category.isProtected}
                       title="Delete category"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash size={14} />
                     </Button>
                     <Button
                       variant="ghost"
@@ -361,7 +361,7 @@ export function CategoryList({
                       }}
                       title="Assign videos"
                     >
-                      <Plus className="h-3.5 w-3.5" />
+                      <Plus size={14} />
                     </Button>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export function CategoryList({
             />
           )}
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass size={16} className="absolute left-2.5 top-2.5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search categories..."
@@ -521,7 +521,7 @@ export function CategoryList({
             >
               {sortLabels[field]}
               {sortField === field && (
-                <ArrowUpDown className="h-3 w-3 ml-1" />
+                <ArrowsDownUp size={12} className="ml-1" />
               )}
             </Button>
           ))}
@@ -603,8 +603,8 @@ export function CategoryList({
           {sortedReview.length > 0 && (
             <>
               <Separator className="my-2" />
-              <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-amber-600">
-                <AlertTriangle className="h-4 w-4" />
+              <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-warning">
+                <Warning size={16} />
                 Review needed ({sortedReview.length})
               </div>
               <div className="space-y-1">
