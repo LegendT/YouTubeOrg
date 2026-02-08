@@ -1,29 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { getDataForCategorization, saveCategorizationResults } from '@/app/actions/ml-categorization';
-import { MLCategorizationEngine } from '@/lib/ml/categorization-engine';
-import type { RunMLCategorizationResult } from '@/types/ml';
+import { getDataForCategorisation, saveCategorisationResults } from '@/app/actions/ml-categorisation';
+import { MLCategorisationEngine } from '@/lib/ml/categorisation-engine';
+import type { RunMLCategorisationResult } from '@/types/ml';
 
-interface CategorizationTriggerProps {
+interface CategorisationTriggerProps {
   onProgressUpdate?: (current: number, total: number, percentage: number, status: string) => void;
-  onComplete?: (result: RunMLCategorizationResult) => void;
+  onComplete?: (result: RunMLCategorisationResult) => void;
 }
 
-export function CategorizationTrigger({ onProgressUpdate, onComplete }: CategorizationTriggerProps) {
+export function CategorisationTrigger({ onProgressUpdate, onComplete }: CategorisationTriggerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleRunCategorization = async () => {
+  const handleRunCategorisation = async () => {
     setIsRunning(true);
     setError(null);
 
-    let engine: MLCategorizationEngine | null = null;
+    let engine: MLCategorisationEngine | null = null;
 
     try {
       // Step 1: Fetch data from server
       onProgressUpdate?.(0, 100, 0, 'Loading data...');
-      const data = await getDataForCategorization();
+      const data = await getDataForCategorisation();
 
       if (!data.success || !data.videos || !data.categories) {
         setError(data.error || 'Failed to load data');
@@ -31,10 +31,10 @@ export function CategorizationTrigger({ onProgressUpdate, onComplete }: Categori
         return;
       }
 
-      // Step 2: Run ML categorization client-side
-      engine = new MLCategorizationEngine();
+      // Step 2: Run ML categorisation client-side
+      engine = new MLCategorisationEngine();
 
-      const results = await engine.categorizeVideos(
+      const results = await engine.categoriseVideos(
         data.videos,
         data.categories,
         (current, total, percentage, status) => {
@@ -44,7 +44,7 @@ export function CategorizationTrigger({ onProgressUpdate, onComplete }: Categori
 
       // Step 3: Save results to database
       onProgressUpdate?.(100, 100, 95, 'Saving results...');
-      const saveResult = await saveCategorizationResults(results);
+      const saveResult = await saveCategorisationResults(results);
 
       if (!saveResult.success) {
         setError(saveResult.error || 'Failed to save results');
@@ -69,11 +69,11 @@ export function CategorizationTrigger({ onProgressUpdate, onComplete }: Categori
   return (
     <div className="flex flex-col gap-2">
       <button
-        onClick={handleRunCategorization}
+        onClick={handleRunCategorisation}
         disabled={isRunning}
         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
-        {isRunning ? 'Categorizing...' : 'Run ML Categorization'}
+        {isRunning ? 'Categorising...' : 'Run ML Categorisation'}
       </button>
 
       {error && (

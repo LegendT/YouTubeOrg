@@ -1,26 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { CategorizationTrigger } from '@/components/ml/categorization-trigger';
+import { CategorisationTrigger } from '@/components/ml/categorisation-trigger';
 import { ProgressDisplay } from '@/components/ml/progress-display';
-import type { RunMLCategorizationResult, MLProgressUpdate } from '@/types/ml';
+import type { RunMLCategorisationResult, MLProgressUpdate } from '@/types/ml';
 
-export function MLCategorizationPage() {
+export function MLCategorisationPage() {
   const [progress, setProgress] = useState<MLProgressUpdate>({
     current: 0,
     total: 0,
     percentage: 0,
-    status: 'Ready to categorize',
+    status: 'Ready to categorise',
   });
-  const [result, setResult] = useState<RunMLCategorizationResult | null>(null);
+  const [result, setResult] = useState<RunMLCategorisationResult | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-6">
-        <h1 className="text-2xl font-bold text-gray-900">ML Video Categorization</h1>
+        <h1 className="text-2xl font-bold text-gray-900">ML Video Categorisation</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Automatically categorize videos using machine learning. This process analyzes video titles and
+          Automatically categorise videos using machine learning. This process analyses video titles and
           descriptions to suggest the best category match.
         </p>
       </div>
@@ -32,7 +32,7 @@ export function MLCategorizationPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h2 className="font-semibold text-blue-900 mb-2">How it works</h2>
             <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-              <li>Analyzes video titles and channel names using AI embeddings</li>
+              <li>Analyses video titles and channel names using AI embeddings</li>
               <li>Matches videos to categories based on semantic similarity</li>
               <li>Assigns confidence levels: HIGH, MEDIUM, or LOW</li>
               <li>Processes videos in batches for optimal performance</li>
@@ -40,11 +40,11 @@ export function MLCategorizationPage() {
             </ul>
           </div>
 
-          {/* Categorization Trigger */}
+          {/* Categorisation Trigger */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Run Categorization</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Run Categorisation</h2>
 
-            <CategorizationTrigger
+            <CategorisationTrigger
               onProgressUpdate={(current, total, percentage, status) => {
                 setProgress({ current, total, percentage, status });
               }}
@@ -69,13 +69,13 @@ export function MLCategorizationPage() {
           {/* Results Display */}
           {result && result.success && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-green-900 mb-4">Categorization Complete</h2>
+              <h2 className="text-lg font-semibold text-green-900 mb-4">Categorisation Complete</h2>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600">Total Videos:</span>
                   <span className="ml-2 font-semibold text-gray-900">
-                    {result.categorizedCount}
+                    {result.categorisedCount}
                   </span>
                 </div>
 
