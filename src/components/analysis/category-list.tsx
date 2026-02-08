@@ -60,14 +60,14 @@ function getConfidenceColor(level: ConfidenceLevel): string {
   }
 }
 
-function StatusIcon({ status }: { status: string }) {
+function getStatusBorderClass(status: string): string {
   switch (status) {
     case 'approved':
-      return <Check className="h-3.5 w-3.5 text-green-600" />
+      return 'border-l-[3px] border-l-green-500'
     case 'rejected':
-      return <X className="h-3.5 w-3.5 text-red-600" />
+      return 'border-l-[3px] border-l-red-500'
     default:
-      return <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+      return 'border-l-[3px] border-l-transparent'
   }
 }
 
@@ -544,7 +544,7 @@ export function CategoryList({
               <div
                 key={proposal.id}
                 data-category-item
-                className={`flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
+                className={`${getStatusBorderClass(proposal.status)} flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
                   selectedId === proposal.id ? 'bg-accent' : ''
                 } ${isFocused ? 'ring-2 ring-primary' : ''}`}
               >
@@ -563,12 +563,9 @@ export function CategoryList({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <StatusIcon status={proposal.status} />
-                        <span className="font-medium text-sm truncate">
-                          {proposal.categoryName}
-                        </span>
-                      </div>
+                      <span className="font-medium text-sm truncate">
+                        {proposal.categoryName}
+                      </span>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span>{proposal.totalVideos} videos</span>
                         <span>{proposal.playlists.length} playlists</span>
@@ -625,7 +622,7 @@ export function CategoryList({
                     <div
                       key={proposal.id}
                       data-category-item
-                      className={`flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
+                      className={`${getStatusBorderClass(proposal.status)} flex items-start gap-2 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50 ${
                         selectedId === proposal.id ? 'bg-accent' : ''
                       } ${isFocused ? 'ring-2 ring-primary' : ''}`}
                     >
@@ -646,12 +643,9 @@ export function CategoryList({
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <StatusIcon status={proposal.status} />
-                              <span className="font-medium text-sm truncate">
-                                {proposal.categoryName}
-                              </span>
-                            </div>
+                            <span className="font-medium text-sm truncate">
+                              {proposal.categoryName}
+                            </span>
                             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                               <span>{proposal.totalVideos} videos</span>
                               <span>
