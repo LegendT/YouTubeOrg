@@ -26,7 +26,7 @@ export default async function ImportPage() {
           Import Watch Later
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Import videos from a Google Takeout CSV export
+          Import videos from a Google Takeout export
         </p>
       </div>
 

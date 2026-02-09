@@ -39,6 +39,7 @@
     "eslint-config-next": "^16.1.6",
     "fast-dice-coefficient": "^1.0.3",
     "googleapis": "^171.3.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.563.0",
     "ml-hclust": "^4.0.0",
     "next": "^15.5.12",
