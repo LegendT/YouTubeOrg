@@ -8,7 +8,7 @@ Import 3,932 Watch Later videos from Google Takeout CSV into the database so the
 
 | Phase | Name | Plans | Requirements | Status |
 |-------|------|-------|-------------|--------|
-| 13 | Watch Later CSV Import & Metadata Enrichment | 5 plans | WL-01 through WL-09 | Planned |
+| 13 | Watch Later CSV Import & Metadata Enrichment | 5 plans | WL-01 through WL-09 | Complete |
 
 ## Phase 13: Watch Later CSV Import & Metadata Enrichment
 
@@ -23,11 +23,11 @@ Import 3,932 Watch Later videos from Google Takeout CSV into the database so the
 - Unavailable/deleted videos are handled gracefully
 
 Plans:
-- [ ] 13-01-PLAN.md — CSV parsing utility and Watch Later playlist creation
-- [ ] 13-02-PLAN.md — Video metadata batch enrichment via YouTube API
-- [ ] 13-03-PLAN.md — Playlist-video relationship creation with re-import deduplication
-- [ ] 13-04-PLAN.md — Import page UI with file upload and progress tracking
-- [ ] 13-05-PLAN.md — ML pipeline integration verification
+- [x] 13-01-PLAN.md — CSV parsing utility and Watch Later playlist creation
+- [x] 13-02-PLAN.md — Video metadata batch enrichment via YouTube API
+- [x] 13-03-PLAN.md — Playlist-video relationship creation with re-import deduplication
+- [x] 13-04-PLAN.md — Import page UI with file upload and progress tracking
+- [x] 13-05-PLAN.md — ML pipeline integration verification
 
 ### Plan Breakdown
 
@@ -92,15 +92,15 @@ Plans 13-01 through 13-03 are the backend foundation (server actions). Plan 13-0
 
 | Requirement | Plan(s) | Status |
 |-------------|---------|--------|
-| WL-01: CSV File Upload | 13-04 | Not started |
-| WL-02: CSV Parsing | 13-01 | Not started |
-| WL-03: Watch Later Playlist Creation | 13-01 | Not started |
-| WL-04: Video Metadata Enrichment | 13-02 | Not started |
-| WL-05: Deleted/Private Video Handling | 13-02 | Not started |
-| WL-06: Playlist-Video Relationships | 13-03 | Not started |
-| WL-07: Import Progress UI | 13-04 | Not started |
-| WL-08: ML Pipeline Integration | 13-05 | Not started |
-| WL-09: Re-import Support | 13-03 | Not started |
+| WL-01: CSV File Upload | 13-04 | Complete |
+| WL-02: CSV Parsing | 13-01 | Complete |
+| WL-03: Watch Later Playlist Creation | 13-01 | Complete |
+| WL-04: Video Metadata Enrichment | 13-02 | Complete |
+| WL-05: Deleted/Private Video Handling | 13-02 | Complete |
+| WL-06: Playlist-Video Relationships | 13-03 | Complete |
+| WL-07: Import Progress UI | 13-04 | Complete |
+| WL-08: ML Pipeline Integration | 13-05 | Complete |
+| WL-09: Re-import Support | 13-03 | Complete |
 
 All 9 requirements covered. No gaps.
 
