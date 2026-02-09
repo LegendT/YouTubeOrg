@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 ## Current Position
 
 Phase: 13 of 13 — Watch Later CSV Import & Metadata Enrichment
-Plan: 1 of 5
+Plan: 2 of 5
 Status: In progress
-Last activity: 2026-02-09 — Completed 13-01-PLAN.md
+Last activity: 2026-02-09 — Completed 13-02-PLAN.md
 
 Progress: v1.0 shipped (65 plans) + v1.1 in progress
-[=----] 1/5 phase 13 plans complete
+[==---] 2/5 phase 13 plans complete
 
 ## Accumulated Context
 
@@ -27,6 +27,9 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 - CSV parser silently skips invalid video IDs rather than erroring, enabling partial imports
 - ensureWatchLaterPlaylist uses onConflictDoUpdate (not DoNothing) to update itemCount on re-import
 - Server action receives CSV text string, not File object — client reads file via FileReader
+- importMetadataBatch takes all video IDs + startIndex (client drives loop), matching sync page polling pattern
+- Existing videos skipped entirely on re-import for quota conservation (no redundant API calls)
+- Unavailable videos get placeholder records with onConflictDoNothing to handle race conditions
 
 ### Pending Todos
 
@@ -46,8 +49,8 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 13-01-PLAN.md
+Stopped at: Completed 13-02-PLAN.md
 Resume file: None
 
 ---
-*Updated: 2026-02-09 after completing plan 13-01*
+*Updated: 2026-02-09 after completing plan 13-02*
