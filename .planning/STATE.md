@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 ## Current Position
 
 Phase: 13 of 13 — Watch Later CSV Import & Metadata Enrichment
-Plan: 3 of 5
+Plan: 4 of 5
 Status: In progress
-Last activity: 2026-02-09 — Completed 13-03-PLAN.md
+Last activity: 2026-02-09 — Completed 13-04-PLAN.md
 
 Progress: v1.0 shipped (65 plans) + v1.1 in progress
-[===--] 3/5 phase 13 plans complete
+[====-] 4/5 phase 13 plans complete
 
 ## Accumulated Context
 
@@ -31,10 +31,13 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 - Existing videos skipped entirely on re-import for quota conservation (no redundant API calls)
 - Unavailable videos get placeholder records with onConflictDoNothing to handle race conditions
 - Application-level dedup via Set lookup for playlistVideos (no unique constraint on playlistId+videoId)
+- Client drives metadata enrichment batch loop with sequential awaits — avoids server action serialisation blocking
+- CSVUpload does client-side validation for instant feedback; server re-validates for security
+- Three-stage pipeline display follows sync-progress.tsx pattern for UI consistency
 
 ### Pending Todos
 
-(None)
+- Improve /import page onboarding: (1) deep link to takeout.google.com/settings/takeout/custom/youtube, (2) accept .zip uploads and auto-extract Watch later-videos.csv, (3) inline step-by-step guide with the deep link
 
 ### Blockers/Concerns
 
@@ -50,8 +53,8 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 13-03-PLAN.md
+Stopped at: Completed 13-04-PLAN.md
 Resume file: None
 
 ---
-*Updated: 2026-02-09 after completing plan 13-03*
+*Updated: 2026-02-09 after completing plan 13-04*
