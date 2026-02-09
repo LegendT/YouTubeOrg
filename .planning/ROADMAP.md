@@ -8,11 +8,13 @@ Import 3,932 Watch Later videos from Google Takeout CSV into the database so the
 
 | Phase | Name | Plans | Requirements | Status |
 |-------|------|-------|-------------|--------|
-| 13 | Watch Later CSV Import & Metadata Enrichment | 13-01 through 13-05 | WL-01 through WL-09 | Not started |
+| 13 | Watch Later CSV Import & Metadata Enrichment | 5 plans | WL-01 through WL-09 | Planned |
 
 ## Phase 13: Watch Later CSV Import & Metadata Enrichment
 
 **Goal:** Build a complete Watch Later import flow — from CSV upload through metadata enrichment to ML pipeline readiness.
+
+**Plans:** 5 plans
 
 **Success criteria:**
 - User can upload a Google Takeout CSV and see imported videos in the categorisation pipeline
@@ -20,53 +22,58 @@ Import 3,932 Watch Later videos from Google Takeout CSV into the database so the
 - Re-import adds only new videos without duplicating existing ones
 - Unavailable/deleted videos are handled gracefully
 
+Plans:
+- [ ] 13-01-PLAN.md — CSV parsing utility and Watch Later playlist creation
+- [ ] 13-02-PLAN.md — Video metadata batch enrichment via YouTube API
+- [ ] 13-03-PLAN.md — Playlist-video relationship creation with re-import deduplication
+- [ ] 13-04-PLAN.md — Import page UI with file upload and progress tracking
+- [ ] 13-05-PLAN.md — ML pipeline integration verification
+
 ### Plan Breakdown
 
-| Plan | Name | Requirements | Dependencies |
-|------|------|-------------|-------------|
-| 13-01 | Server-side CSV parsing and Watch Later playlist creation | WL-02, WL-03 | None |
-| 13-02 | Video metadata batch enrichment via YouTube API | WL-04, WL-05 | 13-01 |
-| 13-03 | Playlist-video relationship creation and re-import logic | WL-06, WL-09 | 13-01, 13-02 |
-| 13-04 | Import page UI with file upload and progress tracking | WL-01, WL-07 | 13-01, 13-02, 13-03 |
-| 13-05 | ML pipeline integration verification | WL-08 | 13-02, 13-03 |
+| Plan | Name | Requirements | Dependencies | Wave |
+|------|------|-------------|-------------|------|
+| 13-01 | CSV parsing and Watch Later playlist creation | WL-02, WL-03 | None | 1 |
+| 13-02 | Video metadata batch enrichment via YouTube API | WL-04, WL-05 | 13-01 | 2 |
+| 13-03 | Playlist-video relationship creation and re-import logic | WL-06, WL-09 | 13-01, 13-02 | 3 |
+| 13-04 | Import page UI with file upload and progress tracking | WL-01, WL-07 | 13-01, 13-02, 13-03 | 4 |
+| 13-05 | ML pipeline integration verification | WL-08 | 13-02, 13-03 | 5 |
 
 ### Plan Details
 
-#### 13-01: Server-side CSV parsing and Watch Later playlist creation
-- Server action to accept CSV content, validate headers, extract video IDs and timestamps
-- Create/upsert Watch Later playlist in `playlists` table (`youtubeId: 'WL'`)
-- Return parsed video IDs with timestamps for downstream processing
+#### 13-01: CSV parsing and Watch Later playlist creation
+- CSV parser utility (parseWatchLaterCSV) with validation and edge case handling
+- Watch Later playlist upsert (ensureWatchLaterPlaylist) with ON CONFLICT DO UPDATE
+- Server action (parseAndInitialiseImport) orchestrating parse + playlist creation
 - **Requirements:** WL-02, WL-03
 
 #### 13-02: Video metadata batch enrichment via YouTube API
-- Batch video IDs into groups of 50, call `youtube.videos.list()` for each batch
-- Upsert video records in `videos` table using existing `fetchVideoBatch()` pattern
-- Handle unavailable/deleted videos: store with placeholder metadata
-- Skip videos already in DB (quota conservation for re-import)
-- Track quota usage via `quotaUsage` table
+- Server action (importMetadataBatch) processes one batch of 50 per invocation
+- Reuses existing fetchVideoBatch() — no hand-rolled API calls
+- Skips videos already in DB with valid metadata (quota conservation for re-import)
+- Inserts placeholder records for unavailable/deleted videos (title: '[Unavailable Video]')
 - **Requirements:** WL-04, WL-05
 
 #### 13-03: Playlist-video relationship creation and re-import logic
-- Create `playlistVideos` entries linking videos to Watch Later playlist
-- Preserve CSV ordering as position, use CSV timestamps as `addedAt`
-- Idempotent: ON CONFLICT DO NOTHING for re-import scenarios
-- Return counts: new, existing, unavailable
+- Server action (createPlaylistRelationships) creates playlistVideos junction records
+- Application-level deduplication (table has NO unique constraint on playlist_id + video_id)
+- Preserves CSV ordering as position, uses CSV timestamps as addedAt
+- Batch inserts in chunks of 500
 - **Requirements:** WL-06, WL-09
 
 #### 13-04: Import page UI with file upload and progress tracking
-- New page at `/import` (or `/watch-later-import`) with file upload component
-- CSV validation feedback (file name, video count, error messages)
-- Real-time progress: parsing → fetching metadata (X/Y) → creating relationships
-- Completion summary: imported, skipped, unavailable counts
-- Toast notifications for errors
-- Follows existing design system: dark mode, Phosphor Icons, accessible
+- New page at /import with server/client component split
+- CSVUpload component with client-side FileReader parsing and instant validation
+- ImportProgress component with three-stage pipeline and batch-level progress
+- ImportSummary component with detailed completion stats
+- Navigation bar updated with Import link (FileCsv icon)
 - **Requirements:** WL-01, WL-07
 
 #### 13-05: ML pipeline integration verification
-- Verify `getDataForCategorisation()` includes Watch Later videos
-- Confirm all required fields present (title, channelTitle, thumbnailUrl)
-- Test categorisation workflow end-to-end with imported videos
-- No ML code changes expected — this plan validates the integration
+- Verify getDataForCategorisation() includes Watch Later videos (no playlist filter)
+- Confirm all required ML fields present (title, channelTitle, thumbnailUrl)
+- Document unavailable video behaviour (LOW confidence -> manual review)
+- No ML code changes expected
 - **Requirements:** WL-08
 
 ### Execution Strategy
@@ -99,3 +106,4 @@ All 9 requirements covered. No gaps.
 
 ---
 *Created: 2026-02-08 for v1.1 Watch Later Import milestone*
+*Plans created: 2026-02-09 by /gsd:plan-phase*
