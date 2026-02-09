@@ -37,6 +37,13 @@ Progress: v1.0 shipped (65 plans) + v1.1 complete (5 plans)
 - No ML code changes needed for Watch Later -- getDataForCategorisation() selects ALL videos with no filtering
 - Unavailable videos get LOW confidence in ML and appear in manual review queue -- acceptable behaviour
 
+### Post-Milestone Improvements (ad-hoc)
+
+- Import page onboarding: inline Takeout guide with deep link + .zip upload with auto-extraction (`178cdaf`)
+- ML review: bulk accept with checkbox selection mode — Select All / Deselect All / individual toggle (`6e8444b`)
+- Video assignment dialog: Select All / Deselect All buttons in results bar (`eb73fe1`)
+- Category delete: orphaned videos now permanently deleted instead of moved to Uncategorised (`575446d`)
+
 ### Pending Todos
 
 None
@@ -55,8 +62,8 @@ None
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 13-05-PLAN.md (Phase 13 complete, v1.1 milestone complete)
+Stopped at: Post-milestone ad-hoc improvements (import onboarding, bulk accept, select all, delete behaviour)
 Resume file: None
 
 ---
-*Updated: 2026-02-09 after completing plan 13-05 (final plan of Phase 13)*
+*Updated: 2026-02-09 after post-milestone ad-hoc improvements*
