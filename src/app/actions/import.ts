@@ -17,9 +17,9 @@ import { parseWatchLaterCSV } from '@/lib/import/csv-parser';
 import type { ParsedCSVRow } from '@/lib/import/csv-parser';
 import { ensureWatchLaterPlaylist } from '@/lib/import/watch-later';
 import { db } from '@/lib/db';
-import { videos } from '@/lib/db/schema';
+import { videos, playlistVideos } from '@/lib/db/schema';
 import { fetchVideoBatch } from '@/lib/youtube/videos';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 /**
  * Parse a Watch Later CSV export and initialise the import.
@@ -175,6 +175,108 @@ export async function importMetadataBatch(
       unavailable: 0,
       skipped: 0,
       error: `Metadata enrichment failed: ${message}`,
+    };
+  }
+}
+
+/**
+ * Create playlist-video relationship records linking imported videos to the
+ * Watch Later playlist, with application-level deduplication.
+ *
+ * CRITICAL: The playlistVideos table has NO unique constraint on
+ * (playlist_id, video_id) — only a serial primary key. Re-import safety
+ * relies entirely on querying existing relationships first and skipping
+ * duplicates in application code.
+ *
+ * Called ONCE after all metadata batches complete (not per-batch). The entire
+ * relationship creation runs in a single invocation because it is purely DB
+ * work (no API calls) and completes in seconds even for ~4,000 rows.
+ *
+ * @param playlistDbId - Database ID of the Watch Later playlist
+ * @param rows - Parsed CSV rows (order preserved for position field)
+ * @returns Counts of created and skipped relationships
+ */
+export async function createPlaylistRelationships(
+  playlistDbId: number,
+  rows: ParsedCSVRow[]
+): Promise<{
+  success: boolean;
+  created: number;
+  skipped: number;
+  error?: string;
+}> {
+  // Step 1: Authentication check
+  const session = await auth();
+  if (!session?.access_token) {
+    return { success: false, created: 0, skipped: 0, error: 'Not authenticated' };
+  }
+
+  try {
+    // Step 2: Resolve YouTube IDs to database IDs (batch in chunks of 500)
+    const youtubeIds = rows.map((r) => r.videoId);
+    const videoRecords: { id: number; youtubeId: string }[] = [];
+    for (let i = 0; i < youtubeIds.length; i += 500) {
+      const chunk = youtubeIds.slice(i, i + 500);
+      const records = await db
+        .select({ id: videos.id, youtubeId: videos.youtubeId })
+        .from(videos)
+        .where(inArray(videos.youtubeId, chunk));
+      videoRecords.push(...records);
+    }
+    const youtubeToDbId = new Map(videoRecords.map((v) => [v.youtubeId, v.id]));
+
+    // Step 3: Application-level deduplication — query ALL existing relationships
+    // for this playlist, build a Set, and skip any video already linked.
+    // This is necessary because playlistVideos has no unique constraint on
+    // (playlistId, videoId).
+    const existingRelations = await db
+      .select({ videoId: playlistVideos.videoId })
+      .from(playlistVideos)
+      .where(eq(playlistVideos.playlistId, playlistDbId));
+    const existingVideoIds = new Set(existingRelations.map((r) => r.videoId));
+
+    // Step 4: Build insert list, filtering out duplicates and preserving CSV order
+    const toInsert: {
+      playlistId: number;
+      videoId: number;
+      position: number;
+      addedAt: Date;
+    }[] = [];
+    let skipped = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const dbId = youtubeToDbId.get(row.videoId);
+      if (!dbId) continue; // Video record not found (should not happen if 13-02 completed)
+
+      if (existingVideoIds.has(dbId)) {
+        skipped++;
+        continue;
+      }
+
+      toInsert.push({
+        playlistId: playlistDbId,
+        videoId: dbId,
+        position: i, // CSV order preserved: first row = position 0
+        addedAt: new Date(row.addedAt),
+      });
+    }
+
+    // Step 5: Batch insert in chunks of 500 for performance
+    for (let i = 0; i < toInsert.length; i += 500) {
+      const chunk = toInsert.slice(i, i + 500);
+      await db.insert(playlistVideos).values(chunk);
+    }
+
+    // Step 6: Return structured counts for the UI summary
+    return { success: true, created: toInsert.length, skipped };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      created: 0,
+      skipped: 0,
+      error: `Relationship creation failed: ${message}`,
     };
   }
 }
