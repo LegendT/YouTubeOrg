@@ -9,12 +9,13 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 
 ## Current Position
 
-Phase: 13 — Watch Later CSV Import & Metadata Enrichment
-Plan: Not started
-Status: Milestone defined, awaiting requirements and roadmap
-Last activity: 2026-02-08 — v1.1 milestone started
+Phase: 13 of 13 — Watch Later CSV Import & Metadata Enrichment
+Plan: 1 of 5
+Status: In progress
+Last activity: 2026-02-09 — Completed 13-01-PLAN.md
 
-Progress: v1.0 shipped (12 phases, 65 plans) → v1.1 in planning
+Progress: v1.0 shipped (65 plans) + v1.1 in progress
+[=----] 1/5 phase 13 plans complete
 
 ## Accumulated Context
 
@@ -23,10 +24,13 @@ Progress: v1.0 shipped (12 phases, 65 plans) → v1.1 in planning
 - Watch Later videos cannot be fetched via YouTube API — import from Google Takeout CSV instead
 - v1.1 scope: Watch Later fix only (CSV import + metadata enrichment + ML pipeline integration)
 - Phase numbering continues from v1.0 (Phase 13+)
+- CSV parser silently skips invalid video IDs rather than erroring, enabling partial imports
+- ensureWatchLaterPlaylist uses onConflictDoUpdate (not DoNothing) to update itemCount on re-import
+- Server action receives CSV text string, not File object — client reads file via FileReader
 
 ### Pending Todos
 
-(None — milestone just started)
+(None)
 
 ### Blockers/Concerns
 
@@ -37,13 +41,13 @@ Progress: v1.0 shipped (12 phases, 65 plans) → v1.1 in planning
 
 **New for v1.1:**
 - Google Takeout CSV is the only data source for Watch Later — user must export manually
-- ~79 API calls needed for metadata enrichment (3,932 videos ÷ 50 per batch) — fits within daily quota
+- ~79 API calls needed for metadata enrichment (3,932 videos / 50 per batch) — fits within daily quota
 
 ## Session Continuity
 
-Last session: 2026-02-08
-Stopped at: Creating REQUIREMENTS.md and ROADMAP.md for v1.1
+Last session: 2026-02-09
+Stopped at: Completed 13-01-PLAN.md
 Resume file: None
 
 ---
-*Updated: 2026-02-08 after v1.1 milestone start*
+*Updated: 2026-02-09 after completing plan 13-01*
