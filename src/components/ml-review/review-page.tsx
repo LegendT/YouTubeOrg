@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useOptimistic, useTransition } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { ArrowLeft, GearSix } from '@phosphor-icons/react';
+import { ArrowLeft, CheckCircle, GearSix } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import type { ReviewResult, ReviewStats } from '@/types/ml';
 import type { Category } from '@/types/categories';
@@ -10,6 +10,7 @@ import {
   acceptSuggestion,
   rejectSuggestion,
   recategoriseVideo,
+  bulkAcceptSuggestions,
   getReviewData,
   getVideoReviewDetail,
 } from '@/app/actions/ml-categorisation';
@@ -50,6 +51,10 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
     useState<ConfidenceFilter>('all');
   const [reviewStatusFilter, setReviewStatusFilter] =
     useState<ReviewStatusFilter>('pending');
+
+  // Bulk selection state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // Category picker state
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -156,6 +161,79 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
         pending: prev.pending - 1,
       }));
     });
+  };
+
+  // --- Bulk selection handlers ---
+  const enterSelectionMode = () => {
+    // Start with all pending visible videos selected
+    const pendingIds = new Set(
+      filteredResults
+        .filter((r) => r.acceptedAt === null && r.rejectedAt === null)
+        .map((r) => r.videoId)
+    );
+    setSelectedIds(pendingIds);
+    setSelectionMode(true);
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleSelectToggle = (videoId: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(videoId)) {
+        next.delete(videoId);
+      } else {
+        next.add(videoId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    const pendingIds = filteredResults
+      .filter((r) => r.acceptedAt === null && r.rejectedAt === null)
+      .map((r) => r.videoId);
+    setSelectedIds(new Set(pendingIds));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedIds(new Set());
+  };
+
+  // --- Bulk accept handler ---
+  const handleBulkAccept = () => {
+    const videoIds = Array.from(selectedIds);
+    if (videoIds.length === 0) return;
+
+    startTransition(async () => {
+      // Optimistically mark all as accepted
+      for (const videoId of videoIds) {
+        updateOptimistic({ videoId, action: 'accept' });
+      }
+
+      const result = await bulkAcceptSuggestions(videoIds);
+
+      if (result.success) {
+        // Persist to real state
+        setResults((prev) =>
+          prev.map((r) =>
+            videoIds.includes(r.videoId)
+              ? { ...r, acceptedAt: new Date(), rejectedAt: null, manualCategoryId: null }
+              : r
+          )
+        );
+        setStats((prev) => ({
+          ...prev,
+          reviewed: prev.reviewed + result.accepted,
+          pending: prev.pending - result.accepted,
+        }));
+      }
+    });
+
+    exitSelectionMode();
   };
 
   // --- Confidence filter handler ---
@@ -301,17 +379,52 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
         onFilterChange={handleFilterChange}
       />
 
-      {/* Recategorise rejected videos button / Back to pending */}
-      <div className="px-4 py-2 border-b bg-card">
+      {/* Toolbar: bulk actions and filter toggles */}
+      <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b bg-card">
         {reviewStatusFilter === 'pending' ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleShowRejected}
-          >
-            <GearSix size={16} />
-            Recategorise rejected videos
-          </Button>
+          selectionMode ? (
+            <>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleBulkAccept}
+                disabled={isPending || selectedIds.size === 0}
+              >
+                <CheckCircle size={16} weight="fill" />
+                Accept Selected ({selectedIds.size})
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleSelectAll}>
+                Select All
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleDeselectAll}>
+                Deselect All
+              </Button>
+              <Button variant="ghost" size="sm" onClick={exitSelectionMode}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleShowRejected}
+              >
+                <GearSix size={16} />
+                Recategorise rejected videos
+              </Button>
+              {filteredResults.length > 0 && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={enterSelectionMode}
+                >
+                  <CheckCircle size={16} weight="fill" />
+                  Bulk Accept...
+                </Button>
+              )}
+            </>
+          )
         ) : (
           <Button
             variant="secondary"
@@ -330,6 +443,8 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
         focusedIndex={gridFocusIndex}
         onCardClick={handleCardClick}
         onFocusChange={handleFocusChange}
+        selectedIds={selectionMode ? selectedIds : undefined}
+        onSelectToggle={selectionMode ? handleSelectToggle : undefined}
       />
 
       {/* Review modal (only in pending mode) */}

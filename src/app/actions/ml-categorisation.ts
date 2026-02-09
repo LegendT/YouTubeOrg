@@ -167,6 +167,41 @@ export async function getMLCategorisationResults(
 // --- Phase 6: Review & Approval Interface ---
 
 /**
+ * Bulk-accept ML categorisation suggestions for multiple videos.
+ * Sets acceptedAt timestamp and clears rejection/manual overrides.
+ *
+ * @param videoIds - Array of video database IDs to accept
+ * @returns Count of accepted videos
+ */
+export async function bulkAcceptSuggestions(
+  videoIds: number[]
+): Promise<{ success: boolean; accepted: number; error?: string }> {
+  if (videoIds.length === 0) {
+    return { success: true, accepted: 0 };
+  }
+
+  try {
+    const result = await db
+      .update(mlCategorisations)
+      .set({
+        acceptedAt: new Date(),
+        rejectedAt: null,
+        manualCategoryId: null,
+      })
+      .where(inArray(mlCategorisations.videoId, videoIds));
+
+    return { success: true, accepted: videoIds.length };
+  } catch (error) {
+    console.error('[bulkAcceptSuggestions] Error:', error);
+    return {
+      success: false,
+      accepted: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
  * Accept an ML categorisation suggestion for a video.
  * Sets acceptedAt timestamp and clears any previous rejection.
  *
