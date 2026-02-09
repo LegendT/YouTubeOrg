@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-08)
 ## Current Position
 
 Phase: 13 of 13 — Watch Later CSV Import & Metadata Enrichment
-Plan: 2 of 5
+Plan: 3 of 5
 Status: In progress
-Last activity: 2026-02-09 — Completed 13-02-PLAN.md
+Last activity: 2026-02-09 — Completed 13-03-PLAN.md
 
 Progress: v1.0 shipped (65 plans) + v1.1 in progress
-[==---] 2/5 phase 13 plans complete
+[===--] 3/5 phase 13 plans complete
 
 ## Accumulated Context
 
@@ -30,6 +30,7 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 - importMetadataBatch takes all video IDs + startIndex (client drives loop), matching sync page polling pattern
 - Existing videos skipped entirely on re-import for quota conservation (no redundant API calls)
 - Unavailable videos get placeholder records with onConflictDoNothing to handle race conditions
+- Application-level dedup via Set lookup for playlistVideos (no unique constraint on playlistId+videoId)
 
 ### Pending Todos
 
@@ -49,8 +50,8 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 13-02-PLAN.md
+Stopped at: Completed 13-03-PLAN.md
 Resume file: None
 
 ---
-*Updated: 2026-02-09 after completing plan 13-02*
+*Updated: 2026-02-09 after completing plan 13-03*
