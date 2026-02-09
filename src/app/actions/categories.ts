@@ -7,7 +7,11 @@ import {
   categories,
   categoryVideos,
   consolidationProposals,
+  duplicateVideos,
+  mlCategorisations,
+  playlistVideos,
   playlists,
+  syncVideoOperations,
   videos,
 } from '@/lib/db/schema';
 import { eq, and, inArray, sql, ne, count, asc } from 'drizzle-orm';
@@ -193,11 +197,12 @@ export async function renameCategory(
 }
 
 /**
- * Delete a category with orphan handling and undo data.
+ * Delete a category and its orphaned videos.
  *
  * Protected categories cannot be deleted. Videos that become orphaned
- * (not in any other category) are moved to the Uncategorised category.
- * Returns undo data to allow reversal.
+ * (not in any other category) are permanently deleted along with their
+ * related rows (playlist_videos, duplicate_videos, sync_video_operations,
+ * ml_categorisations). Returns undo data to allow reversal via snapshot.
  */
 export async function deleteCategory(categoryId: number): Promise<DeleteCategoryResult> {
   const auth = await requireAuth()
@@ -252,32 +257,13 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
         const stillAssignedIds = new Set(stillAssigned.map((r) => r.videoId));
         const orphanedVideoIds = videoIds.filter((id) => !stillAssignedIds.has(id));
 
-        // d. Move orphans to Uncategorised
+        // d. Delete orphaned videos and their related rows
         if (orphanedVideoIds.length > 0) {
-          const [uncategorised] = await tx
-            .select({ id: categories.id, videoCount: categories.videoCount })
-            .from(categories)
-            .where(eq(categories.isProtected, true))
-            .limit(1);
-
-          if (uncategorised) {
-            for (const videoId of orphanedVideoIds) {
-              await tx.insert(categoryVideos).values({
-                categoryId: uncategorised.id,
-                videoId,
-                source: 'orphan',
-              });
-            }
-
-            // Update Uncategorised's video count
-            await tx
-              .update(categories)
-              .set({
-                videoCount: Number(uncategorised.videoCount) + orphanedVideoIds.length,
-                updatedAt: new Date(),
-              })
-              .where(eq(categories.id, uncategorised.id));
-          }
+          await tx.delete(playlistVideos).where(inArray(playlistVideos.videoId, orphanedVideoIds));
+          await tx.delete(duplicateVideos).where(inArray(duplicateVideos.videoId, orphanedVideoIds));
+          await tx.delete(syncVideoOperations).where(inArray(syncVideoOperations.videoId, orphanedVideoIds));
+          await tx.delete(mlCategorisations).where(inArray(mlCategorisations.videoId, orphanedVideoIds));
+          await tx.delete(videos).where(inArray(videos.id, orphanedVideoIds));
 
           orphanedCount = orphanedVideoIds.length;
         }
