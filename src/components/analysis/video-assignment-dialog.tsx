@@ -296,6 +296,46 @@ export function VideoAssignmentDialog({
                   </>
                 )}
               </p>
+              {!isSearching && searchResults.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-6 px-2"
+                    onClick={() => {
+                      const selectableVideos = searchResults.filter(
+                        (v) => !isAlreadyInTarget(v)
+                      )
+                      setSelectedVideos((prev) => {
+                        const next = new Map(prev)
+                        for (const video of selectableVideos) {
+                          next.set(video.id, video)
+                        }
+                        return next
+                      })
+                    }}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-6 px-2"
+                    onClick={() => {
+                      const visibleIds = new Set(searchResults.map((v) => v.id))
+                      setSelectedVideos((prev) => {
+                        const next = new Map(prev)
+                        for (const id of visibleIds) {
+                          next.delete(id)
+                        }
+                        return next
+                      })
+                    }}
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Video list */}
