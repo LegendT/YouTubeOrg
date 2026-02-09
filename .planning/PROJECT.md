@@ -31,7 +31,9 @@ Videos must be findable when needed. If you can't locate a video when you need i
 
 ### Active
 
-(None — planning next milestone)
+- [ ] System imports Watch Later videos from Google Takeout CSV export
+- [ ] System fetches video metadata from YouTube API for imported video IDs
+- [ ] Watch Later videos appear in the existing ML categorisation and review pipeline
 
 ### Out of Scope
 
@@ -62,6 +64,7 @@ Videos must be findable when needed. If you can't locate a video when you need i
 - Pre-operation JSON backups with SHA-256 checksums and immutable operation log
 
 **Known Issues:**
+- YouTube API does not return Watch Later via `playlists.list({ mine: true })` and `playlistItems.list({ playlistId: 'WL' })` returns empty/404 — must import from Google Takeout CSV
 - SYNC-04: YouTube deprecated Watch Later write access in 2020 — cannot programmatically remove videos from Watch Later
 - Google Cloud OAuth in "Testing" mode — needs verification for >100 users
 - Bottleneck reservoir timezone may need adjustment for non-local deployments
@@ -93,5 +96,14 @@ Videos must be findable when needed. If you can't locate a video when you need i
 | Dark mode with ThemeProvider | System preference detection + manual toggle | ✓ Good — oklch colour tokens with semantic names |
 | Phosphor Icons over Lucide | Better icon set, consistent weight/style, SSR support | ✓ Good — unified icon language across all pages |
 
+## Current Milestone: v1.1 Watch Later Import
+
+**Goal:** Import 3,932 Watch Later videos from Google Takeout CSV into the database so they can be categorised by the existing ML pipeline.
+
+**Target features:**
+- CSV import with YouTube API metadata enrichment
+- Watch Later playlist entry creation in database
+- Integration with existing ML categorisation flow
+
 ---
-*Last updated: 2026-02-08 after v1.0 milestone*
+*Last updated: 2026-02-08 after v1.1 milestone start*
