@@ -16,6 +16,7 @@ import {
   Shield,
   ArrowsClockwise,
   ListDashes,
+  DownloadSimple,
 } from '@phosphor-icons/react/ssr'
 
 const workflows = [
@@ -30,15 +31,24 @@ const workflows = [
   },
   {
     step: 2,
+    title: 'Import Watch Later',
+    description:
+      'YouTube blocks API access to Watch Later, so import it via Google Takeout. The guide walks you through exporting your data — upload the zip or CSV and metadata is fetched automatically.',
+    where: 'Import',
+    href: '/import',
+    icon: DownloadSimple,
+  },
+  {
+    step: 3,
     title: 'Analyse & Consolidate Playlists',
     description:
-      'Run clustering analysis on your 87 playlists to propose a consolidated category structure of ~25-35 categories. Review proposals, approve, reject, split, or merge them. Finalise when satisfied.',
+      'Run clustering analysis on your playlists to propose a consolidated category structure. Review proposals, approve, reject, split, or merge them. Finalise when satisfied.',
     where: 'Analysis',
     href: '/analysis',
     icon: ChartBar,
   },
   {
-    step: 3,
+    step: 4,
     title: 'Manage Categories',
     description:
       'Fine-tune your category structure after consolidation. Create new categories, rename or delete existing ones, and merge categories together.',
@@ -47,25 +57,25 @@ const workflows = [
     icon: ChartBar,
   },
   {
-    step: 4,
-    title: 'Auto-Categorise Watch Later Videos',
+    step: 5,
+    title: 'Auto-Categorise Videos',
     description:
-      'Run ML categorisation to automatically assign your Watch Later videos to categories using AI. The model runs entirely in your browser — no data leaves your machine.',
+      'Run ML categorisation to automatically assign your videos to categories using AI. The model runs entirely in your browser — no data leaves your machine.',
     where: 'ML Categorisation',
     href: '/ml-categorisation',
     icon: Brain,
   },
   {
-    step: 5,
+    step: 6,
     title: 'Review ML Suggestions',
     description:
-      'Review the AI\'s category suggestions video by video. Accept with "A", reject with "R", or manually recategorise. Focus on low-confidence items first. Use arrow keys and Tab to navigate.',
+      'Review the AI\'s category suggestions video by video. Accept with "A", reject with "R", or manually recategorise. Use Bulk Accept to approve high-confidence batches quickly.',
     where: 'Review',
     href: '/ml-review',
     icon: ClipboardText,
   },
   {
-    step: 6,
+    step: 7,
     title: 'Browse & Organise Videos',
     description:
       'Browse all your videos with search, sort, and filter. Select multiple videos to move or copy them between categories. Every action can be undone with Ctrl+Z.',
@@ -74,7 +84,7 @@ const workflows = [
     icon: VideoCamera,
   },
   {
-    step: 7,
+    step: 8,
     title: 'Review Safety & Backups',
     description:
       'Check your backup history, review the operation log, and see pending changes before syncing. Backups are created automatically before any destructive operation. You can restore from any backup.',
@@ -83,7 +93,7 @@ const workflows = [
     icon: Shield,
   },
   {
-    step: 8,
+    step: 9,
     title: 'Sync to YouTube',
     description:
       'Preview all changes (playlists to create, videos to add, old playlists to delete) with honest quota estimates. Start the sync and monitor real-time progress. The sync is quota-aware and can pause/resume across multiple days.',

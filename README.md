@@ -18,10 +18,19 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 - **IndexedDB embeddings cache** so re-runs skip already-processed videos
 - Channel-name Jaccard boost for Topic/VEVO channels with generic titles
 
+### Watch Later Import
+- YouTube blocks API access to Watch Later — import via **Google Takeout** instead
+- Step-by-step onboarding guide with deep link to Takeout export settings
+- Upload `.zip` archives directly — auto-extracts `Watch later-videos.csv`
+- Batch metadata enrichment via YouTube API (titles, thumbnails, durations)
+- Handles deleted/private videos gracefully with placeholder records
+- Re-import support — only fetches metadata for new videos
+
 ### Review & Approval
 - Virtualised 3-column grid handles thousands of videos without UI freeze
 - Review modal with embedded YouTube player for quick video previews
 - Keyboard shortcuts: `A` accept, `R` reject, arrow keys navigate, `Tab`/`Enter` for grid
+- **Bulk Accept** with checkbox selection mode — select all, deselect individual items, accept batch
 - Optimistic updates with auto-advance after each decision
 - Filter by confidence level (High/Medium/Low) or review status
 
@@ -61,6 +70,7 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 | Icons | [Phosphor Icons](https://phosphoricons.com/) |
 | Rate Limiting | [Bottleneck](https://github.com/SGrondin/bottleneck) |
 | Clustering | [ml-hclust](https://github.com/mljs/hclust) (AGNES) |
+| Zip Extraction | [JSZip](https://stuk.github.io/jszip/) (client-side Takeout archive handling) |
 | Theme | [next-themes](https://github.com/pacocoursey/next-themes) |
 
 ## Getting Started
@@ -144,12 +154,14 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with Google.
 The application guides you through a sequential workflow:
 
 1. **Dashboard** (`/dashboard`) — Sign in, sync your YouTube data, view playlist overview and quota usage
-2. **Analysis** (`/analysis`) — Run clustering algorithm, review proposed consolidations, approve/reject/split categories, resolve duplicates
-3. **Categories** (`/videos`) — Browse videos by category, search, sort, move/copy between categories
-4. **ML Categorisation** (`/ml-categorisation`) — Trigger ML auto-categorisation of uncategorised videos
-5. **ML Review** (`/ml-review`) — Review ML suggestions with keyboard shortcuts, accept/reject/recategorise
-6. **Safety** (`/safety`) — View backups, operation log, pending changes before sync
-7. **Sync** (`/sync`) — Preview changes, start quota-aware sync to YouTube, monitor progress
+2. **Import** (`/import`) — Import Watch Later videos from Google Takeout (zip or CSV upload with guided instructions)
+3. **Analysis** (`/analysis`) — Run clustering algorithm, review proposed consolidations, approve/reject/split categories, resolve duplicates
+4. **Categories** (`/analysis`) — Fine-tune category structure: create, rename, delete, merge categories, assign videos with Select All
+5. **ML Categorisation** (`/ml-categorisation`) — Trigger ML auto-categorisation of videos into your categories
+6. **ML Review** (`/ml-review`) — Review ML suggestions with keyboard shortcuts, accept/reject/recategorise, bulk accept batches
+7. **Videos** (`/videos`) — Browse videos by category, search, sort, move/copy between categories
+8. **Safety** (`/safety`) — View backups, operation log, pending changes before sync
+9. **Sync** (`/sync`) — Preview changes, start quota-aware sync to YouTube, monitor progress
 
 ## Project Structure
 
@@ -160,6 +172,7 @@ src/
 │   ├── analysis/           # Playlist analysis & consolidation page
 │   ├── api/                # API routes (auth, backup download)
 │   ├── dashboard/          # Dashboard page
+│   ├── import/             # Watch Later import page (Google Takeout)
 │   ├── ml-categorisation/  # ML categorisation trigger page
 │   ├── ml-review/          # ML review interface page
 │   ├── safety/             # Safety dashboard page
@@ -167,6 +180,7 @@ src/
 │   └── videos/             # Video browsing page
 ├── components/             # React components
 │   ├── analysis/           # Analysis-specific components
+│   ├── import/             # Import page components (CSV upload, Takeout guide)
 │   ├── ml/                 # ML categorisation components
 │   ├── ml-review/          # Review interface components
 │   ├── safety/             # Safety dashboard components
@@ -213,7 +227,7 @@ YouTube Data API v3 has a default quota of **10,000 units/day**. The application
 
 ## Known Limitations
 
-- **Watch Later write access**: YouTube deprecated the Watch Later write API in 2020. Videos cannot be programmatically removed from Watch Later — they must be manually removed after sync.
+- **Watch Later API access**: YouTube blocks both read and write API access to Watch Later. Videos must be imported via Google Takeout CSV export, and cannot be programmatically removed from Watch Later after sync.
 - **OAuth testing mode**: Google Cloud OAuth consent screen must be in "Testing" mode during development (limited to configured test users). Production deployment with >100 users requires Google verification.
 - **Single user**: Designed as a personal tool. No multi-user support.
 
