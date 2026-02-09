@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** Videos must be findable when needed. If you can't locate a video when you need it, the collection is worthless.
-**Current focus:** v1.1 Watch Later Import
+**Current focus:** v1.1 Watch Later Import -- COMPLETE
 
 ## Current Position
 
 Phase: 13 of 13 — Watch Later CSV Import & Metadata Enrichment
-Plan: 4 of 5
-Status: In progress
-Last activity: 2026-02-09 — Completed 13-04-PLAN.md
+Plan: 5 of 5
+Status: Phase complete
+Last activity: 2026-02-09 — Completed 13-05-PLAN.md
 
-Progress: v1.0 shipped (65 plans) + v1.1 in progress
-[====-] 4/5 phase 13 plans complete
+Progress: v1.0 shipped (65 plans) + v1.1 complete (5 plans)
+[=====] 5/5 phase 13 plans complete
 
 ## Accumulated Context
 
@@ -34,6 +34,8 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 - Client drives metadata enrichment batch loop with sequential awaits — avoids server action serialisation blocking
 - CSVUpload does client-side validation for instant feedback; server re-validates for security
 - Three-stage pipeline display follows sync-progress.tsx pattern for UI consistency
+- No ML code changes needed for Watch Later -- getDataForCategorisation() selects ALL videos with no filtering
+- Unavailable videos get LOW confidence in ML and appear in manual review queue -- acceptable behaviour
 
 ### Pending Todos
 
@@ -53,8 +55,8 @@ Progress: v1.0 shipped (65 plans) + v1.1 in progress
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 13-04-PLAN.md
+Stopped at: Completed 13-05-PLAN.md (Phase 13 complete, v1.1 milestone complete)
 Resume file: None
 
 ---
-*Updated: 2026-02-09 after completing plan 13-04*
+*Updated: 2026-02-09 after completing plan 13-05 (final plan of Phase 13)*
