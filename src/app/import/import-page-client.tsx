@@ -14,6 +14,7 @@ import {
 } from '@/app/actions/import';
 import type { ParsedCSVRow } from '@/lib/import/csv-parser';
 import { ArrowClockwise, Play, Warning } from '@phosphor-icons/react';
+import { TakeoutGuide } from '@/components/import/takeout-guide';
 
 type ImportStage = 'idle' | 'parsing' | 'enriching' | 'linking' | 'complete' | 'error';
 
@@ -167,6 +168,7 @@ export function ImportPageClient() {
   if (stage === 'idle') {
     return (
       <div className="space-y-6">
+        <TakeoutGuide />
         <CSVUpload onParsed={handleParsed} disabled={false} />
 
         {fileSelected && (

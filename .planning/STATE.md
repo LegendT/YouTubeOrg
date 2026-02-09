@@ -39,7 +39,7 @@ Progress: v1.0 shipped (65 plans) + v1.1 complete (5 plans)
 
 ### Pending Todos
 
-- Improve /import page onboarding: (1) deep link to takeout.google.com/settings/takeout/custom/youtube, (2) accept .zip uploads and auto-extract Watch later-videos.csv, (3) inline step-by-step guide with the deep link
+None
 
 ### Blockers/Concerns
 
