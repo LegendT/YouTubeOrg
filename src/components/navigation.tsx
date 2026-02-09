@@ -10,6 +10,7 @@ import {
   Brain,
   ClipboardText,
   Shield,
+  FileCsv,
   ArrowsClockwise,
   SignOut,
 } from '@phosphor-icons/react';
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'ML Categorisation', href: '/ml-categorisation', icon: Brain },
   { name: 'Review', href: '/ml-review', icon: ClipboardText },
   { name: 'Safety', href: '/safety', icon: Shield },
+  { name: 'Import', href: '/import', icon: FileCsv },
   { name: 'Sync', href: '/sync', icon: ArrowsClockwise },
 ];
 
