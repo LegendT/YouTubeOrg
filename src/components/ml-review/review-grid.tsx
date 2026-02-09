@@ -10,6 +10,8 @@ interface ReviewGridProps {
   focusedIndex: number;
   onCardClick: (videoId: number) => void;
   onFocusChange: (index: number) => void;
+  selectedIds?: Set<number>;
+  onSelectToggle?: (videoId: number) => void;
 }
 
 const ROW_HEIGHT = 340;
@@ -51,6 +53,8 @@ export function ReviewGrid({
   focusedIndex,
   onCardClick,
   onFocusChange,
+  selectedIds,
+  onSelectToggle,
 }: ReviewGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const columnCount = useColumnCount(parentRef);
@@ -123,6 +127,9 @@ export function ReviewGrid({
                       result={result}
                       isFocused={globalIndex === focusedIndex}
                       onClick={onCardClick}
+                      selectable={!!selectedIds}
+                      selected={selectedIds?.has(result.videoId)}
+                      onSelectToggle={onSelectToggle}
                     />
                   );
                 })}

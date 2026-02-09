@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { ReviewResult } from '@/types/ml';
 import type { ConfidenceLevel } from '@/lib/ml/confidence';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
@@ -10,6 +11,9 @@ interface ReviewCardProps {
   result: ReviewResult;
   isFocused: boolean;
   onClick: (videoId: number) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectToggle?: (videoId: number) => void;
 }
 
 const confidenceBadgeStyles: Record<ConfidenceLevel, string> = {
@@ -24,7 +28,7 @@ const confidenceLabels: Record<ConfidenceLevel, string> = {
   LOW: 'Low',
 };
 
-export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
+export function ReviewCard({ result, isFocused, onClick, selectable, selected, onSelectToggle }: ReviewCardProps) {
   // Prefer mqdefault (320x180) over DB-stored default (120x90)
   const thumbnailUrl =
     getThumbnailUrl(result.youtubeId) ?? result.thumbnailUrl;
@@ -74,16 +78,30 @@ export function ReviewCard({ result, isFocused, onClick }: ReviewCardProps) {
           {confidenceLabels[result.confidence]}
         </div>
 
-        {/* Review state indicator */}
-        {isAccepted && (
-          <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
-            <CheckCircle size={20} weight="fill" className="text-success" />
+        {/* Selection checkbox or review state indicator */}
+        {selectable ? (
+          <div
+            className="absolute top-1.5 left-1.5 bg-card rounded p-0.5"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectToggle?.(result.videoId);
+            }}
+          >
+            <Checkbox checked={selected} />
           </div>
-        )}
-        {isRejected && (
-          <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
-            <XCircle size={20} weight="fill" className="text-destructive" />
-          </div>
+        ) : (
+          <>
+            {isAccepted && (
+              <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
+                <CheckCircle size={20} weight="fill" className="text-success" />
+              </div>
+            )}
+            {isRejected && (
+              <div className="absolute top-1 left-1 bg-card rounded-full p-0.5">
+                <XCircle size={20} weight="fill" className="text-destructive" />
+              </div>
+            )}
+          </>
         )}
       </div>
 
