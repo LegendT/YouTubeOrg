@@ -89,7 +89,7 @@ export function VideoCard({
         {/* Category badges */}
         {showCategoryBadge && video.categoryNames.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-            {video.categoryNames.map((categoryName) => (
+            {[...new Set(video.categoryNames)].map((categoryName) => (
               <Badge
                 key={categoryName}
                 style={{

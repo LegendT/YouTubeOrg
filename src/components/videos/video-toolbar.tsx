@@ -1,6 +1,6 @@
 'use client';
 
-import { MagnifyingGlass, X, CaretDown } from '@phosphor-icons/react';
+import { MagnifyingGlass, X, CaretDown, Trash } from '@phosphor-icons/react';
 import { SortOption } from '@/types/videos';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,6 +36,7 @@ interface VideoToolbarProps {
   // Batch actions
   onMoveToClick: () => void;
   onCopyToClick: () => void;
+  onDeleteClick: () => void;
   hasSelection: boolean;
 
   // Current category context
@@ -66,6 +67,7 @@ export function VideoToolbar({
   isAllSelected,
   onMoveToClick,
   onCopyToClick,
+  onDeleteClick,
   hasSelection,
   currentCategoryName,
 }: VideoToolbarProps) {
@@ -175,6 +177,16 @@ export function VideoToolbar({
             onClick={onCopyToClick}
           >
             Copy to...
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0 text-muted-foreground hover:text-destructive"
+            disabled={!hasSelection}
+            onClick={onDeleteClick}
+          >
+            <Trash weight="bold" className="h-4 w-4" />
+            Delete
           </Button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { videos, categories, mlCategorisations } from '@/lib/db/schema';
+import { videos, categories, mlCategorisations, categoryVideos, playlistVideos } from '@/lib/db/schema';
 import type { RunMLCategorisationResult, MLCategorisationResult, CategorisationResult, ReviewResult, ReviewStats, VideoReviewDetail } from '@/types/ml';
 import { eq, inArray, and, isNull, isNotNull, count, sql } from 'drizzle-orm';
 import type { Category } from '@/types/categories';
@@ -38,7 +38,7 @@ export async function getDataForCategorisation(): Promise<{
     if (allCategories.length === 0) {
       return {
         success: false,
-        error: 'No categories available for ML categorisation',
+        error: 'No categories available for ML categorisation. Go to the Analysis page first to create categories from your playlists.',
       };
     }
 
@@ -181,16 +181,82 @@ export async function bulkAcceptSuggestions(
   }
 
   try {
-    const result = await db
-      .update(mlCategorisations)
-      .set({
-        acceptedAt: new Date(),
-        rejectedAt: null,
-        manualCategoryId: null,
+    // Fetch suggested categories for all videos
+    const mlRows = await db
+      .select({
+        videoId: mlCategorisations.videoId,
+        suggestedCategoryId: mlCategorisations.suggestedCategoryId,
       })
+      .from(mlCategorisations)
       .where(inArray(mlCategorisations.videoId, videoIds));
 
-    return { success: true, accepted: videoIds.length };
+    if (mlRows.length === 0) {
+      return { success: true, accepted: 0 };
+    }
+
+    // Collect affected category IDs for videoCount updates
+    const affectedCategoryIds = new Set(mlRows.map((r) => r.suggestedCategoryId));
+
+    await db.transaction(async (tx) => {
+      // Mark as accepted in mlCategorisations
+      await tx
+        .update(mlCategorisations)
+        .set({
+          acceptedAt: new Date(),
+          rejectedAt: null,
+          manualCategoryId: null,
+        })
+        .where(inArray(mlCategorisations.videoId, videoIds));
+
+      // Remove any prior ML-sourced categoryVideos entries for these videos
+      await tx
+        .delete(categoryVideos)
+        .where(
+          and(
+            inArray(categoryVideos.videoId, videoIds),
+            eq(categoryVideos.source, 'ml')
+          )
+        );
+
+      // Check which videos are already in their target category (from consolidation etc.)
+      const existingAssignments = await tx
+        .select({
+          videoId: categoryVideos.videoId,
+          categoryId: categoryVideos.categoryId,
+        })
+        .from(categoryVideos)
+        .where(inArray(categoryVideos.videoId, videoIds));
+
+      const existingSet = new Set(
+        existingAssignments.map((e) => `${e.videoId}-${e.categoryId}`)
+      );
+
+      // Only insert entries that don't already exist
+      const newEntries = mlRows.filter(
+        (r) => !existingSet.has(`${r.videoId}-${r.suggestedCategoryId}`)
+      );
+
+      for (const entry of newEntries) {
+        await tx.insert(categoryVideos).values({
+          categoryId: entry.suggestedCategoryId,
+          videoId: entry.videoId,
+          source: 'ml',
+        });
+      }
+
+      // Update videoCount for each affected category
+      for (const catId of affectedCategoryIds) {
+        await tx
+          .update(categories)
+          .set({
+            videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${catId})`,
+            updatedAt: new Date(),
+          })
+          .where(eq(categories.id, catId));
+      }
+    });
+
+    return { success: true, accepted: mlRows.length };
   } catch (error) {
     console.error('[bulkAcceptSuggestions] Error:', error);
     return {
@@ -212,14 +278,69 @@ export async function acceptSuggestion(
   videoId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db
-      .update(mlCategorisations)
-      .set({
-        acceptedAt: new Date(),
-        rejectedAt: null,
-        manualCategoryId: null,
-      })
-      .where(eq(mlCategorisations.videoId, videoId));
+    // Look up the suggested category
+    const mlRow = await db
+      .select({ suggestedCategoryId: mlCategorisations.suggestedCategoryId })
+      .from(mlCategorisations)
+      .where(eq(mlCategorisations.videoId, videoId))
+      .limit(1);
+
+    if (mlRow.length === 0) {
+      return { success: false, error: 'No ML categorisation found for this video' };
+    }
+
+    const categoryId = mlRow[0].suggestedCategoryId;
+
+    await db.transaction(async (tx) => {
+      // Mark as accepted in mlCategorisations
+      await tx
+        .update(mlCategorisations)
+        .set({
+          acceptedAt: new Date(),
+          rejectedAt: null,
+          manualCategoryId: null,
+        })
+        .where(eq(mlCategorisations.videoId, videoId));
+
+      // Remove any prior ML-sourced categoryVideos entry for this video
+      await tx
+        .delete(categoryVideos)
+        .where(
+          and(
+            eq(categoryVideos.videoId, videoId),
+            eq(categoryVideos.source, 'ml')
+          )
+        );
+
+      // Only insert if video isn't already in this category (e.g. from consolidation)
+      const existing = await tx
+        .select({ id: categoryVideos.id })
+        .from(categoryVideos)
+        .where(
+          and(
+            eq(categoryVideos.videoId, videoId),
+            eq(categoryVideos.categoryId, categoryId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length === 0) {
+        await tx.insert(categoryVideos).values({
+          categoryId,
+          videoId,
+          source: 'ml',
+        });
+
+        // Update category videoCount
+        await tx
+          .update(categories)
+          .set({
+            videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${categoryId})`,
+            updatedAt: new Date(),
+          })
+          .where(eq(categories.id, categoryId));
+      }
+    });
 
     return { success: true };
   } catch (error) {
@@ -242,13 +363,50 @@ export async function rejectSuggestion(
   videoId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db
-      .update(mlCategorisations)
-      .set({
-        rejectedAt: new Date(),
-        acceptedAt: null,
-      })
-      .where(eq(mlCategorisations.videoId, videoId));
+    // Find any prior ML-sourced categoryVideos entry (from a previous acceptance)
+    const priorEntries = await db
+      .select({ categoryId: categoryVideos.categoryId })
+      .from(categoryVideos)
+      .where(
+        and(
+          eq(categoryVideos.videoId, videoId),
+          eq(categoryVideos.source, 'ml')
+        )
+      );
+    const priorCategoryIds = new Set(priorEntries.map((r) => r.categoryId));
+
+    await db.transaction(async (tx) => {
+      await tx
+        .update(mlCategorisations)
+        .set({
+          rejectedAt: new Date(),
+          acceptedAt: null,
+        })
+        .where(eq(mlCategorisations.videoId, videoId));
+
+      // Remove ML-sourced categoryVideos entry if it exists
+      if (priorEntries.length > 0) {
+        await tx
+          .delete(categoryVideos)
+          .where(
+            and(
+              eq(categoryVideos.videoId, videoId),
+              eq(categoryVideos.source, 'ml')
+            )
+          );
+
+        // Update videoCount for affected categories
+        for (const catId of priorCategoryIds) {
+          await tx
+            .update(categories)
+            .set({
+              videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${catId})`,
+              updatedAt: new Date(),
+            })
+            .where(eq(categories.id, catId));
+        }
+      }
+    });
 
     return { success: true };
   } catch (error) {
@@ -284,24 +442,83 @@ export async function recategoriseVideo(
       return { success: false, error: 'No ML categorisation found for this video' };
     }
 
-    const updateData: {
-      manualCategoryId: number;
-      rejectedAt?: Date;
-      acceptedAt: null;
-    } = {
+    const updateData = {
       manualCategoryId: newCategoryId,
-      acceptedAt: null,
+      acceptedAt: new Date(),
+      rejectedAt: null,
     };
 
-    // Set rejectedAt if not already rejected
-    if (!existing[0].rejectedAt) {
-      updateData.rejectedAt = new Date();
-    }
+    // Find categories that had prior ML-sourced entries for this video (for count update)
+    const priorEntries = await db
+      .select({ categoryId: categoryVideos.categoryId })
+      .from(categoryVideos)
+      .where(
+        and(
+          eq(categoryVideos.videoId, videoId),
+          eq(categoryVideos.source, 'ml')
+        )
+      );
+    const priorCategoryIds = new Set(priorEntries.map((r) => r.categoryId));
 
-    await db
-      .update(mlCategorisations)
-      .set(updateData)
-      .where(eq(mlCategorisations.videoId, videoId));
+    await db.transaction(async (tx) => {
+      // Update mlCategorisations
+      await tx
+        .update(mlCategorisations)
+        .set(updateData)
+        .where(eq(mlCategorisations.videoId, videoId));
+
+      // Remove any prior ML-sourced categoryVideos entry
+      await tx
+        .delete(categoryVideos)
+        .where(
+          and(
+            eq(categoryVideos.videoId, videoId),
+            eq(categoryVideos.source, 'ml')
+          )
+        );
+
+      // Only insert if video isn't already in the new category (from consolidation etc.)
+      const alreadyInTarget = await tx
+        .select({ id: categoryVideos.id })
+        .from(categoryVideos)
+        .where(
+          and(
+            eq(categoryVideos.videoId, videoId),
+            eq(categoryVideos.categoryId, newCategoryId)
+          )
+        )
+        .limit(1);
+
+      if (alreadyInTarget.length === 0) {
+        await tx.insert(categoryVideos).values({
+          categoryId: newCategoryId,
+          videoId,
+          source: 'ml',
+        });
+      }
+
+      // Update videoCount for the new category
+      await tx
+        .update(categories)
+        .set({
+          videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${newCategoryId})`,
+          updatedAt: new Date(),
+        })
+        .where(eq(categories.id, newCategoryId));
+
+      // Update videoCount for any prior categories that lost this video
+      for (const oldCatId of priorCategoryIds) {
+        if (oldCatId !== newCategoryId) {
+          await tx
+            .update(categories)
+            .set({
+              videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${oldCatId})`,
+              updatedAt: new Date(),
+            })
+            .where(eq(categories.id, oldCatId));
+        }
+      }
+    });
 
     return { success: true };
   } catch (error) {
@@ -367,7 +584,31 @@ export async function getReviewData(
       .innerJoin(categories, eq(mlCategorisations.suggestedCategoryId, categories.id))
       .where(whereClause);
 
-    return results as ReviewResult[];
+    // Fetch current category names for each video
+    const videoIds = results.map((r) => r.videoId);
+    const currentCategories = videoIds.length > 0
+      ? await db
+          .select({
+            videoId: categoryVideos.videoId,
+            categoryName: categories.name,
+          })
+          .from(categoryVideos)
+          .innerJoin(categories, eq(categoryVideos.categoryId, categories.id))
+          .where(inArray(categoryVideos.videoId, videoIds))
+      : [];
+
+    // Group category names by video ID
+    const categoryMap = new Map<number, string[]>();
+    for (const row of currentCategories) {
+      const names = categoryMap.get(row.videoId) ?? [];
+      names.push(row.categoryName);
+      categoryMap.set(row.videoId, names);
+    }
+
+    return results.map((r) => ({
+      ...r,
+      currentCategoryNames: categoryMap.get(r.videoId) ?? [],
+    })) as ReviewResult[];
   } catch (error) {
     console.error('[getReviewData] Error:', error);
     return [];
@@ -484,5 +725,23 @@ export async function getReviewStats(): Promise<ReviewStats> {
       mediumConfidence: 0,
       lowConfidence: 0,
     };
+  }
+}
+
+/**
+ * Delete a video and all its associations (categorisations, category assignments, playlist links).
+ * mlCategorisations cascade automatically; categoryVideos and playlistVideos need manual cleanup.
+ */
+export async function deleteVideo(videoId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    await db.transaction(async (tx) => {
+      await tx.delete(categoryVideos).where(eq(categoryVideos.videoId, videoId));
+      await tx.delete(playlistVideos).where(eq(playlistVideos.videoId, videoId));
+      await tx.delete(videos).where(eq(videos.id, videoId));
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('[deleteVideo] Error:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

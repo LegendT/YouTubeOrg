@@ -31,6 +31,7 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 - Review modal with embedded YouTube player for quick video previews
 - Keyboard shortcuts: `A` accept, `R` reject, arrow keys navigate, `Tab`/`Enter` for grid
 - **Bulk Accept** with checkbox selection mode — select all, deselect individual items, accept batch
+- Delete unwanted videos directly from the review modal
 - Optimistic updates with auto-advance after each decision
 - Filter by confidence level (High/Medium/Low) or review status
 
@@ -46,6 +47,8 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 - **Quota-aware multi-day batching** — pauses at 1,000 remaining units, resumes next day
 - Stage-based state machine with checkpoint/resume at video granularity
 - Idempotent operations (409 conflict = success, 404 on delete = success)
+- Skips YouTube system playlists (Favorites, Liked Videos) that cannot be deleted via API
+- Localised quota reset time in pause message (converts midnight Pacific to user's timezone)
 - Real-time progress with 3-second polling
 
 ### UX & Accessibility
@@ -78,7 +81,7 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 ### Prerequisites
 
 - **Node.js** 18+
-- **PostgreSQL** 14+ (local or Docker)
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (for automatic PostgreSQL setup)
 - **Google Cloud** project with YouTube Data API v3 enabled
 
 ### 1. Clone and install
@@ -89,21 +92,7 @@ cd YouTubeOrg
 npm install
 ```
 
-### 2. Set up PostgreSQL
-
-Using Docker:
-```bash
-docker run --name youtube-org-db \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=youtube_org \
-  -p 5432:5432 \
-  -d postgres:16
-```
-
-Or use an existing PostgreSQL instance.
-
-### 3. Configure Google OAuth
+### 2. Configure Google OAuth
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project (or select existing)
@@ -113,7 +102,7 @@ Or use an existing PostgreSQL instance.
 6. Add authorised redirect URI: `http://localhost:3000/api/auth/callback/google`
 7. Copy the Client ID and Client Secret
 
-### 4. Create environment file
+### 3. Create environment file
 
 Create `.env.local` in the project root:
 
@@ -135,19 +124,21 @@ Generate `NEXTAUTH_SECRET` with:
 openssl rand -base64 32
 ```
 
-### 5. Push database schema
-
-```bash
-npx drizzle-kit push
-```
-
-### 6. Start the development server
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
+This single command will:
+1. Start a PostgreSQL Docker container (or reuse an existing one)
+2. Wait for the database to be ready
+3. Push the database schema via Drizzle
+4. Start the Next.js dev server with Turbopack
+
 Open [http://localhost:3000](http://localhost:3000) and sign in with Google.
+
+> **Note:** If using an existing PostgreSQL instance instead of Docker, update `DATABASE_URL` in `.env.local` and run `npx drizzle-kit push` manually before starting the server.
 
 ## Usage Workflow
 
@@ -222,7 +213,7 @@ YouTube Data API v3 has a default quota of **10,000 units/day**. The application
 - **Read operations**: ~1 unit per request (cached with ETags for 0-cost re-fetches)
 - **Write operations**: 50 units per playlist create, 50 per video insert, 50 per playlist delete
 - Sync pauses when remaining quota drops below 1,000 units
-- Quota resets at midnight Pacific Time
+- Quota resets at midnight Pacific Time (displayed in user's local timezone)
 - Multi-day sync support with checkpoint/resume
 
 ## Known Limitations

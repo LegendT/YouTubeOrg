@@ -13,6 +13,7 @@ import {
   bulkAcceptSuggestions,
   getReviewData,
   getVideoReviewDetail,
+  deleteVideo,
 } from '@/app/actions/ml-categorisation';
 import { ReviewGrid } from './review-grid';
 import { ReviewModal } from './review-modal';
@@ -163,6 +164,21 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
     });
   };
 
+  // --- Delete handler ---
+  const handleDelete = (videoId: number) => {
+    advanceToNext(videoId);
+    startTransition(async () => {
+      await deleteVideo(videoId);
+      // Remove from local state
+      setResults((prev) => prev.filter((r) => r.videoId !== videoId));
+      setStats((prev) => ({
+        ...prev,
+        total: prev.total - 1,
+        pending: prev.pending - 1,
+      }));
+    });
+  };
+
   // --- Bulk selection handlers ---
   const enterSelectionMode = () => {
     // Start with all pending visible videos selected
@@ -280,19 +296,27 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
 
   const handleCategoryPickerConfirm = (categoryId: number) => {
     if (pickerVideoId === null) return;
-
-    startTransition(async () => {
-      await recategoriseVideo(pickerVideoId, categoryId);
-      // Refetch data to update the grid
-      const updatedResults = await getReviewData(
-        confidenceFilter === 'all' ? undefined : confidenceFilter,
-        reviewStatusFilter
-      );
-      setResults(updatedResults);
-    });
+    const videoId = pickerVideoId;
 
     setShowCategoryPicker(false);
     setPickerVideoId(null);
+
+    startTransition(async () => {
+      await recategoriseVideo(videoId, categoryId);
+      // Remove from local state — recategorise marks as accepted, so it's no longer rejected/pending
+      setResults((prev) =>
+        prev.map((r) =>
+          r.videoId === videoId
+            ? { ...r, acceptedAt: new Date(), rejectedAt: null, manualCategoryId: categoryId }
+            : r
+        )
+      );
+      setStats((prev) => ({
+        ...prev,
+        reviewed: prev.reviewed + 1,
+        pending: Math.max(0, prev.pending - 1),
+      }));
+    });
   };
 
   const handleCategoryPickerClose = () => {
@@ -456,6 +480,7 @@ export function ReviewPage({ initialResults, initialStats }: ReviewPageProps) {
         onNavigate={handleNavigate}
         onAccept={handleAccept}
         onReject={handleReject}
+        onDelete={handleDelete}
       />
 
       {/* Category picker dialog */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useHotkeys } from 'react-hotkeys-hook';
-import { ArrowSquareOut } from '@phosphor-icons/react';
+import { ArrowSquareOut, Trash } from '@phosphor-icons/react';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ interface ReviewModalProps {
   onNavigate: (videoId: number) => void;
   onAccept: (videoId: number) => void;
   onReject: (videoId: number) => void;
+  onDelete: (videoId: number) => void;
 }
 
 const confidenceBadgeStyles: Record<ConfidenceLevel, string> = {
@@ -45,6 +46,7 @@ export function ReviewModal({
   onNavigate,
   onAccept,
   onReject,
+  onDelete,
 }: ReviewModalProps) {
   // Use data directly from resultsList — no server action needed
   const currentIndex = videoId
@@ -160,6 +162,18 @@ export function ReviewModal({
               </div>
             </div>
 
+            {/* Current category */}
+            <div className="bg-muted/50 p-4 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground">
+                Current Category:{' '}
+                <span className="font-medium text-foreground">
+                  {currentResult.currentCategoryNames.length > 0
+                    ? currentResult.currentCategoryNames.join(', ')
+                    : 'None'}
+                </span>
+              </p>
+            </div>
+
             {/* ML suggestion card */}
             <div className="bg-card p-4 rounded-lg border border-border">
               <div className="flex items-center justify-between gap-4">
@@ -214,6 +228,19 @@ export function ReviewModal({
                 className="px-6"
               >
                 Reject (R)
+              </Button>
+            </div>
+
+            {/* Delete button */}
+            <div className="flex items-center justify-center pt-2 border-t border-border">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => videoId && onDelete(videoId)}
+              >
+                <Trash weight="bold" className="h-4 w-4" />
+                Delete Video
               </Button>
             </div>
           </div>

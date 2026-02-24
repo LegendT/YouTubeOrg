@@ -19,8 +19,8 @@ export const youtubeRateLimiter = new Bottleneck({
   reservoir: 10000,                          // Daily quota limit
   reservoirRefreshAmount: 10000,             // Reset to 10k units
   reservoirRefreshInterval: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-  maxConcurrent: 5,                          // Max 5 concurrent API requests
-  minTime: 200,                              // Minimum 200ms between requests
+  maxConcurrent: 50,                         // Must be >= max weight (write ops cost 50 units)
+  minTime: 200,                              // Minimum 200ms between requests (actual concurrency control)
 });
 
 // Event listener: Log when quota is depleted

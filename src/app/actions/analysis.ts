@@ -10,6 +10,8 @@ import {
   playlists,
   playlistVideos,
   videos,
+  categories,
+  categoryVideos,
 } from '@/lib/db/schema';
 import { eq, desc, inArray, sql, count, max, ne, and } from 'drizzle-orm';
 import { createConsolidationProposals, calculateDeduplicatedCount } from '@/lib/analysis/consolidation';
@@ -270,6 +272,8 @@ export async function runAnalysis(
 ): Promise<RunAnalysisResult> {
   try {
     // Step 0: Clear previous proposals and duplicates so we don't accumulate stale data
+    // Null out category references to proposals before deleting (FK constraint)
+    await db.update(categories).set({ sourceProposalId: null });
     await db.delete(consolidationProposals);
     await db.delete(duplicateVideos);
 
@@ -975,15 +979,67 @@ export async function finalizeConsolidation(): Promise<{
       }
     }
 
-    // 4. Set finalizedAt on the analysis session
+    // 4. Remove existing categories from a prior finalization (categoryVideos cascade)
+    await db.delete(categoryVideos);
+    await db.delete(categories);
+
+    // 5. Create categories from approved proposals and assign videos
+    let createdCount = 0;
+    for (const proposal of approved) {
+      // Create the category
+      const [newCategory] = await db
+        .insert(categories)
+        .values({
+          name: proposal.categoryName,
+          sourceProposalId: proposal.id,
+          videoCount: 0,
+          isProtected: false,
+        })
+        .returning({ id: categories.id });
+
+      // Get deduplicated video IDs from the source playlists
+      const playlistIds = proposal.sourcePlaylistIds as number[];
+      const videoRows = await db
+        .selectDistinct({ videoId: playlistVideos.videoId })
+        .from(playlistVideos)
+        .where(inArray(playlistVideos.playlistId, playlistIds));
+
+      // Assign videos to the category
+      if (videoRows.length > 0) {
+        await db.insert(categoryVideos).values(
+          videoRows.map((row) => ({
+            categoryId: newCategory.id,
+            videoId: row.videoId,
+            source: 'consolidation' as const,
+          }))
+        );
+
+        // Update denormalised video count
+        await db
+          .update(categories)
+          .set({ videoCount: videoRows.length })
+          .where(eq(categories.id, newCategory.id));
+      }
+
+      createdCount++;
+    }
+
+    // 6. Create the "Uncategorised" catch-all category
+    await db.insert(categories).values({
+      name: 'Uncategorised',
+      videoCount: 0,
+      isProtected: true,
+    });
+
+    // 7. Set finalizedAt on the analysis session
     await db
       .update(analysisSessions)
       .set({ finalizedAt: new Date() })
       .where(eq(analysisSessions.id, session.id));
 
-    // 5. Revalidate and return
+    // 8. Revalidate and return
     revalidatePath('/analysis');
-    return { success: true, categoryCount: approved.length };
+    return { success: true, categoryCount: createdCount };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return {

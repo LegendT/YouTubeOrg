@@ -120,6 +120,16 @@ export async function syncAllData() {
       };
     }
 
+    // Handle insufficient scopes — user needs to re-authenticate
+    if (error.message?.includes('insufficient authentication scopes') || error.message?.includes('insufficientPermissions')) {
+      console.warn('[Sync] Insufficient scopes. User needs to sign out and back in.');
+      return {
+        success: false,
+        error: 'INSUFFICIENT_SCOPES',
+        partialSuccess: false,
+      };
+    }
+
     // For all other errors, log and return failure
     console.error('[Sync] Sync failed:', error);
     return {

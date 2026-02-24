@@ -375,16 +375,31 @@ export async function executeDeletePlaylists(
   accessToken: string,
   batchSize: number
 ): Promise<void> {
-  // Query playlists not yet deleted
-  const remaining = await db
+  // Query playlists not yet deleted, excluding YouTube system playlists
+  // (Favorites start with 'FL', Liked Videos start with 'LL' — these cannot be deleted via API)
+  const allRemaining = await db
     .select({
       id: playlists.id,
       youtubeId: playlists.youtubeId,
       title: playlists.title,
     })
     .from(playlists)
-    .where(isNull(playlists.deletedFromYoutubeAt))
-    .limit(batchSize);
+    .where(isNull(playlists.deletedFromYoutubeAt));
+
+  // Skip system playlists by marking them as deleted
+  const systemPlaylists = allRemaining.filter(
+    (p) => p.youtubeId.startsWith('FL') || p.youtubeId.startsWith('LL')
+  );
+  for (const sp of systemPlaylists) {
+    await db
+      .update(playlists)
+      .set({ deletedFromYoutubeAt: new Date() })
+      .where(eq(playlists.id, sp.id));
+  }
+
+  const remaining = allRemaining
+    .filter((p) => !p.youtubeId.startsWith('FL') && !p.youtubeId.startsWith('LL'))
+    .slice(0, batchSize);
 
   // If none remain, this stage is complete
   if (remaining.length === 0) {
@@ -468,4 +483,9 @@ export async function executeDeletePlaylists(
     failed,
     skipped: 0,
   });
+
+  // If entire batch failed (no progress), advance to completed to avoid infinite retry loop
+  if (failed > 0 && failed === remaining.length) {
+    await advanceStage(job.id, 'completed');
+  }
 }

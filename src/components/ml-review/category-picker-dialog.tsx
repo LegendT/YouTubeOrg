@@ -46,7 +46,7 @@ export function CategoryPickerDialog({
 
         {/* Category list */}
         <div className="flex flex-col gap-1 mt-2">
-          {allCategories.map((category) => {
+          {[...allCategories].sort((a, b) => a.name.localeCompare(b.name)).map((category) => {
             const isCurrent = category.name === currentCategoryName;
             return (
               <button

@@ -60,6 +60,7 @@ export interface ReviewResult {
   acceptedAt: Date | null;
   rejectedAt: Date | null;
   manualCategoryId: number | null;
+  currentCategoryNames: string[];
 }
 
 /** Statistics summary for ML review dashboard */

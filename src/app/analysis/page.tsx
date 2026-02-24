@@ -45,9 +45,9 @@ export default async function AnalysisPage() {
                 : 'Sync your playlists first, then analyze and consolidate them into categories'}
           </p>
         </div>
-        {!managementMode && hasProposals && (
+        {hasProposals || managementMode ? (
           <RunAnalysisButton hasExistingProposals={true} />
-        )}
+        ) : null}
       </div>
 
       {/* Dashboard or empty state */}

@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
-import { videos, categoryVideos, categories } from '@/lib/db/schema';
-import { eq, inArray, desc, asc, and, count } from 'drizzle-orm';
+import { videos, categoryVideos, categories, playlistVideos, duplicateVideos, syncVideoOperations } from '@/lib/db/schema';
+import { eq, inArray, desc, asc, and, count, sql } from 'drizzle-orm';
 import type { VideoCardData } from '@/types/videos';
 import { getThumbnailUrl } from '@/lib/videos/thumbnail-url';
 
@@ -186,5 +186,55 @@ export async function removeVideosFromCategory(
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return { success: false, error: `Failed to remove videos: ${message}` };
+  }
+}
+
+/**
+ * Permanently delete videos from the database.
+ *
+ * Removes all related records (categoryVideos, playlistVideos, duplicateVideos,
+ * syncVideoOperations) then deletes the video rows. mlCategorisations cascade
+ * automatically. Updates affected category video counts.
+ */
+export async function deleteVideos(
+  videoIds: number[]
+): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+  try {
+    if (videoIds.length === 0) {
+      return { success: true, deletedCount: 0 };
+    }
+
+    // Find affected categories before deleting so we can update their counts
+    const affectedCategories = await db
+      .select({ categoryId: categoryVideos.categoryId })
+      .from(categoryVideos)
+      .where(inArray(categoryVideos.videoId, videoIds));
+    const affectedCategoryIds = [...new Set(affectedCategories.map((r) => r.categoryId))];
+
+    await db.transaction(async (tx) => {
+      await tx.delete(categoryVideos).where(inArray(categoryVideos.videoId, videoIds));
+      await tx.delete(playlistVideos).where(inArray(playlistVideos.videoId, videoIds));
+      await tx.delete(duplicateVideos).where(inArray(duplicateVideos.videoId, videoIds));
+      await tx.delete(syncVideoOperations).where(inArray(syncVideoOperations.videoId, videoIds));
+      await tx.delete(videos).where(inArray(videos.id, videoIds));
+
+      // Update video counts for affected categories
+      for (const catId of affectedCategoryIds) {
+        await tx
+          .update(categories)
+          .set({
+            videoCount: sql`(SELECT count(*) FROM category_videos WHERE category_id = ${catId})`,
+            updatedAt: new Date(),
+          })
+          .where(eq(categories.id, catId));
+      }
+    });
+
+    revalidatePath('/videos');
+    return { success: true, deletedCount: videoIds.length };
+  } catch (error) {
+    console.error('[deleteVideos] Error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, deletedCount: 0, error: `Failed to delete videos: ${message}` };
   }
 }

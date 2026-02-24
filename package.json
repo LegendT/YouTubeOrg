@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "(docker start youtube-org-pg 2>/dev/null || docker run -d --name youtube-org-pg -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=youtube_organizer postgres:16) && until docker exec youtube-org-pg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done && npx drizzle-kit push && next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

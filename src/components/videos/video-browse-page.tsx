@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { CategoryListItem } from '@/types/categories';
 import type { VideoCardData, SortOption } from '@/types/videos';
 import { getCategories } from '@/app/actions/categories';
-import { getVideosForCategory, removeVideosFromCategory } from '@/app/actions/videos';
+import { getVideosForCategory, removeVideosFromCategory, deleteVideos } from '@/app/actions/videos';
 import { assignVideosToCategory } from '@/app/actions/categories';
 import { CategorySidebar } from './category-sidebar';
 import { VideoToolbar } from './video-toolbar';
@@ -260,6 +260,29 @@ export function VideoBrowsePage({
     }
   };
 
+  // Delete handler
+  const handleDelete = async () => {
+    const videoIds = Array.from(selectedIds);
+    const count = videoIds.length;
+
+    // Optimistic update: remove from local state immediately
+    setVideos((prev) => prev.filter((v) => !selectedIds.has(v.id)));
+    clearSelection();
+
+    const result = await deleteVideos(videoIds);
+    if (result.success) {
+      toast.success(`Deleted ${count} video${count > 1 ? 's' : ''}`);
+      // Refresh categories to update counts
+      const updatedCategories = await getCategories();
+      setCategories(updatedCategories);
+    } else {
+      toast.error(result.error || 'Failed to delete videos', { duration: Infinity });
+      // Revert: reload current view
+      const reloadedVideos = await getVideosForCategory(selectedCategoryId);
+      setVideos(reloadedVideos);
+    }
+  };
+
   // Get current category name for display
   const currentCategoryName =
     selectedCategoryId === null
@@ -300,6 +323,7 @@ export function VideoBrowsePage({
           isAllSelected={isAllSelected}
           onMoveToClick={openMoveDialog}
           onCopyToClick={openCopyDialog}
+          onDeleteClick={handleDelete}
           hasSelection={selectedIds.size > 0}
           currentCategoryName={currentCategoryName}
         />

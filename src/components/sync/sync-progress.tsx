@@ -327,8 +327,25 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
             <div className="rounded-lg bg-warning/10 border border-warning/20 p-4 text-sm text-warning">
               {job.pauseReason === 'quota_exhausted' && (
                 <p>
-                  Sync paused — daily quota exhausted. The quota resets at midnight
-                  Pacific Time. Come back tomorrow to resume.
+                  Sync paused — daily quota exhausted. The quota resets at{' '}
+                  {(() => {
+                    const now = new Date();
+                    // Current time expressed as if it were Pacific
+                    const ptNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+                    // Next midnight in that same representation
+                    const ptMidnight = new Date(ptNow);
+                    ptMidnight.setDate(ptMidnight.getDate() + 1);
+                    ptMidnight.setHours(0, 0, 0, 0);
+                    // Offset back to real time
+                    const resetTime = new Date(now.getTime() + (ptMidnight.getTime() - ptNow.getTime()));
+                    return resetTime.toLocaleString(undefined, {
+                      weekday: 'short',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      timeZoneName: 'short',
+                    });
+                  })()}
+                  . Come back then to resume.
                 </p>
               )}
               {job.pauseReason === 'user_paused' && (
