@@ -84,41 +84,40 @@ export async function trackQuotaUsage(
 }
 
 /**
- * Calculate remaining quota for current day
+ * Calculate remaining quota for the current YouTube quota day.
  *
- * Sums all quota usage since midnight today and subtracts from 10,000 unit limit.
+ * YouTube resets quota at midnight Pacific Time (PST/PDT). This function
+ * sums all usage since the most recent midnight PT and subtracts from the
+ * 10,000-unit daily limit.
  *
- * Note: This calculates based on database records, not Bottleneck's in-memory
- * reservoir. The reservoir provides real-time rate limiting; this function
- * provides historical/persistent tracking for monitoring and analytics.
+ * This is the authoritative quota check used by the sync engine before
+ * each batch. Rate limiting (request pacing) is handled separately by
+ * Bottleneck in rate-limiter.ts.
  *
  * @returns Number of quota units remaining today (0-10000)
- *
- * Example usage in dashboard:
- * ```typescript
- * const remaining = await getRemainingQuota();
- * if (remaining < 1000) {
- *   showWarning('Low quota: Only ${remaining} units remaining today');
- * }
- * ```
  */
 export async function getRemainingQuota(): Promise<number> {
-  // Get today's date at midnight (start of day)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Calculate the most recent midnight Pacific Time as a UTC Date
+  const now = new Date();
+  const ptNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+  const ptMidnight = new Date(ptNow);
+  ptMidnight.setHours(0, 0, 0, 0);
+  // Convert midnight PT back to real UTC by reversing the timezone offset
+  const ptOffsetMs = ptNow.getTime() - now.getTime();
+  const quotaDayStart = new Date(ptMidnight.getTime() - ptOffsetMs);
 
-  // Sum all quota units used since midnight today
+  // Sum all quota units used since midnight PT
   const result = await db
     .select({ total: sql<number>`COALESCE(SUM(${quotaUsage.unitsUsed}), 0)` })
     .from(quotaUsage)
-    .where(sql`${quotaUsage.date} >= ${today}`);
+    .where(sql`${quotaUsage.date} >= ${quotaDayStart}`);
 
   const used = Number(result[0]?.total || 0);
   const remaining = 10000 - used;
 
-  console.log(`[Quota Tracker] Used ${used} / 10,000 units today. Remaining: ${remaining}`);
+  console.log(`[Quota Tracker] Used ${used} / 10,000 units since midnight PT. Remaining: ${remaining}`);
 
-  return Math.max(0, remaining); // Ensure non-negative
+  return Math.max(0, remaining);
 }
 
 /**

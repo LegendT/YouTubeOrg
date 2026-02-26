@@ -435,20 +435,16 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
                   {PIPELINE_LABELS[stage]}
                 </span>
 
-                {/* Stage result summary */}
-                {resultSummary && (
-                  <span
-                    className={`text-sm ${
-                      status === 'completed' ? 'text-success' : 'text-muted-foreground'
-                    }`}
-                  >
+                {/* Stage result summary (completed stages only — current stage uses live progress) */}
+                {resultSummary && status === 'completed' && (
+                  <span className="text-sm text-success">
                     {resultSummary}
                   </span>
                 )}
 
-                {/* Current stage progress */}
-                {status === 'current' && isActive && job.currentStageTotal > 0 && stage !== 'backup' && (
-                  <span className="text-sm text-info">
+                {/* Current stage progress (active, paused, or failed) */}
+                {status === 'current' && job.currentStageTotal > 0 && stage !== 'backup' && (
+                  <span className={`text-sm ${isActive ? 'text-info' : isPaused ? 'text-warning' : 'text-destructive'}`}>
                     {formatNumber(job.currentStageProgress)}/{formatNumber(job.currentStageTotal)}
                   </span>
                 )}
