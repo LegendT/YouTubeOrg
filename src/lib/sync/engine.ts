@@ -1,7 +1,6 @@
 import { db } from '@/lib/db';
 import { syncJobs } from '@/lib/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
-import { getRemainingQuota } from '@/lib/youtube/quota';
 import { createSnapshot } from '@/lib/backup/snapshot';
 import type {
   SyncStage,
@@ -27,9 +26,6 @@ import {
  * and resume from the correct position. Each call to processSyncBatch processes
  * up to batchSize operations and returns -- the client polls and calls again.
  */
-
-// Minimum remaining quota before pausing (leaves room for user browsing)
-const QUOTA_PAUSE_THRESHOLD = 1000;
 
 /**
  * Cast a raw syncJobs DB row to a typed SyncJobRecord.
@@ -141,13 +137,9 @@ export async function processSyncBatch(
     return job;
   }
 
-  // Quota check before processing (except for non-API stages)
-  if (job.stage !== 'pending' && job.stage !== 'backup') {
-    const remaining = await getRemainingQuota();
-    if (remaining < QUOTA_PAUSE_THRESHOLD) {
-      return await pauseSyncJob(job.id, 'quota_exhausted');
-    }
-  }
+  // NOTE: Quota check is handled inside each stage executor, AFTER the
+  // "is this stage done?" check. This allows stages to advance (a free
+  // DB-only operation) even when quota is exhausted.
 
   // Stage routing
   switch (job.stage) {

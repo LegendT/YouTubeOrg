@@ -8,6 +8,7 @@ import {
 } from '@/lib/db/schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { createYouTubePlaylist, addVideoToPlaylist, deleteYouTubePlaylist } from '@/lib/youtube/write-operations';
+import { getRemainingQuota } from '@/lib/youtube/quota';
 import {
   advanceStage,
   pauseSyncJob,
@@ -16,6 +17,9 @@ import {
   updateStageResults,
 } from './engine';
 import type { SyncJobRecord, SyncError } from '@/types/sync';
+
+// Minimum remaining quota before pausing (leaves room for user browsing)
+const QUOTA_PAUSE_THRESHOLD = 1000;
 
 /**
  * Stage Executors for the Sync Engine
@@ -39,6 +43,24 @@ function extractApiError(error: any): { status?: number; reason?: string; messag
   const reason = error?.response?.data?.error?.errors?.[0]?.reason;
   const message = error?.message || 'Unknown error';
   return { status, reason, message };
+}
+
+/**
+ * Check if an API error is a fatal auth/quota issue that should pause the entire job
+ * rather than being recorded as a per-item failure.
+ */
+function isFatalApiError(apiError: { status?: number; reason?: string }): 'quota_exhausted' | 'auth_error' | null {
+  if (apiError.status === 403 && apiError.reason === 'quotaExceeded') {
+    return 'quota_exhausted';
+  }
+  // Expired or insufficient-scope tokens fail every operation — pause immediately
+  if (apiError.status === 403 && apiError.reason === 'insufficientPermissions') {
+    return 'auth_error';
+  }
+  if (apiError.status === 401) {
+    return 'auth_error';
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +113,13 @@ export async function executeCreatePlaylists(
     return;
   }
 
+  // Quota check before making API calls
+  const quotaRemaining = await getRemainingQuota();
+  if (quotaRemaining < QUOTA_PAUSE_THRESHOLD) {
+    await pauseSyncJob(job.id, 'quota_exhausted');
+    return;
+  }
+
   // Count total for progress display
   const allNonProtected = await db
     .select({ id: categories.id })
@@ -118,9 +147,10 @@ export async function executeCreatePlaylists(
       await updateJobProgress(job.id, succeeded, totalCount, 50);
     } catch (error: any) {
       const apiError = extractApiError(error);
+      const fatal = isFatalApiError(apiError);
 
-      if (apiError.status === 403 && apiError.reason === 'quotaExceeded') {
-        await pauseSyncJob(job.id, 'quota_exhausted');
+      if (fatal) {
+        await pauseSyncJob(job.id, fatal);
         return;
       }
 
@@ -238,6 +268,13 @@ export async function executeAddVideos(
     return;
   }
 
+  // Quota check before making API calls
+  const quotaRemaining = await getRemainingQuota();
+  if (quotaRemaining < QUOTA_PAUSE_THRESHOLD) {
+    await pauseSyncJob(job.id, 'quota_exhausted');
+    return;
+  }
+
   // Get total operation counts for progress tracking
   const totalResult = await db
     .select({ cnt: sql<string>`COUNT(*)` })
@@ -296,9 +333,10 @@ export async function executeAddVideos(
       await updateJobProgress(job.id, completedCount, totalOps, 50);
     } catch (error: any) {
       const apiError = extractApiError(error);
+      const fatal = isFatalApiError(apiError);
 
-      if (apiError.status === 403 && apiError.reason === 'quotaExceeded') {
-        await pauseSyncJob(job.id, 'quota_exhausted');
+      if (fatal) {
+        await pauseSyncJob(job.id, fatal);
         return;
       }
 
@@ -419,6 +457,13 @@ export async function executeDeletePlaylists(
     return;
   }
 
+  // Quota check before making API calls
+  const quotaRemaining = await getRemainingQuota();
+  if (quotaRemaining < QUOTA_PAUSE_THRESHOLD) {
+    await pauseSyncJob(job.id, 'quota_exhausted');
+    return;
+  }
+
   // Count totals for progress tracking
   const allPlaylistsResult = await db
     .select({ cnt: sql<string>`COUNT(*)` })
@@ -447,9 +492,10 @@ export async function executeDeletePlaylists(
       await updateJobProgress(job.id, deletedCount, totalCount, 50);
     } catch (error: any) {
       const apiError = extractApiError(error);
+      const fatal = isFatalApiError(apiError);
 
-      if (apiError.status === 403 && apiError.reason === 'quotaExceeded') {
-        await pauseSyncJob(job.id, 'quota_exhausted');
+      if (fatal) {
+        await pauseSyncJob(job.id, fatal);
         return;
       }
 

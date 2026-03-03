@@ -251,29 +251,10 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
       ? Math.round((job.currentStageProgress / job.currentStageTotal) * 100)
       : 0;
 
-  // Determine what stage the job was in before pausing
-  // (for showing pipeline state when paused)
+  // Determine what stage the job was in before pausing.
+  // Uses the stored _pausedAtStage value (set by pauseSyncJob in engine.ts).
   const effectiveStage: SyncStage = isPaused || isFailed
-    ? (() => {
-        // Find the last completed stage from stageResults,
-        // the next one is where we paused
-        for (let i = PIPELINE_STAGES.length - 1; i >= 0; i--) {
-          const stage = PIPELINE_STAGES[i];
-          const result = job.stageResults[stage];
-          if (result && (result.succeeded + result.failed + result.skipped) > 0) {
-            // If this stage has results, it was at least started
-            // Check if it's complete (all items processed)
-            if (i < PIPELINE_STAGES.length - 1) {
-              // If a later stage has no results, we paused at this stage or the next
-              const nextStage = PIPELINE_STAGES[i + 1];
-              const nextResult = job.stageResults[nextStage];
-              if (!nextResult) return stage;
-            }
-            return stage;
-          }
-        }
-        return PIPELINE_STAGES[0]; // Default to backup
-      })()
+    ? ((job.stageResults as any)._pausedAtStage as SyncStage | undefined) ?? PIPELINE_STAGES[0]
     : job.stage;
 
   return (
@@ -351,6 +332,9 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
               {job.pauseReason === 'user_paused' && (
                 <p>Sync paused by you.</p>
               )}
+              {job.pauseReason === 'auth_error' && (
+                <p>Sync paused — authentication expired. Please sign out and sign back in, then resume.</p>
+              )}
               {job.pauseReason === 'errors_collected' && (
                 <p>Sync paused — errors encountered. Review errors below.</p>
               )}
@@ -393,6 +377,8 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
               : getStageStatus(job.stage, stage);
 
             const resultSummary = stageResultSummary(stage, job.stageResults);
+            const stageResult = job.stageResults[stage];
+            const hasFailures = status === 'completed' && stageResult && stageResult.failed > 0;
 
             return (
               <div
@@ -400,14 +386,19 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
                 className={`flex items-center gap-3 rounded-lg px-4 py-3 ${
                   status === 'current'
                     ? 'bg-info/10 border border-info/20'
-                    : status === 'completed'
-                      ? 'bg-success/10 border border-success/20'
-                      : 'bg-muted border border-border'
+                    : hasFailures
+                      ? 'bg-warning/10 border border-warning/20'
+                      : status === 'completed'
+                        ? 'bg-success/10 border border-success/20'
+                        : 'bg-muted border border-border'
                 }`}
               >
                 {/* Stage icon */}
-                {status === 'completed' && (
+                {status === 'completed' && !hasFailures && (
                   <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
+                )}
+                {status === 'completed' && hasFailures && (
+                  <Warning className="h-5 w-5 text-warning flex-shrink-0" />
                 )}
                 {status === 'current' && (
                   isActive ? (
@@ -427,9 +418,11 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
                   className={`text-sm font-medium flex-1 ${
                     status === 'current'
                       ? 'text-info'
-                      : status === 'completed'
-                        ? 'text-success'
-                        : 'text-muted-foreground'
+                      : hasFailures
+                        ? 'text-warning'
+                        : status === 'completed'
+                          ? 'text-success'
+                          : 'text-muted-foreground'
                   }`}
                 >
                   {PIPELINE_LABELS[stage]}
@@ -437,7 +430,7 @@ export function SyncProgress({ job, onPause, onResume, onJobUpdate }: SyncProgre
 
                 {/* Stage result summary (completed stages only — current stage uses live progress) */}
                 {resultSummary && status === 'completed' && (
-                  <span className="text-sm text-success">
+                  <span className={`text-sm ${hasFailures ? 'text-warning' : 'text-success'}`}>
                     {resultSummary}
                   </span>
                 )}

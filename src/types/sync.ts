@@ -20,7 +20,7 @@ export type SyncStage =
   | 'failed'
   | 'paused';
 
-export type PauseReason = 'quota_exhausted' | 'user_paused' | 'errors_collected';
+export type PauseReason = 'quota_exhausted' | 'user_paused' | 'errors_collected' | 'auth_error';
 
 export interface SyncError {
   stage: string;

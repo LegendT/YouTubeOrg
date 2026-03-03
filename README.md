@@ -47,6 +47,7 @@ A full-stack web application that transforms fragmented YouTube playlists into a
 - **Quota-aware multi-day batching** — pauses at 1,000 remaining units, resumes next day
 - Stage-based state machine with checkpoint/resume at video granularity
 - Idempotent operations (409 conflict = success, 404 on delete = success)
+- **Auth error detection** — pauses immediately on expired tokens with re-authentication prompt
 - Skips YouTube system playlists (Favorites, Liked Videos) that cannot be deleted via API
 - Localised quota reset time in pause message (converts midnight Pacific to user's timezone)
 - Real-time progress with 3-second polling
