@@ -86,7 +86,6 @@ export class EmbeddingsCache {
         };
       });
     } catch (error) {
-      console.error('EmbeddingsCache.get error:', error);
       return null;
     }
   }
@@ -127,7 +126,6 @@ export class EmbeddingsCache {
         };
       });
     } catch (error) {
-      console.error('EmbeddingsCache.set error:', error);
       throw error;
     }
   }
@@ -178,7 +176,6 @@ export class EmbeddingsCache {
         }
       });
     } catch (error) {
-      console.error('EmbeddingsCache.getBatch error:', error);
       return new Map();
     }
   }
@@ -226,7 +223,6 @@ export class EmbeddingsCache {
 
       await Promise.all(promises);
     } catch (error) {
-      console.error('EmbeddingsCache.setBatch error:', error);
       throw error;
     }
   }
@@ -291,7 +287,6 @@ export class EmbeddingsCache {
         });
       }
     } catch (error) {
-      console.error('EmbeddingsCache.clear error:', error);
       throw error;
     }
   }

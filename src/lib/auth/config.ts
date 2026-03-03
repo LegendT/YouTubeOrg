@@ -58,13 +58,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       // Case 3: Token expired - refresh it
       if (!token.refresh_token) {
-        console.error("Missing refresh_token - cannot refresh access token")
         token.error = "RefreshAccessTokenError"
         return token
       }
 
       try {
-        console.log("Refreshing expired access token...")
 
         const response = await fetch("https://oauth2.googleapis.com/token", {
           method: "POST",
@@ -84,15 +82,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!response.ok) {
           // Handle revoked token error (AUTH-04 requirement)
           if (newTokens.error === "invalid_grant") {
-            console.error("Refresh token has been revoked or expired")
             token.error = "RefreshAccessTokenError"
             return token
           }
 
           throw newTokens
         }
-
-        console.log("Access token refreshed successfully")
 
         return {
           ...token,
@@ -102,7 +97,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           refresh_token: newTokens.refresh_token ?? token.refresh_token,
         }
       } catch (error) {
-        console.error("Error refreshing access_token:", error)
         return {
           ...token,
           error: "RefreshAccessTokenError",

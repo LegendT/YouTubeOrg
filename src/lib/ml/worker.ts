@@ -26,14 +26,6 @@ env.useBrowserCache = true;
 env.useFS = false;
 env.useFSCache = false;
 
-console.log('[Worker] Transformers.js environment configured:', {
-  allowLocalModels: env.allowLocalModels,
-  allowRemoteModels: env.allowRemoteModels,
-  useBrowserCache: env.useBrowserCache,
-  useFS: env.useFS,
-  numThreads: env.backends?.onnx?.wasm?.numThreads
-});
-
 /**
  * Singleton pattern for pipeline initialization.
  * Ensures model is loaded once per worker lifetime.
@@ -53,7 +45,6 @@ class PipelineSingleton {
   ): Promise<FeatureExtractionPipeline> {
     if (this.instance === null) {
       try {
-        console.log('[Worker] Loading model:', this.model);
 
         // Type assertion needed due to complex Transformers.js overload types
         const pipelinePromise = progress_callback
@@ -64,9 +55,7 @@ class PipelineSingleton {
           : pipeline(this.task, this.model, { dtype: 'q8' } as any);
 
         this.instance = (await pipelinePromise) as FeatureExtractionPipeline;
-        console.log('[Worker] Model loaded successfully');
       } catch (error) {
-        console.error('[Worker] Failed to load model:', error);
         throw new Error(`Failed to load ML model: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
@@ -150,14 +139,10 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         // Extract the raw data array
         let data: number[];
 
-        console.log('[Worker] Output type:', Array.isArray(output) ? 'array' : 'tensor', 'length:', Array.isArray(output) ? output.length : 'N/A');
-
         if (Array.isArray(output)) {
           // If output is an array of tensors, flatten them
-          console.log('[Worker] Processing array of', output.length, 'tensors');
           data = output.flatMap((tensor, i) => {
             if (!tensor || !tensor.data) {
-              console.error('[Worker] Tensor', i, 'is invalid:', tensor);
               throw new Error(`Invalid tensor at index ${i}`);
             }
             return Array.from(tensor.data as number[]);
@@ -165,17 +150,13 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
         } else {
           // Single tensor - extract data
           if (!output || !output.data) {
-            console.error('[Worker] Output tensor is invalid:', output);
             throw new Error('Invalid output tensor from model');
           }
-          console.log('[Worker] Processing single tensor with data length:', (output.data as any).length);
           data = Array.from(output.data as number[]);
         }
 
         const batchSize = texts.length;
         const expectedLength = batchSize * EMBEDDING_DIM;
-
-        console.log('[Worker] Extracted data length:', data.length, 'Expected:', expectedLength, 'Batch size:', batchSize);
 
         // Validate data length
         if (data.length !== expectedLength) {
@@ -191,8 +172,6 @@ self.addEventListener('message', async (event: MessageEvent<WorkerMessage>) => {
           const embedding = new Float32Array(data.slice(start, end));
           embeddings.push(embedding);
         }
-
-        console.log('[Worker] Generated', embeddings.length, 'embeddings, each', embeddings[0]?.length, 'dims');
 
         // Send result back to main thread
         const resultMessage: EmbeddingsResultMessage = {

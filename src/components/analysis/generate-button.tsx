@@ -22,7 +22,6 @@ export function GenerateProposalButton() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to generate proposals'
       setError(msg)
-      console.error('Failed to generate proposals:', err)
     } finally {
       setIsLoading(false)
     }

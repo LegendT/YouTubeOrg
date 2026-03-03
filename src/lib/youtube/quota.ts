@@ -80,7 +80,6 @@ export async function trackQuotaUsage(
     details: details ? JSON.stringify(details) : null,
   });
 
-  console.log(`[Quota Tracker] Logged ${cost} units for ${operation}`);
 }
 
 /**
@@ -114,8 +113,6 @@ export async function getRemainingQuota(): Promise<number> {
 
   const used = Number(result[0]?.total || 0);
   const remaining = 10000 - used;
-
-  console.log(`[Quota Tracker] Used ${used} / 10,000 units since midnight PT. Remaining: ${remaining}`);
 
   return Math.max(0, remaining);
 }

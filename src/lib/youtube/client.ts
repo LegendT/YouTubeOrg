@@ -79,13 +79,11 @@ export async function fetchWithETagCache<T>(
       // Step 3: Handle 304 Not Modified response
       // googleapis throws 304 as an error rather than success response
       if (error?.response?.status === 304 || error?.code === 304) {
-        console.log(`[ETag Cache] 304 Not Modified for ${resourceType} - returning cached data (saved 1 quota unit)`);
 
         if (cachedData) {
           return cachedData;
         } else {
           // This shouldn't happen (304 without cached data), but handle gracefully
-          console.error(`[ETag Cache] 304 received but no cached data found for key: ${cacheKey}`);
           throw new Error('304 Not Modified received but no cached data available');
         }
       }
@@ -117,12 +115,10 @@ export async function fetchWithETagCache<T>(
           },
         });
 
-      console.log(`[ETag Cache] Cached ${resourceType} with ETag: ${newEtag.substring(0, 20)}...`);
     }
 
     return responseData;
   } catch (error) {
-    console.error(`[ETag Cache] Error fetching ${resourceType}:`, error);
     throw error;
   }
 }

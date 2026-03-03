@@ -176,7 +176,6 @@ export function AnalysisDashboard({
       const data = await getCategoryDetail(proposalId)
       setCategoryData(data)
     } catch (error) {
-      console.error('Failed to fetch category detail:', error)
       setCategoryData(null)
     } finally {
       setIsLoading(false)
@@ -191,7 +190,6 @@ export function AnalysisDashboard({
       const data = await getCategoryDetailManagement(categoryId)
       setManagementDetail(data)
     } catch (error) {
-      console.error('Failed to fetch management detail:', error)
       setManagementDetail(null)
     } finally {
       setIsLoading(false)

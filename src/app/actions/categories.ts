@@ -83,7 +83,6 @@ export async function getCategories(): Promise<CategoryListItem[]> {
 
     return enriched;
   } catch (error) {
-    console.error('Failed to get categories:', error);
     return [];
   }
 }
@@ -229,7 +228,6 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
     try {
       backup = await createSnapshot('pre_delete', `category:${category.name}`);
     } catch (backupError) {
-      console.warn('Pre-delete backup failed (proceeding with delete):', backupError);
     }
 
     const result = await db.transaction(async (tx) => {
@@ -292,7 +290,6 @@ export async function deleteCategory(categoryId: number): Promise<DeleteCategory
         ...(backup ? { backupSnapshotId: backup.snapshotId } : {}),
       });
     } catch (logError) {
-      console.warn('Operation log entry failed (delete completed):', logError);
     }
 
     return {
@@ -437,7 +434,6 @@ export async function mergeCategories(
       const categoryNames = sourceCategories.map(c => c.name).join(', ');
       backup = await createSnapshot('pre_merge', `merge:${categoryNames}`);
     } catch (backupError) {
-      console.warn('Pre-merge backup failed (proceeding with merge):', backupError);
     }
 
     const result = await db.transaction(async (tx) => {
@@ -507,7 +503,6 @@ export async function mergeCategories(
         ...(backup ? { backupSnapshotId: backup.snapshotId } : {}),
       });
     } catch (logError) {
-      console.warn('Operation log entry failed (merge completed):', logError);
     }
 
     return {
@@ -656,7 +651,6 @@ export async function searchVideosForAssignment(
 
     return { videos: enriched, total };
   } catch (error) {
-    console.error('Failed to search videos:', error);
     return { videos: [], total: 0 };
   }
 }
@@ -853,7 +847,6 @@ export async function getCategoryDetailManagement(
       total: enrichedVideos.length,
     };
   } catch (error) {
-    console.error('Failed to get category detail:', error);
     return null;
   }
 }

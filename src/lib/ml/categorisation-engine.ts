@@ -109,7 +109,6 @@ export class MLCategorisationEngine {
         if (pending) {
           // Validate embeddings structure
           if (!embeddings || !Array.isArray(embeddings) || embeddings.length === 0) {
-            console.error('[Engine] Invalid embeddings received:', embeddings);
             pending.reject(new Error('Invalid embeddings received from worker'));
             this.pendingRequests.delete(id);
             return;
@@ -128,19 +127,16 @@ export class MLCategorisationEngine {
           this.pendingRequests.delete(id);
         }
       } else if (type === 'ERROR') {
-        console.error('[Engine] Worker error:', error);
         const pending = this.pendingRequests.get(id);
         if (pending) {
           pending.reject(new Error(error || 'Unknown worker error'));
           this.pendingRequests.delete(id);
         }
       } else if (type === 'LOAD_PROGRESS') {
-        console.log('[ML Worker] Model loading progress:', progress);
       }
     });
 
     this.worker.addEventListener('error', (error) => {
-      console.error('[ML Worker] Error:', error);
       // Reject all pending requests
       for (const pending of this.pendingRequests.values()) {
         pending.reject(new Error('Worker error'));
@@ -157,7 +153,6 @@ export class MLCategorisationEngine {
     this.initWorker();
 
     if (!this.worker) {
-      console.error('[Engine] Worker failed to initialise');
       throw new Error('Worker failed to initialise');
     }
 
@@ -175,7 +170,6 @@ export class MLCategorisationEngine {
       setTimeout(() => {
         const pending = this.pendingRequests.get(id);
         if (pending) {
-          console.error(`[Engine] Embedding generation timed out after 60s`);
           pending.reject(new Error('Embedding generation timeout'));
           this.pendingRequests.delete(id);
         }
@@ -248,18 +242,11 @@ export class MLCategorisationEngine {
         ) {
           validCachedEmbeddings.set(videoId, embedding);
         } else {
-          console.warn(
-            `[Engine] Invalid cached embedding for video ${videoId}: ` +
-            `${embedding ? `${embedding.length} dims (expected ${EMBEDDING_DIM})` : 'undefined'}`
-          );
           invalidVideoIds.push(videoId);
         }
       }
 
       if (invalidVideoIds.length > 0) {
-        console.warn(
-          `[Engine] Found ${invalidVideoIds.length} corrupted cache entries, will regenerate`
-        );
       }
 
       // Step 2b: Generate embeddings for uncached or invalid videos
@@ -293,7 +280,6 @@ export class MLCategorisationEngine {
         const videoEmbedding = validCachedEmbeddings.get(video.id);
 
         if (!videoEmbedding) {
-          console.error(`[Engine] No embedding found for video ${video.id}`);
           continue;
         }
 
@@ -313,7 +299,6 @@ export class MLCategorisationEngine {
         }
 
         if (bestMatch.categoryId === -1) {
-          console.warn(`[Engine] No category match for video ${video.id}`);
           continue;
         }
 

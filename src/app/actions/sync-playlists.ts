@@ -54,17 +54,14 @@ export async function syncAllData() {
   }
 
   try {
-    console.log('[Sync] Starting full data sync...');
 
     // Step 2: Sync playlists
     const playlistCount = await syncPlaylistsToDatabase(session.access_token);
-    console.log(`[Sync] Synced ${playlistCount} playlists`);
 
     // Step 3: Get all playlists from database
     const allPlaylists = await db.select().from(playlists);
 
     if (allPlaylists.length === 0) {
-      console.log('[Sync] No playlists found. Nothing to sync.');
       return {
         success: true,
         playlistCount: 0,
@@ -78,18 +75,14 @@ export async function syncAllData() {
       try {
         await fetchPlaylistItems(session.access_token, playlist.youtubeId);
         syncedPlaylists++;
-        console.log(`[Sync] Progress: ${syncedPlaylists}/${allPlaylists.length} playlists synced`);
       } catch (error: any) {
         // If quota exceeded on a specific playlist, re-throw to handle at top level
         if (error.message?.includes('quotaExceeded') || error.message?.includes('Quota exceeded')) {
           throw error;
         }
         // For other errors, log and continue to next playlist
-        console.error(`[Sync] Error syncing playlist ${playlist.youtubeId}:`, error);
       }
     }
-
-    console.log(`[Sync] Full sync complete: ${playlistCount} playlists, ${syncedPlaylists} video syncs`);
 
     return {
       success: true,
@@ -102,7 +95,6 @@ export async function syncAllData() {
       error?.response?.status === 403 &&
       error?.response?.data?.error?.errors?.[0]?.reason === 'quotaExceeded'
     ) {
-      console.warn('[Sync] Quota exceeded. Sync will resume automatically on next attempt.');
       return {
         success: false,
         error: 'Quota exceeded. Sync progress has been saved and will resume tomorrow automatically.',
@@ -112,7 +104,6 @@ export async function syncAllData() {
 
     // Handle other quota-related errors (from our error messages)
     if (error.message?.includes('quotaExceeded') || error.message?.includes('Quota exceeded')) {
-      console.warn('[Sync] Quota exceeded:', error.message);
       return {
         success: false,
         error: 'Quota exceeded. Sync progress has been saved and will resume tomorrow automatically.',
@@ -122,7 +113,6 @@ export async function syncAllData() {
 
     // Handle insufficient scopes — user needs to re-authenticate
     if (error.message?.includes('insufficient authentication scopes') || error.message?.includes('insufficientPermissions')) {
-      console.warn('[Sync] Insufficient scopes. User needs to sign out and back in.');
       return {
         success: false,
         error: 'INSUFFICIENT_SCOPES',
@@ -131,7 +121,6 @@ export async function syncAllData() {
     }
 
     // For all other errors, log and return failure
-    console.error('[Sync] Sync failed:', error);
     return {
       success: false,
       error: `Sync failed: ${error.message || 'Unknown error'}`,

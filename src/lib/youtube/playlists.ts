@@ -72,26 +72,17 @@ export async function fetchAllPlaylists(
       const items = response.items || [];
       allPlaylists.push(...items);
 
-      console.log(
-        `[Playlists] Fetched ${items.length} playlists (page token: ${pageToken || 'first'})`
-      );
-
       // Get next page token for pagination
       pageToken = response.nextPageToken || undefined;
     } while (pageToken);
 
-    console.log(`[Playlists] Completed fetch: ${allPlaylists.length} total playlists`);
     return allPlaylists;
   } catch (error: any) {
     // Handle quota exhaustion gracefully
     if (error?.response?.status === 403 && error?.response?.data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
-      console.error(
-        `[Playlists] Quota exceeded after fetching ${allPlaylists.length} playlists. Resume will start from next page.`
-      );
       throw new Error(`Quota exceeded. Fetched ${allPlaylists.length} playlists before limit.`);
     }
 
-    console.error('[Playlists] Error fetching playlists:', error);
     throw error;
   }
 }
@@ -122,14 +113,12 @@ export async function syncPlaylistsToDatabase(accessToken: string): Promise<numb
     const playlistsData = await fetchAllPlaylists(accessToken);
 
     if (playlistsData.length === 0) {
-      console.log('[Playlists] No playlists to sync');
       return 0;
     }
 
     // Step 2: Upsert each playlist to database
     for (const playlist of playlistsData) {
       if (!playlist.id) {
-        console.warn('[Playlists] Skipping playlist without ID:', playlist);
         continue;
       }
 
@@ -166,7 +155,6 @@ export async function syncPlaylistsToDatabase(accessToken: string): Promise<numb
       operation: 'sync',
     });
 
-    console.log(`[Playlists] Successfully synced ${playlistsData.length} playlists to database`);
     return playlistsData.length;
   } catch (error: any) {
     // Re-throw with context about partial progress

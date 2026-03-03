@@ -51,7 +51,6 @@ export async function getDataForCategorisation(): Promise<{
       categories: allCategories,
     };
   } catch (error) {
-    console.error('[getDataForCategorisation] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -107,7 +106,6 @@ export async function saveCategorisationResults(
       lowConfidenceCount: lowCount,
     };
   } catch (error) {
-    console.error('[saveCategorisationResults] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -135,7 +133,6 @@ export async function getMLCategorisationForVideo(
 
     return result[0] as MLCategorisationResult;
   } catch (error) {
-    console.error('[getMLCategorisationForVideo] Error:', error);
     return null;
   }
 }
@@ -159,7 +156,6 @@ export async function getMLCategorisationResults(
 
     return results as MLCategorisationResult[];
   } catch (error) {
-    console.error('[getMLCategorisationResults] Error:', error);
     return [];
   }
 }
@@ -258,7 +254,6 @@ export async function bulkAcceptSuggestions(
 
     return { success: true, accepted: mlRows.length };
   } catch (error) {
-    console.error('[bulkAcceptSuggestions] Error:', error);
     return {
       success: false,
       accepted: 0,
@@ -344,7 +339,6 @@ export async function acceptSuggestion(
 
     return { success: true };
   } catch (error) {
-    console.error('[acceptSuggestion] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -410,7 +404,6 @@ export async function rejectSuggestion(
 
     return { success: true };
   } catch (error) {
-    console.error('[rejectSuggestion] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -522,7 +515,6 @@ export async function recategoriseVideo(
 
     return { success: true };
   } catch (error) {
-    console.error('[recategoriseVideo] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -610,7 +602,6 @@ export async function getReviewData(
       currentCategoryNames: categoryMap.get(r.videoId) ?? [],
     })) as ReviewResult[];
   } catch (error) {
-    console.error('[getReviewData] Error:', error);
     return [];
   }
 }
@@ -681,7 +672,6 @@ export async function getVideoReviewDetail(
       allCategories: allCategories as Category[],
     };
   } catch (error) {
-    console.error('[getVideoReviewDetail] Error:', error);
     return null;
   }
 }
@@ -716,7 +706,6 @@ export async function getReviewStats(): Promise<ReviewStats> {
       lowConfidence: Number(row.lowConfidence),
     };
   } catch (error) {
-    console.error('[getReviewStats] Error:', error);
     return {
       total: 0,
       reviewed: 0,
@@ -741,7 +730,6 @@ export async function deleteVideo(videoId: number): Promise<{ success: boolean; 
     });
     return { success: true };
   } catch (error) {
-    console.error('[deleteVideo] Error:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

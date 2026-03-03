@@ -87,7 +87,6 @@ export async function getOperationLog(
 
     return { entries, total };
   } catch (error) {
-    console.error('Failed to get operation log:', error);
     return { entries: [], total: 0 };
   }
 }
@@ -203,7 +202,6 @@ export async function getPendingChanges(): Promise<PendingChangeSummary> {
       lastSyncTimestamp: null, // Phase 8 will track last sync time
     };
   } catch (error) {
-    console.error('Failed to get pending changes:', error);
     return { changes: [], totalChanges: 0, lastSyncTimestamp: null };
   }
 }

@@ -64,7 +64,6 @@ export async function listBackups(): Promise<BackupSnapshotMeta[]> {
       createdAt: row.createdAt,
     }));
   } catch (error) {
-    console.error('Failed to list backups:', error);
     return [];
   }
 }

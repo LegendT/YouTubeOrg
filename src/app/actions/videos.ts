@@ -131,7 +131,6 @@ export async function getVideosForCategory(
 
     return result;
   } catch (error) {
-    console.error('Failed to get videos for category:', error);
     return [];
   }
 }
@@ -233,7 +232,6 @@ export async function deleteVideos(
     revalidatePath('/videos');
     return { success: true, deletedCount: videoIds.length };
   } catch (error) {
-    console.error('[deleteVideos] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return { success: false, deletedCount: 0, error: `Failed to delete videos: ${message}` };
   }

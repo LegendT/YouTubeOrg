@@ -63,7 +63,6 @@ export function RemovePlaylistButton({
         onUpdate()
       }
     } catch (err) {
-      console.error('Failed to remove playlist:', err)
     } finally {
       setIsRemoving(false)
     }

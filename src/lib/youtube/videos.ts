@@ -70,11 +70,7 @@ export async function fetchPlaylistItems(
     let itemsFetched = existingProgress[0]?.itemsFetched || 0;
 
     if (existingProgress.length > 0) {
-      console.log(
-        `[Videos] Resuming playlist ${playlistYoutubeId} from token: ${pageToken}, items fetched: ${itemsFetched}`
-      );
     } else {
-      console.log(`[Videos] Starting fresh sync for playlist ${playlistYoutubeId}`);
     }
 
     // Get playlist database ID for join table
@@ -114,9 +110,6 @@ export async function fetchPlaylistItems(
       );
 
       const items = response.items || [];
-      console.log(
-        `[Videos] Fetched ${items.length} playlist items from ${playlistYoutubeId} (page: ${pageToken || 'first'})`
-      );
 
       // Step 3: Extract video IDs and fetch full video details in batch
       const videoIds = items
@@ -141,7 +134,6 @@ export async function fetchPlaylistItems(
             .limit(1);
 
           if (videoRecord.length === 0) {
-            console.warn(`[Videos] Video ${videoId} not found in database after batch fetch`);
             continue;
           }
 
@@ -180,9 +172,6 @@ export async function fetchPlaylistItems(
           },
         });
 
-      console.log(
-        `[Videos] Progress: ${itemsFetched} items from playlist ${playlistYoutubeId}`
-      );
     } while (pageToken);
 
     // Step 6: Sync complete - delete sync state entry
@@ -193,24 +182,17 @@ export async function fetchPlaylistItems(
       itemsFetched,
     });
 
-    console.log(
-      `[Videos] Completed sync for playlist ${playlistYoutubeId}: ${itemsFetched} total items`
-    );
   } catch (error: any) {
     // Handle quota exhaustion - preserve syncState for resume
     if (
       error?.response?.status === 403 &&
       error?.response?.data?.error?.errors?.[0]?.reason === 'quotaExceeded'
     ) {
-      console.error(
-        `[Videos] Quota exceeded while syncing playlist ${playlistYoutubeId}. Progress saved for resume.`
-      );
       throw new Error(
         `Quota exceeded. Playlist ${playlistYoutubeId} sync will resume from saved progress.`
       );
     }
 
-    console.error(`[Videos] Error syncing playlist ${playlistYoutubeId}:`, error);
     throw error;
   }
 }
@@ -271,12 +253,9 @@ export async function fetchVideoBatch(
     const items = response.items || [];
     allVideos.push(...items);
 
-    console.log(`[Videos] Fetched batch of ${items.length} videos (${i + 1}-${i + batch.length})`);
-
     // Store videos in database
     for (const video of items) {
       if (!video.id) {
-        console.warn('[Videos] Skipping video without ID:', video);
         continue;
       }
 

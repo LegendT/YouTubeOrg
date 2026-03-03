@@ -37,13 +37,11 @@ youtubeRateLimiter.on('failed', async (error: any, jobInfo) => {
       ? parseInt(retryAfter, 10) * 1000
       : Math.min(1000 * Math.pow(2, jobInfo.retryCount), 30000);
 
-    console.warn(`[Rate Limiter] 429 Rate Limit hit. Retrying after ${delay}ms (attempt ${jobInfo.retryCount + 1})`);
     return delay;
   }
 
   // Handle 403 Quota Exceeded - do NOT retry (fatal error)
   if (error?.response?.status === 403 && error?.response?.data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
-    console.error('[Rate Limiter] 403 Quota Exceeded - daily limit reached. No retry.');
     return; // undefined = don't retry
   }
 
@@ -73,11 +71,9 @@ export async function callYouTubeAPI<T>(
       const result = await apiCall();
 
       const operationLog = operationType ? ` (${operationType}, ${quotaCost} units)` : '';
-      console.log(`[Rate Limiter] API call succeeded${operationLog}`);
 
       return result;
     } catch (error) {
-      console.error('[Rate Limiter] API call failed:', error);
       throw error;
     }
   });

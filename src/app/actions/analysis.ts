@@ -1176,7 +1176,6 @@ export async function getCategoryDetail(
       videos: uniqueVideos,
     };
   } catch (error) {
-    console.error('Failed to get category detail:', error);
     return null;
   }
 }
