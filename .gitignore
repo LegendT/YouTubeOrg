@@ -44,3 +44,6 @@ test-db.ts
 
 # Backup snapshots (Phase 7)
 /backups
+
+# Personal data (Google Takeout exports)
+/data

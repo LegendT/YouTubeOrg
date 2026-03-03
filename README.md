@@ -132,8 +132,8 @@ npm run dev
 ```
 
 This single command will:
-1. Start a PostgreSQL Docker container (or reuse an existing one)
-2. Wait for the database to be ready
+1. Start a PostgreSQL container via Docker Compose (or reuse an existing one)
+2. Wait for the database health check to pass
 3. Push the database schema via Drizzle
 4. Start the Next.js dev server with Turbopack
 
