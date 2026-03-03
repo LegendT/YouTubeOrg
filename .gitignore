@@ -47,3 +47,11 @@ test-db.ts
 
 # Personal data (Google Takeout exports)
 /data
+
+# IDE
+.vscode/
+
+# AI tooling and project management
+.claude/
+.planning/
+.history/
